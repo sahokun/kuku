@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="screen-orientation" content="portrait">
+  <title>九九学習アプリ</title>
+  
+  <!--
+  ゲーム要件:
+  ・九九の問題がランダムで出る（例: 2×2=?）
+  ・問題表示と同時に読み上げ音声が流れる（例: 「ににんが」）
+  ・1-9（および0）のボタンで答えを入力して答える
+  ・合ってたら⚪︎で1点、間違ってたら✖️で0点
+  ・合ってても間違えても正解の読み上げ音声が流れる（例: 「し」）
+  ・モード: 1-9の段の個別モード、1-3、3-5、6-9、1-4、5-9、1-9の段モード
+  ・タイトル画面、スコア画面がある
+  ・デザイン: KAWAIIカルチャー、ゆめかわいい、パステルカラー、丸ゴシック
+  ・5問目と10問目は逆問題: 答えが表示され、式（かけ算の数）を穴埋めで入力する
+  ・全問題で九九の読みがなを表示し、回答後に完全な読みが表示される
+    - 通常問題: 式と共に「ににんが」を表示、回答後に「し」を公開
+    - 逆問題: 答えと共に「し」を表示、回答後に「ににんが」を公開
+  -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-color: #FFF0F5; /* Lavender Blush */
+      --main-pink: #FF69B4; /* Hot Pink */
+      --pastel-purple: #9370DB; /* Medium Purple */
+      --mint: #4ECDC4;
+      --gold: #FFD700;
+      --text-color: #555;
+      --white: #ffffff;
+      --shadow: 0 4px 0 rgba(0,0,0,0.1);
+      --btn-shadow: 0 6px 0 rgba(0,0,0,0.15);
+      --btn-active-shadow: 0 2px 0 rgba(0,0,0,0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100vh;
+      min-height: 100dvh;
+      background-color: var(--bg-color);
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      color: var(--text-color);
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+
+    #app {
+      width: 100%;
+      height: 100%;
+      max-width: 500px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(255, 105, 180, 0.1) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(78, 205, 196, 0.1) 0%, transparent 20%);
+    }
+
+    /* 共通スタイル */
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px;
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+      transition: opacity 0.3s ease;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .screen.active {
+      opacity: 1;
+      pointer-events: auto;
+      z-index: 1;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      color: var(--main-pink);
+      text-shadow: 3px 3px 0 #fff, 6px 6px 0 rgba(0,0,0,0.1);
+      margin: 6px 0;
+      text-align: center;
+    }
+
+    h2 {
+      color: var(--pastel-purple);
+      margin: 3px 0;
+      font-size: 0.85rem;
+    }
+
+    .btn {
+      background-color: var(--white);
+      border: 2px solid var(--main-pink);
+      border-radius: 50px;
+      padding: 6px 12px;
+      font-size: 0.75rem;
+      font-family: inherit;
+      font-weight: 700;
+      color: var(--main-pink);
+      cursor: pointer;
+      box-shadow: var(--btn-shadow);
+      transition: transform 0.1s, box-shadow 0.1s;
+      margin: 2px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 65px;
+    }
+
+    .btn:active {
+      transform: translateY(4px);
+      box-shadow: var(--btn-active-shadow);
+    }
+
+    .btn-primary {
+      background-color: var(--main-pink);
+      color: var(--white);
+      border-color: var(--white);
+    }
+
+    .btn-secondary {
+      background-color: var(--mint);
+      color: var(--white);
+      border-color: var(--white);
+    }
+
+    /* タイトル画面 */
+    #title-screen {
+      justify-content: flex-start;
+    }
+
+    .mode-section {
+      width: 100%;
+      background: rgba(255,255,255,0.6);
+      border-radius: 12px;
+      padding: 8px;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .mode-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+    }
+
+    .mode-grid .btn {
+      min-width: auto;
+      width: 100%;
+      padding: 5px 0;
+      font-size: 0.7rem;
+      border-radius: 10px;
+    }
+
+    .range-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 4px;
+    }
+
+    /* ゲーム画面 */
+    #game-screen {
+      justify-content: flex-start;
+      gap: 6px;
+    }
+
+    .status-bar {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      font-weight: bold;
+      color: var(--pastel-purple);
+      padding: 0 52px 0 8px;
+      position: relative;
+    }
+
+    .status-bar-center {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+
+    .question-area {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      margin: 6px 0;
+      min-height: 7rem;
+    }
+
+    .question-text {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: var(--main-pink);
+      text-shadow: 2px 2px 0 #fff;
+      margin-bottom: 6px;
+      letter-spacing: 1px;
+      min-height: 2.5rem;
+    }
+
+    .answer-display {
+      font-size: 1.6rem;
+      height: 2rem;
+      line-height: 2rem;
+      color: var(--pastel-purple);
+      border-bottom: 2px dashed var(--mint);
+      padding: 0 12px;
+      min-width: 80px;
+      text-align: center;
+      background: rgba(255,255,255,0.5);
+      border-radius: 6px;
+    }
+
+    /* 九九よみがな表示 */
+    .kuku-reading {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--pastel-purple);
+      height: 1.6rem;
+      line-height: 1.6rem;
+      text-align: center;
+      margin: 4px 0;
+      letter-spacing: 2px;
+      overflow: visible;
+    }
+
+    .kuku-blank {
+      display: inline-block;
+      min-width: 2em;
+      border-bottom: 2px dashed var(--main-pink);
+      margin: 0 2px;
+      color: transparent;
+    }
+
+    .kuku-revealed {
+      display: inline-block;
+      color: var(--main-pink);
+      font-weight: 900;
+      animation: kukuReveal 0.3s ease-out;
+    }
+
+    @keyframes kukuReveal {
+      from { opacity: 0; transform: scale(1.3); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* 式入力モード（Q5, Q10用） */
+    .equation-display {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 1.8rem;
+      font-weight: 900;
+    }
+
+    .equation-slot {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.2rem;
+      height: 2.2rem;
+      border: 2px dashed var(--mint);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.5);
+      font-size: 1.6rem;
+      color: var(--main-pink);
+      font-weight: 900;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .equation-slot.active-slot {
+      border-color: var(--main-pink);
+      background: rgba(255, 105, 180, 0.1);
+      animation: slotPulse 1s infinite;
+    }
+
+    .equation-slot.filled-slot {
+      border-style: solid;
+      background: rgba(78, 205, 196, 0.15);
+    }
+
+    @keyframes slotPulse {
+      0%, 100% { border-color: var(--main-pink); }
+      50% { border-color: var(--mint); }
+    }
+
+    .equation-operator {
+      color: var(--text-color);
+      font-size: 1.4rem;
+    }
+
+    .equation-answer-part {
+      color: var(--main-pink);
+      font-weight: 900;
+      font-size: 1.8rem;
+    }
+
+    .numpad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      width: 100%;
+      max-width: 240px;
+    }
+
+    .num-btn {
+      background-color: var(--white);
+      border: 2px solid var(--mint);
+      color: var(--mint);
+      font-size: 1.1rem;
+      font-weight: bold;
+      border-radius: 50%;
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--btn-shadow);
+      cursor: pointer;
+    }
+
+    .num-btn:active {
+      transform: translateY(4px);
+      box-shadow: var(--btn-active-shadow);
+      background-color: var(--mint);
+      color: var(--white);
+    }
+
+    .action-btn {
+      border-radius: 12px;
+      aspect-ratio: auto;
+      height: 100%;
+      font-size: 0.75rem;
+    }
+
+    .btn-clear {
+      border-color: #ffb7b2;
+      color: #ffb7b2;
+    }
+    .btn-enter {
+      background-color: var(--main-pink);
+      color: white;
+      border-color: white;
+      grid-column: span 1;
+    }
+
+    /* フィードバックオーバーレイ */
+    #feedback-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+      z-index: 10;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .feedback-icon {
+      font-size: 8rem;
+      font-weight: 900;
+      text-shadow: 0 0 20px rgba(255,255,255,0.8);
+      transform: scale(0);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .correct {
+      color: var(--mint);
+    }
+    .incorrect {
+      color: var(--main-pink);
+    }
+
+    /* リザルト画面 */
+    #result-screen {
+      justify-content: center;
+    }
+
+    .score-board {
+      background: white;
+      padding: 15px;
+      border-radius: 15px;
+      border: 3px solid var(--gold);
+      text-align: center;
+      margin-bottom: 15px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    }
+
+    .score-text {
+      font-size: 0.9rem;
+      color: var(--text-color);
+    }
+
+    .final-score {
+      font-size: 2.8rem;
+      font-weight: 900;
+      color: var(--main-pink);
+      line-height: 1.2;
+    }
+
+    .perfect-msg {
+      color: var(--gold);
+      font-weight: bold;
+      font-size: 0.9rem;
+      margin-top: 6px;
+    }
+
+    .mute-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      z-index: 100;
+      background: rgba(255,255,255,0.5);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    #table-screen {
+      justify-content: flex-start;
+    }
+
+    .table-header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .table-content {
+      width: 100%;
+      background: rgba(255,255,255,0.7);
+      border-radius: 8px;
+      padding: 6px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 5px;
+      max-width: 450px;
+    }
+
+    .table-dan-section {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .table-dan-title {
+      font-weight: 900;
+      font-size: 0.75rem;
+      color: var(--main-pink);
+      margin-bottom: 2px;
+      padding: 3px 6px;
+      background: rgba(255, 105, 180, 0.1);
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .play-dan-btn {
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      min-width: auto;
+    }
+
+    .table-row {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 3px;
+      padding: 3px 6px;
+      margin: 1px 0;
+      background: white;
+      border-radius: 3px;
+      font-size: 0.7rem;
+      color: var(--text-color);
+      cursor: pointer;
+      transition: all 0.15s;
+      border: 1px solid transparent;
+    }
+
+    .table-row:hover {
+      background: var(--mint);
+      color: white;
+    }
+
+    .table-row.playing {
+      background: var(--main-pink);
+      color: white;
+      border-color: var(--gold);
+    }
+
+    .table-row-left {
+      font-weight: bold;
+      color: var(--pastel-purple);
+      font-size: 0.68rem;
+    }
+
+    .table-row:hover .table-row-left,
+    .table-row.playing .table-row-left {
+      color: white;
+    }
+
+    .table-row-right {
+      font-weight: 900;
+      font-size: 0.78rem;
+    }
+
+    .table-row-reading {
+      font-size: 0.6rem;
+      color: var(--pastel-purple);
+      opacity: 0.7;
+      margin-left: auto;
+    }
+
+    .table-row:hover .table-row-reading,
+    .table-row.playing .table-row-reading {
+      color: white;
+      opacity: 0.9;
+    }
+
+    /* BGMセレクター */
+    .bgm-selector {
+      padding: 6px 8px;
+    }
+    .bgm-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+    }
+    .bgm-option {
+      font-size: 0.6rem;
+      padding: 4px 2px;
+      min-width: auto;
+      border-color: var(--pastel-purple);
+      color: var(--pastel-purple);
+      transition: all 0.2s;
+    }
+    .bgm-option.bgm-active {
+      background-color: var(--pastel-purple);
+      color: var(--white);
+      border-color: var(--white);
+    }
+
+    /* くみあわせモード */
+    .dan-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      margin-bottom: 4px;
+    }
+    .dan-header h2 {
+      margin: 0;
+    }
+    .combination-btn {
+      font-size: 0.6rem;
+      padding: 3px 8px;
+      min-width: auto;
+      border-color: var(--pastel-purple);
+      color: var(--pastel-purple);
+    }
+    .dan-selected {
+      background-color: var(--main-pink) !important;
+      color: var(--white) !important;
+      border-color: var(--gold) !important;
+      box-shadow: 0 0 8px rgba(255, 105, 180, 0.4);
+    }
+    .combination-start {
+      width: 100%;
+      margin-top: 6px;
+      font-size: 0.85rem;
+      padding: 8px;
+    }
+    .combination-start:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div id="app">
+    <div id="mute-btn" class="mute-btn" onclick="toggleMute()">🔇</div>
+    <!-- タイトル画面 -->
+    <div id="title-screen" class="screen active">
+      <h1>九九学習アプリ</h1>
+
+      <div class="mode-section bgm-selector">
+        <h2>おんがく</h2>
+        <div class="bgm-grid">
+          <button class="btn bgm-option bgm-active" onclick="selectSong(0)">ゆったり</button>
+          <button class="btn bgm-option" onclick="selectSong(1)">わくわく</button>
+          <button class="btn bgm-option" onclick="selectSong(2)">たのしい</button>
+          <button class="btn bgm-option" onclick="selectSong(3)">キラキラ</button>
+        </div>
+      </div>
+
+      <div class="mode-section">
+        <div class="dan-header">
+          <h2>だんをえらんでね</h2>
+          <button id="combination-toggle" class="btn combination-btn" onclick="toggleCombinationMode()">くみあわせ</button>
+        </div>
+        <div class="mode-grid">
+          <button class="btn" data-dan="1" onclick="handleDanClick(1)">1のだん</button>
+          <button class="btn" data-dan="2" onclick="handleDanClick(2)">2のだん</button>
+          <button class="btn" data-dan="3" onclick="handleDanClick(3)">3のだん</button>
+          <button class="btn" data-dan="4" onclick="handleDanClick(4)">4のだん</button>
+          <button class="btn" data-dan="5" onclick="handleDanClick(5)">5のだん</button>
+          <button class="btn" data-dan="6" onclick="handleDanClick(6)">6のだん</button>
+          <button class="btn" data-dan="7" onclick="handleDanClick(7)">7のだん</button>
+          <button class="btn" data-dan="8" onclick="handleDanClick(8)">8のだん</button>
+          <button class="btn" data-dan="9" onclick="handleDanClick(9)">9のだん</button>
+        </div>
+        <button id="combination-start" class="btn btn-primary combination-start" onclick="startCombinationGame()" style="display: none;" disabled>スタート</button>
+      </div>
+
+      <div class="mode-section">
+        <h2>まとめて</h2>
+        <div class="range-grid">
+          <button class="btn btn-secondary" onclick="startGame('2-3')">2〜3のだん</button>
+          <button class="btn btn-secondary" onclick="startGame('4-6')">4〜6のだん</button>
+          <button class="btn btn-secondary" onclick="startGame('7-9')">7〜9のだん</button>
+          <button class="btn btn-secondary" onclick="startGame('2-5')">2〜5のだん</button>
+          <button class="btn btn-secondary" onclick="startGame('6-9')">6〜9のだん</button>
+          <button class="btn btn-primary" style="grid-column: span 2;" onclick="startGame('1-9')">ぜんぶ (1〜9)</button>
+        </div>
+      </div>
+
+      <div style="margin-top: 10px;">
+        <button class="btn btn-primary" style="font-size: 0.75rem; padding: 8px;" onclick="showTable()">📖 九九のひょう</button>
+      </div>
+    </div>
+
+    <!-- ゲーム画面 -->
+    <div id="game-screen" class="screen">
+      <div class="status-bar">
+        <button class="btn" style="font-size: 0.65rem; padding: 4px 10px; margin: 0;" onclick="showTitle()">やめる</button>
+        <span id="question-counter" class="status-bar-center">もんだい 1/10</span>
+        <span id="score-display">スコア: 0</span>
+      </div>
+
+      <div class="question-area">
+        <div id="question-text" class="question-text"></div>
+        <div id="kuku-reading" class="kuku-reading"></div>
+        <div id="answer-display" class="answer-display">&nbsp;</div>
+      </div>
+
+      <div class="numpad">
+        <button class="num-btn" onclick="inputNum(7)">7</button>
+        <button class="num-btn" onclick="inputNum(8)">8</button>
+        <button class="num-btn" onclick="inputNum(9)">9</button>
+        <button class="num-btn" onclick="inputNum(4)">4</button>
+        <button class="num-btn" onclick="inputNum(5)">5</button>
+        <button class="num-btn" onclick="inputNum(6)">6</button>
+        <button class="num-btn" onclick="inputNum(1)">1</button>
+        <button class="num-btn" onclick="inputNum(2)">2</button>
+        <button class="num-btn" onclick="inputNum(3)">3</button>
+        <button class="num-btn action-btn btn-clear" onclick="clearInput()">けす</button>
+        <button class="num-btn" onclick="inputNum(0)">0</button>
+        <button class="num-btn action-btn btn-enter" onclick="submitAnswer()">OK</button>
+      </div>
+
+    </div>
+
+    <!-- フィードバック -->
+    <div id="feedback-overlay">
+      <div id="feedback-icon" class="feedback-icon"></div>
+    </div>
+
+    <!-- リザルト画面 -->
+    <div id="result-screen" class="screen">
+      <h1>けっか</h1>
+      <div class="score-board">
+        <div class="score-text">あなたのスコア</div>
+        <div id="final-score" class="final-score">10</div>
+        <div id="perfect-msg" class="perfect-msg"></div>
+      </div>
+      <button class="btn btn-primary" onclick="showTitle()">もういっかい</button>
+    </div>
+
+    <!-- 九九の表画面 -->
+    <div id="table-screen" class="screen">
+      <div class="table-header">
+        <button class="btn" style="font-size: 0.65rem; padding: 4px 10px;" onclick="showTitle()">もどる</button>
+        <h1 style="margin: 0; font-size: 1.1rem;">九九のひょう</h1>
+        <div style="width: 50px;"></div>
+      </div>
+
+      <div id="table-content" class="table-content">
+        <!-- 動的に生成 -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 九九データ (読み仮名付き)
+    // q_read: 問題読み上げ（〜が、まで）, a_read: 答え読み上げ
+    const kukuData = [
+      // 1の段
+      { a: 1, b: 1, q_read: "いんいちが", a_read: "いち" },
+      { a: 1, b: 2, q_read: "いんにが", a_read: "に" },
+      { a: 1, b: 3, q_read: "いんさんが", a_read: "さん" },
+      { a: 1, b: 4, q_read: "いんしが", a_read: "し" },
+      { a: 1, b: 5, q_read: "いんごが", a_read: "ご" },
+      { a: 1, b: 6, q_read: "いんろくが", a_read: "ろく" },
+      { a: 1, b: 7, q_read: "いんしちが", a_read: "しち" },
+      { a: 1, b: 8, q_read: "いんはちが", a_read: "はち" },
+      { a: 1, b: 9, q_read: "いんくが", a_read: "く" },
+      // 2の段
+      { a: 2, b: 1, q_read: "にいちが", a_read: "に" },
+      { a: 2, b: 2, q_read: "ににんが", a_read: "し" },
+      { a: 2, b: 3, q_read: "にさんが", a_read: "ろく" },
+      { a: 2, b: 4, q_read: "にしが", a_read: "はち" },
+      { a: 2, b: 5, q_read: "にご", a_read: "じゅう" },
+      { a: 2, b: 6, q_read: "にろく", a_read: "じゅうに" },
+      { a: 2, b: 7, q_read: "にしち", a_read: "じゅうし" },
+      { a: 2, b: 8, q_read: "にはち", a_read: "じゅうろく" },
+      { a: 2, b: 9, q_read: "にく", a_read: "じゅうはち" },
+      // 3の段
+      { a: 3, b: 1, q_read: "さんいちが", a_read: "さん" },
+      { a: 3, b: 2, q_read: "さんにが", a_read: "ろく" },
+      { a: 3, b: 3, q_read: "さざんが", a_read: "く" },
+      { a: 3, b: 4, q_read: "さんし", a_read: "じゅうに" },
+      { a: 3, b: 5, q_read: "さんご", a_read: "じゅうご" },
+      { a: 3, b: 6, q_read: "さぶろく", a_read: "じゅうはち" },
+      { a: 3, b: 7, q_read: "さんしち", a_read: "にじゅういち" },
+      { a: 3, b: 8, q_read: "さんぱ", a_read: "にじゅうし" },
+      { a: 3, b: 9, q_read: "さんく", a_read: "にじゅうしち" },
+      // 4の段
+      { a: 4, b: 1, q_read: "しいちが", a_read: "し" },
+      { a: 4, b: 2, q_read: "しにが", a_read: "はち" },
+      { a: 4, b: 3, q_read: "しさん", a_read: "じゅうに" },
+      { a: 4, b: 4, q_read: "しし", a_read: "じゅうろく" },
+      { a: 4, b: 5, q_read: "しご", a_read: "にじゅう" },
+      { a: 4, b: 6, q_read: "しろく", a_read: "にじゅうし" },
+      { a: 4, b: 7, q_read: "ししち", a_read: "にじゅうはち" },
+      { a: 4, b: 8, q_read: "しは", a_read: "さんじゅうに" },
+      { a: 4, b: 9, q_read: "しく", a_read: "さんじゅうろく" },
+      // 5の段
+      { a: 5, b: 1, q_read: "ごいちが", a_read: "ご" },
+      { a: 5, b: 2, q_read: "ごに", a_read: "じゅう" },
+      { a: 5, b: 3, q_read: "ごさん", a_read: "じゅうご" },
+      { a: 5, b: 4, q_read: "ごし", a_read: "にじゅう" },
+      { a: 5, b: 5, q_read: "ごご", a_read: "にじゅうご" },
+      { a: 5, b: 6, q_read: "ごろく", a_read: "さんじゅう" },
+      { a: 5, b: 7, q_read: "ごしち", a_read: "さんじゅうご" },
+      { a: 5, b: 8, q_read: "ごは", a_read: "しじゅう" },
+      { a: 5, b: 9, q_read: "ごく", a_read: "しじゅうご" },
+      // 6の段
+      { a: 6, b: 1, q_read: "ろくいちが", a_read: "ろく" },
+      { a: 6, b: 2, q_read: "ろくに", a_read: "じゅうに" },
+      { a: 6, b: 3, q_read: "ろくさん", a_read: "じゅうはち" },
+      { a: 6, b: 4, q_read: "ろくし", a_read: "にじゅうし" },
+      { a: 6, b: 5, q_read: "ろくご", a_read: "さんじゅう" },
+      { a: 6, b: 6, q_read: "ろくろく", a_read: "さんじゅうろく" },
+      { a: 6, b: 7, q_read: "ろくしち", a_read: "しじゅうに" },
+      { a: 6, b: 8, q_read: "ろくは", a_read: "しじゅうはち" },
+      { a: 6, b: 9, q_read: "ろっく", a_read: "ごじゅうし" },
+      // 7の段
+      { a: 7, b: 1, q_read: "しちいちが", a_read: "しち" },
+      { a: 7, b: 2, q_read: "しちに", a_read: "じゅうし" },
+      { a: 7, b: 3, q_read: "しちさん", a_read: "にじゅういち" },
+      { a: 7, b: 4, q_read: "しちし", a_read: "にじゅうはち" },
+      { a: 7, b: 5, q_read: "しちご", a_read: "さんじゅうご" },
+      { a: 7, b: 6, q_read: "しちろく", a_read: "しじゅうに" },
+      { a: 7, b: 7, q_read: "しちしち", a_read: "しじゅうく" },
+      { a: 7, b: 8, q_read: "しちは", a_read: "ごじゅうろく" },
+      { a: 7, b: 9, q_read: "しちく", a_read: "ろくじゅうさん" },
+      // 8の段
+      { a: 8, b: 1, q_read: "はちいちが", a_read: "はち" },
+      { a: 8, b: 2, q_read: "はちに", a_read: "じゅうろく" },
+      { a: 8, b: 3, q_read: "はちさん", a_read: "にじゅうし" },
+      { a: 8, b: 4, q_read: "はちし", a_read: "さんじゅうに" },
+      { a: 8, b: 5, q_read: "はちご", a_read: "しじゅう" },
+      { a: 8, b: 6, q_read: "はちろく", a_read: "しじゅうはち" },
+      { a: 8, b: 7, q_read: "はちしち", a_read: "ごじゅうろく" },
+      { a: 8, b: 8, q_read: "はっぱ", a_read: "ろくじゅうし" },
+      { a: 8, b: 9, q_read: "はっく", a_read: "しちじゅうに" },
+      // 9の段
+      { a: 9, b: 1, q_read: "くいちが", a_read: "く" },
+      { a: 9, b: 2, q_read: "くに", a_read: "じゅうはち" },
+      { a: 9, b: 3, q_read: "くさん", a_read: "にじゅうしち" },
+      { a: 9, b: 4, q_read: "くし", a_read: "さんじゅうろく" },
+      { a: 9, b: 5, q_read: "くご", a_read: "しじゅうご" },
+      { a: 9, b: 6, q_read: "くろく", a_read: "ごじゅうし" },
+      { a: 9, b: 7, q_read: "くしち", a_read: "ろくじゅうさん" },
+      { a: 9, b: 8, q_read: "くは", a_read: "しちじゅうに" },
+      { a: 9, b: 9, q_read: "くく", a_read: "はちじゅういち" },
+    ];
+
+    // ゲーム状態
+    let currentQuestions = [];
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let currentInput = "";
+    let isProcessing = false;
+    let currentQuestionType = "answer"; // "answer"（通常）or "equation"（逆問題: Q5, Q10）
+    let equationInputB = "";
+    const TOTAL_QUESTIONS = 10;
+
+    // くみあわせモード
+    let isCombinationMode = false;
+    let selectedDans = new Set();
+
+    // 音声合成
+    const synth = window.speechSynthesis;
+    let voice = null;
+
+    function initVoice() {
+      const voices = synth.getVoices();
+      // 日本語の音声を探す
+      voice = voices.find(v => v.lang === 'ja-JP') || voices[0];
+    }
+
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+      speechSynthesis.onvoiceschanged = initVoice;
+    }
+
+    function speak(text) {
+      if (synth.speaking) {
+        synth.cancel();
+      }
+      const utterThis = new SpeechSynthesisUtterance(text);
+      if (voice) utterThis.voice = voice;
+      utterThis.lang = 'ja-JP';
+      utterThis.rate = 1.0;
+      utterThis.pitch = 1.2; // 子供向けに少し高め
+      synth.speak(utterThis);
+    }
+
+    // 画面切り替え
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(el => {
+        el.classList.remove('active');
+      });
+      document.getElementById(screenId).classList.add('active');
+    }
+
+    // ゲーム開始
+    function startGame(mode) {
+      // 音声初期化（ユーザー操作トリガー）
+      initVoice();
+      initAudio();
+      speak(""); // ダミー再生でアンロック
+
+      score = 0;
+      currentQuestionIndex = 0;
+      currentInput = "";
+      isProcessing = false;
+      currentQuestionType = "answer";
+      equationInputB = "";
+      document.getElementById('question-text').textContent = '';
+      document.getElementById('kuku-reading').innerHTML = '';
+      document.getElementById('answer-display').textContent = '\u00A0';
+      document.getElementById('answer-display').style.display = '';
+      
+      // 問題生成
+      let candidates = [];
+
+      if (mode.includes(',')) {
+        // くみあわせモード: カンマ区切りの段リスト
+        const dans = mode.split(',').map(Number);
+        candidates = kukuData.filter(d => dans.includes(d.a));
+      } else if (mode.includes('-')) {
+        const [start, end] = mode.split('-').map(Number);
+        candidates = kukuData.filter(d => d.a >= start && d.a <= end);
+      } else {
+        const target = Number(mode);
+        candidates = kukuData.filter(d => d.a === target);
+      }
+
+      // ランダムに10問選ぶ（重複ありにするか？なしにするか？ -> なし推奨だが候補が少ない場合はあり）
+      // シャッフルして先頭10個を取る
+      currentQuestions = shuffleArray([...candidates]).slice(0, TOTAL_QUESTIONS);
+      // もし候補が10個未満なら（例：1つの段は9個しかない）、補充する
+      while (currentQuestions.length < TOTAL_QUESTIONS) {
+        const randomQ = candidates[Math.floor(Math.random() * candidates.length)];
+        currentQuestions.push(randomQ);
+      }
+
+      updateStatusBar();
+      showScreen('game-screen');
+      
+      // 少し待ってから最初の問題を表示
+      setTimeout(showNextQuestion, 500);
+    }
+
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function showNextQuestion() {
+      if (currentQuestionIndex >= TOTAL_QUESTIONS) {
+        endGame();
+        return;
+      }
+
+      const q = currentQuestions[currentQuestionIndex];
+      const questionTextEl = document.getElementById('question-text');
+      const answerDisplayEl = document.getElementById('answer-display');
+      const kukuReadingEl = document.getElementById('kuku-reading');
+
+      // Q5(index 4)とQ10(index 9)は逆問題
+      const isEquationType = (currentQuestionIndex === 4 || currentQuestionIndex === 9);
+      currentQuestionType = isEquationType ? "equation" : "answer";
+
+      // 入力状態リセット
+      currentInput = "";
+      equationInputB = "";
+
+      if (currentQuestionType === "equation") {
+        // 逆問題: 左の数と答えを表示し、右の数だけ穴埋め
+        const answer = q.a * q.b;
+        questionTextEl.innerHTML =
+          '<div class="equation-display">' +
+          '<span class="equation-answer-part">' + q.a + '</span>' +
+          '<span class="equation-operator">&times;</span>' +
+          '<span id="slot-b" class="equation-slot active-slot">?</span>' +
+          '<span class="equation-operator">=</span>' +
+          '<span class="equation-answer-part">' + answer + '</span>' +
+          '</div>';
+
+        // よみがな: 式部分が空欄、答え部分を表示
+        kukuReadingEl.innerHTML =
+          '<span class="kuku-blank">' + q.q_read + '</span>' +
+          '<span>' + q.a_read + '</span>';
+
+        // 通常の入力欄を非表示
+        answerDisplayEl.style.display = 'none';
+
+        // 「あなうめもんだい」を読み上げ
+        speak("あなうめもんだい");
+      } else {
+        // 通常問題: 式を表示し、答えを入力させる
+        questionTextEl.textContent = q.a + ' \u00d7 ' + q.b + ' = ?';
+
+        // よみがな: 式部分を表示、答え部分が空欄
+        kukuReadingEl.innerHTML =
+          '<span>' + q.q_read + '</span>' +
+          '<span class="kuku-blank">' + q.a_read + '</span>';
+
+        // 通常の入力欄を表示
+        answerDisplayEl.style.display = '';
+
+        // 式の読みを読み上げ
+        speak(q.q_read);
+      }
+
+      updateInputDisplay();
+      updateStatusBar();
+      isProcessing = false;
+    }
+
+    function updateStatusBar() {
+      document.getElementById('question-counter').textContent = `もんだい ${currentQuestionIndex + 1}/${TOTAL_QUESTIONS}`;
+      document.getElementById('score-display').textContent = `スコア: ${score}`;
+    }
+
+    function inputNum(num) {
+      if (isProcessing) return;
+
+      if (currentQuestionType === "equation") {
+        // 逆問題: 右の数を1桁入力
+        if (equationInputB !== "") return; // 入力済み
+        equationInputB = String(num);
+        updateEquationDisplay();
+        playSe('btn');
+      } else {
+        // 通常問題
+        if (currentInput === "0") currentInput = "";
+        if (currentInput.length >= 2) return; // 2桁まで
+        currentInput += num;
+        updateInputDisplay();
+        playSe('btn');
+      }
+    }
+
+    function clearInput() {
+      if (isProcessing) return;
+
+      if (currentQuestionType === "equation") {
+        equationInputB = "";
+        updateEquationDisplay();
+      } else {
+        currentInput = "";
+        updateInputDisplay();
+      }
+      playSe('cancel');
+    }
+
+    function updateInputDisplay() {
+      const display = document.getElementById('answer-display');
+      display.textContent = currentInput || '\u00A0'; // 空の場合は&nbsp;を表示
+    }
+
+    function updateEquationDisplay() {
+      const slotB = document.getElementById('slot-b');
+      if (!slotB) return;
+
+      if (equationInputB !== "") {
+        slotB.textContent = equationInputB;
+        slotB.classList.remove('active-slot');
+        slotB.classList.add('filled-slot');
+      } else {
+        slotB.textContent = '?';
+        slotB.classList.remove('filled-slot');
+        slotB.classList.add('active-slot');
+      }
+    }
+
+    function submitAnswer() {
+      if (isProcessing) return;
+
+      const q = currentQuestions[currentQuestionIndex];
+      const kukuReadingEl = document.getElementById('kuku-reading');
+
+      if (currentQuestionType === "equation") {
+        // 逆問題: 右の数の入力必須
+        if (equationInputB === "") return;
+
+        isProcessing = true;
+        const userB = Number(equationInputB);
+
+        // q.bと一致するか判定
+        const isCorrect = (userB === q.b);
+
+        if (isCorrect) {
+          score++;
+          showFeedback(true);
+          playSe('correct');
+        } else {
+          showFeedback(false);
+          playSe('incorrect');
+        }
+
+        // よみがな: 式部分(q_read)を公開して完成
+        kukuReadingEl.innerHTML =
+          '<span class="kuku-revealed">' + q.q_read + '</span>' +
+          '<span>' + q.a_read + '</span>';
+
+        // 正解の読み上げ
+        setTimeout(() => {
+          speak(q.q_read + q.a_read);
+        }, 500);
+
+        // 次の問題へ
+        setTimeout(() => {
+          currentQuestionIndex++;
+          showNextQuestion();
+        }, 2500);
+
+      } else {
+        // 通常問題
+        if (currentInput === "") return;
+
+        isProcessing = true;
+        const userAnswer = Number(currentInput);
+        const correctAnswer = q.a * q.b;
+        const isCorrect = userAnswer === correctAnswer;
+
+        if (isCorrect) {
+          score++;
+          showFeedback(true);
+          playSe('correct');
+        } else {
+          showFeedback(false);
+          playSe('incorrect');
+        }
+
+        // よみがな: 答え部分(a_read)を公開して完成
+        kukuReadingEl.innerHTML =
+          '<span>' + q.q_read + '</span>' +
+          '<span class="kuku-revealed">' + q.a_read + '</span>';
+
+        // 正解の読み上げ
+        setTimeout(() => {
+          speak(q.q_read + q.a_read);
+        }, 500);
+
+        // 次の問題へ
+        setTimeout(() => {
+          currentQuestionIndex++;
+          showNextQuestion();
+        }, 2500);
+      }
+    }
+
+    function showFeedback(isCorrect) {
+      const overlay = document.getElementById('feedback-overlay');
+      const icon = document.getElementById('feedback-icon');
+      
+      overlay.style.opacity = 1;
+      icon.textContent = isCorrect ? '⭕' : '❌';
+      icon.className = 'feedback-icon ' + (isCorrect ? 'correct' : 'incorrect');
+      
+      // アニメーション
+      requestAnimationFrame(() => {
+        icon.style.transform = 'scale(1)';
+      });
+
+      setTimeout(() => {
+        icon.style.transform = 'scale(0)';
+        overlay.style.opacity = 0;
+      }, 1500);
+    }
+
+    function endGame() {
+      showScreen('result-screen');
+      playSe('result');
+      document.getElementById('final-score').textContent = `${score} / ${TOTAL_QUESTIONS}`;
+      
+      const msgEl = document.getElementById('perfect-msg');
+      if (score === TOTAL_QUESTIONS) {
+        msgEl.textContent = "すごい！ぜんもんせいかい！";
+        speak("すごい！ぜんもんせいかい！");
+      } else if (score >= 7) {
+        msgEl.textContent = "よくがんばったね！";
+        speak("よくがんばったね！");
+      } else {
+        msgEl.textContent = "またチャレンジしてね！";
+        speak("またチャレンジしてね！");
+      }
+    }
+
+    function showTitle() {
+      showScreen('title-screen');
+      synth.cancel();
+      playSe('cancel');
+      stopTablePlayback();
+      // くみあわせモードをリセット
+      if (isCombinationMode) {
+        toggleCombinationMode();
+      }
+    }
+
+    // くみあわせモード
+    function toggleCombinationMode() {
+      isCombinationMode = !isCombinationMode;
+      selectedDans.clear();
+
+      const toggleBtn = document.getElementById('combination-toggle');
+      const startBtn = document.getElementById('combination-start');
+      const danButtons = document.querySelectorAll('.mode-grid .btn');
+
+      toggleBtn.classList.toggle('btn-primary', isCombinationMode);
+      toggleBtn.textContent = isCombinationMode ? 'くみあわせ ON' : 'くみあわせ';
+      startBtn.style.display = isCombinationMode ? 'block' : 'none';
+      startBtn.disabled = true;
+
+      danButtons.forEach(btn => {
+        btn.classList.remove('dan-selected');
+      });
+
+      playSe('btn');
+    }
+
+    function handleDanClick(dan) {
+      if (!isCombinationMode) {
+        startGame(String(dan));
+        return;
+      }
+
+      const btn = document.querySelector(`.mode-grid .btn[data-dan="${dan}"]`);
+
+      if (selectedDans.has(dan)) {
+        selectedDans.delete(dan);
+        btn.classList.remove('dan-selected');
+      } else {
+        selectedDans.add(dan);
+        btn.classList.add('dan-selected');
+      }
+
+      const startBtn = document.getElementById('combination-start');
+      startBtn.disabled = selectedDans.size === 0;
+
+      playSe('btn');
+    }
+
+    function startCombinationGame() {
+      if (selectedDans.size === 0) return;
+      const mode = Array.from(selectedDans).sort().join(',');
+      startGame(mode);
+    }
+
+    // 九九の表モード
+    let isPlayingTable = false;
+    let tablePlaybackData = [];
+    let tablePlaybackIndex = 0;
+
+    function showTable() {
+      showScreen('table-screen');
+      renderAllTable();
+    }
+
+    function renderAllTable() {
+      const container = document.getElementById('table-content');
+      container.innerHTML = '';
+
+      for (let dan = 1; dan <= 9; dan++) {
+        const tableData = kukuData.filter(d => d.a === dan);
+
+        const section = document.createElement('div');
+        section.className = 'table-dan-section';
+
+        const title = document.createElement('div');
+        title.className = 'table-dan-title';
+        title.innerHTML = `
+          <span>${dan}のだん</span>
+          <button class="btn btn-secondary play-dan-btn" onclick="playDan(${dan})">🔊</button>
+        `;
+
+        section.appendChild(title);
+
+        tableData.forEach((data, index) => {
+          const row = document.createElement('div');
+          row.className = 'table-row';
+          row.id = `table-row-${dan}-${index}`;
+          row.onclick = () => playTableRow(data, dan, index);
+
+          const left = document.createElement('span');
+          left.className = 'table-row-left';
+          left.textContent = `${data.a} × ${data.b} =`;
+
+          const right = document.createElement('span');
+          right.className = 'table-row-right';
+          right.textContent = data.a * data.b;
+
+          const reading = document.createElement('span');
+          reading.className = 'table-row-reading';
+          reading.textContent = data.q_read + data.a_read;
+
+          row.appendChild(left);
+          row.appendChild(right);
+          row.appendChild(reading);
+          section.appendChild(row);
+        });
+
+        container.appendChild(section);
+      }
+    }
+
+    function playTableRow(data, dan, rowIndex) {
+      stopTablePlayback();
+
+      // ハイライト
+      const row = document.getElementById(`table-row-${dan}-${rowIndex}`);
+      if (row) {
+        row.classList.add('playing');
+        setTimeout(() => row.classList.remove('playing'), 2000);
+      }
+
+      speak(data.q_read + data.a_read);
+    }
+
+    function playDan(dan) {
+      if (isPlayingTable) {
+        stopTablePlayback();
+        return;
+      }
+
+      isPlayingTable = true;
+      tablePlaybackIndex = 0;
+      tablePlaybackData = kukuData.filter(d => d.a === dan).map((data, index) => ({
+        data: data,
+        dan: dan,
+        index: index
+      }));
+
+      playNextTableRow();
+    }
+
+    function playNextTableRow() {
+      if (!isPlayingTable || tablePlaybackIndex >= tablePlaybackData.length) {
+        stopTablePlayback();
+        return;
+      }
+
+      const item = tablePlaybackData[tablePlaybackIndex];
+      const row = document.getElementById(`table-row-${item.dan}-${item.index}`);
+
+      // 全ての行のハイライトを削除
+      document.querySelectorAll('.table-row').forEach(r => r.classList.remove('playing'));
+
+      // 現在の行をハイライト
+      if (row) {
+        row.classList.add('playing');
+      }
+
+      speak(item.data.q_read + item.data.a_read);
+
+      tablePlaybackIndex++;
+      setTimeout(() => playNextTableRow(), 2000);
+    }
+
+    function stopTablePlayback() {
+      isPlayingTable = false;
+      tablePlaybackIndex = 0;
+      tablePlaybackData = [];
+      document.querySelectorAll('.table-row').forEach(r => r.classList.remove('playing'));
+    }
+
+    // 初期化
+    initVoice();
+
+    // --- Audio System ---
+    let audioCtx = null;
+    let isMuted = true;
+    let bgmTimer = null;
+    let audioInitialized = false;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      if (!audioInitialized) {
+        isMuted = false;
+        updateMuteIcon();
+        audioInitialized = true;
+      }
+      startBgm();
+    }
+
+    function toggleMute() {
+      if (!audioCtx) {
+        initAudio();
+        return;
+      }
+      isMuted = !isMuted;
+      updateMuteIcon();
+      if (isMuted) {
+        stopBgm();
+        synth.cancel();
+      } else {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        startBgm();
+      }
+    }
+
+    function updateMuteIcon() {
+      const btn = document.getElementById('mute-btn');
+      btn.textContent = isMuted ? '🔇' : '🔊';
+    }
+
+    const BGM_SONGS = [
+      {
+        name: "ゆったり",
+        tempo: 0.4,
+        waveType: "sine",
+        gain: 0.03,
+        melody: [523.25, 587.33, 659.25, 783.99, 659.25, 783.99, 1046.50, 783.99,
+                 523.25, 659.25, 587.33, 523.25, 392.00, 523.25, 587.33, 659.25]
+      },
+      {
+        name: "わくわく",
+        tempo: 0.2,
+        waveType: "square",
+        gain: 0.015,
+        melody: [523.25, 523.25, 783.99, 783.99, 659.25, 783.99, 523.25, 392.00,
+                 440.00, 523.25, 659.25, 523.25, 783.99, 659.25, 523.25, 440.00,
+                 523.25, 659.25, 783.99, 1046.50, 783.99, 659.25, 523.25, 659.25,
+                 783.99, 523.25, 440.00, 392.00, 440.00, 523.25, 659.25, 523.25]
+      },
+      {
+        name: "たのしい",
+        tempo: 0.18,
+        waveType: "triangle",
+        gain: 0.025,
+        melody: [659.25, 783.99, 659.25, 523.25, 659.25, 783.99, 1046.50, 783.99,
+                 659.25, 523.25, 392.00, 523.25, 659.25, 523.25, 783.99, 659.25,
+                 1046.50, 783.99, 659.25, 783.99, 523.25, 659.25, 392.00, 523.25]
+      },
+      {
+        name: "キラキラ",
+        tempo: 0.22,
+        waveType: "sine",
+        gain: 0.03,
+        melody: [1046.50, 1046.50, 783.99, 783.99, 880.00, 880.00, 783.99, 0,
+                 698.46, 698.46, 659.25, 659.25, 587.33, 587.33, 523.25, 0,
+                 783.99, 783.99, 698.46, 698.46, 659.25, 659.25, 587.33, 0,
+                 783.99, 783.99, 698.46, 698.46, 659.25, 659.25, 587.33, 0,
+                 1046.50, 1046.50, 783.99, 783.99, 880.00, 880.00, 783.99, 0,
+                 698.46, 698.46, 659.25, 659.25, 587.33, 587.33, 523.25, 0]
+      }
+    ];
+    let currentSongIndex = 0;
+    let noteIndex = 0;
+
+    function selectSong(index) {
+      currentSongIndex = index;
+      noteIndex = 0;
+      document.querySelectorAll('.bgm-option').forEach((el, i) => {
+        el.classList.toggle('bgm-active', i === index);
+      });
+      if (!isMuted && bgmTimer) {
+        stopBgm();
+        startBgm();
+      }
+      initAudio();
+      playSe('btn');
+    }
+
+    function startBgm() {
+      if (isMuted || bgmTimer) return;
+      scheduleNextNote();
+    }
+
+    function stopBgm() {
+      clearTimeout(bgmTimer);
+      bgmTimer = null;
+    }
+
+    function scheduleNextNote() {
+      if (isMuted) { bgmTimer = null; return; }
+      if (!audioCtx) return;
+
+      const song = BGM_SONGS[currentSongIndex];
+      const freq = song.melody[noteIndex % song.melody.length];
+
+      if (freq > 0) {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = song.waveType;
+        osc.frequency.value = freq;
+
+        gain.gain.setValueAtTime(song.gain, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + song.tempo);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + song.tempo);
+      }
+
+      noteIndex++;
+      bgmTimer = setTimeout(scheduleNextNote, song.tempo * 1000);
+    }
+
+    function playSe(type) {
+      if (isMuted || !audioCtx) return;
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      if (type === 'btn') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(880, now);
+        gain.gain.setValueAtTime(0.05, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        osc.start(now);
+        osc.stop(now + 0.1);
+      } else if (type === 'correct') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.linearRampToValueAtTime(1046.50, now + 0.1);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      } else if (type === 'incorrect') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.linearRampToValueAtTime(100, now + 0.3);
+        gain.gain.setValueAtTime(0.05, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      } else if (type === 'cancel') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440, now);
+        gain.gain.setValueAtTime(0.05, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        osc.start(now);
+        osc.stop(now + 0.1);
+      } else if (type === 'result') {
+        [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => {
+          const o = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          o.connect(g);
+          g.connect(audioCtx.destination);
+          o.type = 'triangle';
+          o.frequency.value = f;
+          g.gain.setValueAtTime(0.05, now + i * 0.1);
+          g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.4);
+          o.start(now + i * 0.1);
+          o.stop(now + i * 0.1 + 0.4);
+        });
+      }
+    }
+
+  </script>
+</body>
+</html>
