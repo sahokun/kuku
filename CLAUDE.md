@@ -44,7 +44,7 @@ kuku/
 | ブランチ | 役割 | 誰が操作 |
 |---------|------|---------|
 | `main` | 本番リリース | ユーザーのみ |
-| `develop` | 動作確認・自動デプロイ | Claude (squash merge のみ) |
+| `develop` | 動作確認 | Claude (squash merge のみ) |
 | `feature/*` | 開発作業 | Claude (自由にコミット) |
 
 ### feature/* ブランチでの作業
@@ -53,7 +53,7 @@ kuku/
 - `git push -u origin feature/*` でリモートにバックアップ
 
 ### feature/* → develop: Squash Merge
-- 実装完了時に `git checkout develop && git merge --squash feature/xxx` で反映
+- Issueクローズ時に `git checkout develop && git merge --squash feature/xxx` で反映
 - **1つの機能 = develop 上で1コミット**（動作確認の単位）
 - コミットメッセージ形式:
   ```
@@ -67,7 +67,7 @@ kuku/
   Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
   ```
 - マージ後に feature ブランチを削除（ローカル + リモート）
-- **squash merge 後は `git push origin develop` まで行う**（ユーザーがすぐ動作確認できるように）
+- **squash merge 後は `git push origin develop` まで行う**
 
 ### develop → main: ユーザー指示のみ
 - ユーザーが develop で動作確認後に実施
