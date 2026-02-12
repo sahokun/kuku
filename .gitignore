@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+
+# local env files
+.env*.local
+
+# editor
+.vscode/
+
+# AI metadata
+.ai/
+
+# Claude Code (commands only committed)
+.claude/*
+!.claude/commands/
