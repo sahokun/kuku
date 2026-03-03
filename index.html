@@ -623,6 +623,119 @@
       cursor: not-allowed;
     }
 
+    /* もんだいすう設定 */
+    .settings-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 4px 8px;
+      background: rgba(255,255,255,0.6);
+      border-radius: 12px;
+      margin-bottom: 8px;
+    }
+    .settings-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--pastel-purple);
+    }
+    .settings-unit {
+      font-size: 0.75rem;
+      color: var(--text-color);
+    }
+    .stepper {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .stepper-btn {
+      min-width: 32px;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      font-size: 1rem;
+      border-radius: 50%;
+    }
+    #question-count-display {
+      min-width: 36px;
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: var(--main-pink);
+    }
+
+    /* 自由選択画面 */
+    #free-select-screen {
+      justify-content: flex-start;
+    }
+    .free-select-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      margin: 4px 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    #free-select-count {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--pastel-purple);
+    }
+    .compact-kuku-table {
+      display: grid;
+      grid-template-columns: 24px repeat(9, 1fr);
+      gap: 3px;
+      width: 100%;
+      padding: 4px;
+    }
+    .ck-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      color: var(--pastel-purple);
+      font-weight: 700;
+      height: 28px;
+    }
+    .ck-cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 28px;
+      border-radius: 6px;
+      background: #f0f0f0;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-color);
+      cursor: pointer;
+      transition: background 0.12s, color 0.12s, transform 0.1s;
+    }
+    .ck-cell:active {
+      transform: scale(0.92);
+    }
+    .ck-cell.selected {
+      background: var(--main-pink);
+      color: white;
+    }
+    .free-select-footer {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      margin-top: 8px;
+      gap: 8px;
+    }
+    .free-select-footer .btn {
+      flex: 1;
+      font-size: 0.85rem;
+      padding: 10px;
+    }
+    #free-start-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
   </style>
 </head>
 <body>
@@ -674,8 +787,19 @@
         </div>
       </div>
 
-      <div style="margin-top: 10px;">
-        <button class="btn btn-primary" style="font-size: 0.75rem; padding: 8px;" onclick="showTable()">📖 九九のひょう</button>
+      <div class="settings-row">
+        <span class="settings-label">もんだいすう</span>
+        <div class="stepper">
+          <button class="btn stepper-btn" onclick="changeQuestionCount(-1)">－</button>
+          <span id="question-count-display">10</span>
+          <button class="btn stepper-btn" onclick="changeQuestionCount(1)">＋</button>
+        </div>
+        <span class="settings-unit">もん</span>
+      </div>
+
+      <div style="display: flex; gap: 6px; width: 100%; margin-top: 2px;">
+        <button class="btn btn-secondary" style="flex: 1; font-size: 0.75rem; padding: 8px;" onclick="showFreeSelect()">✏️ 自由選択</button>
+        <button class="btn btn-primary" style="flex: 1; font-size: 0.75rem; padding: 8px;" onclick="showTable()">📖 九九のひょう</button>
       </div>
     </div>
 
@@ -724,6 +848,23 @@
         <div id="perfect-msg" class="perfect-msg"></div>
       </div>
       <button class="btn btn-primary" onclick="showTitle()">もういっかい</button>
+    </div>
+
+    <!-- 自由選択画面 -->
+    <div id="free-select-screen" class="screen">
+      <h1>もんだいをえらぼう</h1>
+      <div class="free-select-controls">
+        <button class="btn btn-secondary" style="font-size: 0.7rem; padding: 5px 10px; min-width: auto;" onclick="selectAllFree()">すべて選ぶ</button>
+        <button class="btn" style="font-size: 0.7rem; padding: 5px 10px; min-width: auto;" onclick="clearAllFree()">クリア</button>
+        <span id="free-select-count">0もん選択中</span>
+      </div>
+      <div id="free-select-table" class="compact-kuku-table">
+        <!-- JS で生成 -->
+      </div>
+      <div class="free-select-footer">
+        <button class="btn btn-secondary" onclick="showTitle()">もどる</button>
+        <button class="btn btn-primary" id="free-start-btn" onclick="startFreeGame()" disabled>スタート</button>
+      </div>
     </div>
 
     <!-- 九九の表画面 -->
@@ -844,11 +985,15 @@
     let isProcessing = false;
     let currentQuestionType = "answer"; // "answer"（通常）or "equation"（逆問題: Q5, Q10）
     let equationInputB = "";
-    const TOTAL_QUESTIONS = 10;
+    let totalQuestions = parseInt(localStorage.getItem('kuku_question_count') || '10');
 
     // くみあわせモード
     let isCombinationMode = false;
     let selectedDans = new Set();
+
+    // 自由選択モード
+    let isFreeMode = false;
+    let selectedFreeProblems = new Set(); // "a,b" 形式
 
     // 音声合成
     const synth = window.speechSynthesis;
@@ -891,6 +1036,7 @@
       initAudio();
       speak(""); // ダミー再生でアンロック
 
+      isFreeMode = false;
       score = 0;
       currentQuestionIndex = 0;
       currentInput = "";
@@ -919,9 +1065,9 @@
 
       // ランダムに10問選ぶ（重複ありにするか？なしにするか？ -> なし推奨だが候補が少ない場合はあり）
       // シャッフルして先頭10個を取る
-      currentQuestions = shuffleArray([...candidates]).slice(0, TOTAL_QUESTIONS);
+      currentQuestions = shuffleArray([...candidates]).slice(0, totalQuestions);
       // もし候補が10個未満なら（例：1つの段は9個しかない）、補充する
-      while (currentQuestions.length < TOTAL_QUESTIONS) {
+      while (currentQuestions.length < totalQuestions) {
         const randomQ = candidates[Math.floor(Math.random() * candidates.length)];
         currentQuestions.push(randomQ);
       }
@@ -942,7 +1088,7 @@
     }
 
     function showNextQuestion() {
-      if (currentQuestionIndex >= TOTAL_QUESTIONS) {
+      if (currentQuestionIndex >= totalQuestions) {
         endGame();
         return;
       }
@@ -952,8 +1098,8 @@
       const answerDisplayEl = document.getElementById('answer-display');
       const kukuReadingEl = document.getElementById('kuku-reading');
 
-      // Q5(index 4)とQ10(index 9)は逆問題
-      const isEquationType = (currentQuestionIndex === 4 || currentQuestionIndex === 9);
+      // 5問ごとに逆問題（自由選択モードでは逆問題なし）
+      const isEquationType = !isFreeMode && ((currentQuestionIndex + 1) % 5 === 0);
       currentQuestionType = isEquationType ? "equation" : "answer";
 
       // 入力状態リセット
@@ -1004,7 +1150,7 @@
     }
 
     function updateStatusBar() {
-      document.getElementById('question-counter').textContent = `もんだい ${currentQuestionIndex + 1}/${TOTAL_QUESTIONS}`;
+      document.getElementById('question-counter').textContent = `もんだい ${currentQuestionIndex + 1}/${totalQuestions}`;
       document.getElementById('score-display').textContent = `スコア: ${score}`;
     }
 
@@ -1159,10 +1305,10 @@
     function endGame() {
       showScreen('result-screen');
       playSe('result');
-      document.getElementById('final-score').textContent = `${score} / ${TOTAL_QUESTIONS}`;
+      document.getElementById('final-score').textContent = `${score} / ${totalQuestions}`;
       
       const msgEl = document.getElementById('perfect-msg');
-      if (score === TOTAL_QUESTIONS) {
+      if (score === totalQuestions) {
         msgEl.textContent = "すごい！ぜんもんせいかい！";
         speak("すごい！ぜんもんせいかい！");
       } else if (score >= 7) {
@@ -1179,6 +1325,7 @@
       synth.cancel();
       playSe('cancel');
       stopTablePlayback();
+      isFreeMode = false;
       // くみあわせモードをリセット
       if (isCombinationMode) {
         toggleCombinationMode();
@@ -1232,6 +1379,97 @@
       if (selectedDans.size === 0) return;
       const mode = Array.from(selectedDans).sort().join(',');
       startGame(mode);
+    }
+
+    // もんだいすう設定
+    function changeQuestionCount(delta) {
+      totalQuestions = Math.min(99, Math.max(1, totalQuestions + delta));
+      localStorage.setItem('kuku_question_count', totalQuestions);
+      document.getElementById('question-count-display').textContent = totalQuestions;
+      playSe('btn');
+    }
+
+    // 自由選択モード
+    function showFreeSelect() {
+      playSe('btn');
+      renderFreeSelectTable();
+      showScreen('free-select-screen');
+    }
+
+    function renderFreeSelectTable() {
+      const container = document.getElementById('free-select-table');
+      let html = '<div class="ck-header"></div>';
+      for (let a = 1; a <= 9; a++) html += `<div class="ck-header">${a}</div>`;
+      for (let b = 1; b <= 9; b++) {
+        html += `<div class="ck-header">${b}</div>`;
+        for (let a = 1; a <= 9; a++) {
+          const key = `${a},${b}`;
+          const sel = selectedFreeProblems.has(key) ? ' selected' : '';
+          html += `<div class="ck-cell${sel}" onclick="toggleFreeCell(${a},${b})">${a * b}</div>`;
+        }
+      }
+      container.innerHTML = html;
+      updateFreeSelectUI();
+    }
+
+    function toggleFreeCell(a, b) {
+      const key = `${a},${b}`;
+      if (selectedFreeProblems.has(key)) selectedFreeProblems.delete(key);
+      else selectedFreeProblems.add(key);
+      renderFreeSelectTable();
+      playSe('btn');
+    }
+
+    function updateFreeSelectUI() {
+      const count = selectedFreeProblems.size;
+      document.getElementById('free-select-count').textContent = `${count}もん選択中`;
+      document.getElementById('free-start-btn').disabled = count === 0;
+    }
+
+    function selectAllFree() {
+      for (let a = 1; a <= 9; a++)
+        for (let b = 1; b <= 9; b++)
+          selectedFreeProblems.add(`${a},${b}`);
+      renderFreeSelectTable();
+      playSe('btn');
+    }
+
+    function clearAllFree() {
+      selectedFreeProblems.clear();
+      renderFreeSelectTable();
+      playSe('btn');
+    }
+
+    function startFreeGame() {
+      if (selectedFreeProblems.size === 0) return;
+      isFreeMode = true;
+
+      const candidates = [...selectedFreeProblems].map(key => {
+        const [a, b] = key.split(',').map(Number);
+        return kukuData.find(d => d.a === a && d.b === b);
+      }).filter(Boolean);
+
+      currentQuestions = shuffleArray([...candidates]).slice(0, totalQuestions);
+      while (currentQuestions.length < totalQuestions) {
+        currentQuestions.push(...shuffleArray([...candidates]));
+      }
+      currentQuestions = currentQuestions.slice(0, totalQuestions);
+
+      score = 0;
+      currentQuestionIndex = 0;
+      currentInput = "";
+      equationInputB = "";
+      isProcessing = false;
+      currentQuestionType = "answer";
+      document.getElementById('question-text').textContent = '';
+      document.getElementById('kuku-reading').innerHTML = '';
+      document.getElementById('answer-display').textContent = '\u00A0';
+      document.getElementById('answer-display').style.display = '';
+
+      initVoice(); initAudio(); speak("");
+      updateStatusBar();
+      showScreen('game-screen');
+      setTimeout(showNextQuestion, 500);
     }
 
     // 九九の表モード
@@ -1442,6 +1680,7 @@
 
     function selectSong(index) {
       currentSongIndex = index;
+      localStorage.setItem('kuku_bgm', index);
       noteIndex = 0;
       document.querySelectorAll('.bgm-option').forEach((el, i) => {
         el.classList.toggle('bgm-active', i === index);
@@ -1543,6 +1782,18 @@
         });
       }
     }
+
+    // 初期化: localStorage からBGMと問題数を復元
+    (function init() {
+      const savedBgm = parseInt(localStorage.getItem('kuku_bgm') || '0');
+      if (savedBgm !== 0) {
+        currentSongIndex = savedBgm;
+        document.querySelectorAll('.bgm-option').forEach((el, i) => {
+          el.classList.toggle('bgm-active', i === savedBgm);
+        });
+      }
+      document.getElementById('question-count-display').textContent = totalQuestions;
+    })();
 
   </script>
 </body>
