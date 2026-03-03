@@ -756,6 +756,10 @@
         </div>
       </div>
 
+      <div style="width: 100%; margin: 4px 0;">
+        <button class="btn btn-primary" style="width: 100%; font-size: 0.85rem; padding: 10px;" onclick="showTable()">📖 九九のひょう</button>
+      </div>
+
       <div class="mode-section">
         <div class="dan-header">
           <h2>だんをえらんでね</h2>
@@ -784,6 +788,7 @@
           <button class="btn btn-secondary" onclick="startGame('2-5')">2〜5のだん</button>
           <button class="btn btn-secondary" onclick="startGame('6-9')">6〜9のだん</button>
           <button class="btn btn-primary" style="grid-column: span 2;" onclick="startGame('1-9')">ぜんぶ (1〜9)</button>
+          <button class="btn btn-secondary" style="grid-column: span 2;" onclick="showFreeSelect()">✏️ じゆうにえらぶ</button>
         </div>
       </div>
 
@@ -797,10 +802,6 @@
         <span class="settings-unit">もん</span>
       </div>
 
-      <div style="display: flex; gap: 6px; width: 100%; margin-top: 2px;">
-        <button class="btn btn-secondary" style="flex: 1; font-size: 0.75rem; padding: 8px;" onclick="showFreeSelect()">✏️ 自由選択</button>
-        <button class="btn btn-primary" style="flex: 1; font-size: 0.75rem; padding: 8px;" onclick="showTable()">📖 九九のひょう</button>
-      </div>
     </div>
 
     <!-- ゲーム画面 -->
