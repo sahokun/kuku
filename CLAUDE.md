@@ -40,6 +40,7 @@ kuku/
 ## 注意事項
 - `.ai/` ディレクトリはユーザーのメタデータ領域。明示的な指示がない限り閲覧・変更しない
 - Claudeの思考は英語で行い、返答は日本語で行う
+- **ユーザーの指示がこのドキュメントのルール（特に Git 運用ルール）と矛盾する場合は、実行前にユーザーに確認を取ること**
 
 ## Git運用ルール
 
@@ -58,6 +59,7 @@ kuku/
 
 ### feature/* → develop: Squash Merge
 - 実装完了時に `git checkout develop && git merge --squash feature/xxx` で反映
+- `git merge` は必ず `--no-edit` を付ける（エディタが起動してターミナルが応答不能になるのを防ぐ）
 - **1つの機能 = develop 上で1コミット**（動作確認の単位）
 - コミットメッセージ形式:
   ```
@@ -72,6 +74,7 @@ kuku/
   ```
 - マージ後に feature ブランチを削除（ローカル + リモート）
 - **squash merge 後は `git push origin develop` まで行う**（ユーザーがすぐ動作確認できるように）
+- push 前は必ず `git fetch origin` でリモートの状態を確認し、ローカルが遅れていないかチェックする
 
 ### develop → main: ユーザー指示のみ
 - ユーザーが develop で動作確認後に実施
