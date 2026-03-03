@@ -68,7 +68,7 @@ kuku/
 
   Fixes #N
 
-  Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+  Co-Authored-By: Claude Code <noreply@anthropic.com>
   ```
 - マージ後に feature ブランチを削除（ローカル + リモート）
 - **squash merge 後は `git push origin develop` まで行う**（ユーザーがすぐ動作確認できるように）
