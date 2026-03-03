@@ -49,7 +49,7 @@ kuku/
 | ブランチ | 役割 | 誰が操作 |
 |---------|------|---------|
 | `main` | 本番リリース | ユーザーのみ |
-| `develop` | 動作確認・自動デプロイ | Claude (squash merge のみ) |
+| `develop` | 動作確認 | Claude (squash merge のみ) |
 | `feature/*` | 開発作業 | Claude (自由にコミット) |
 
 ### feature/* ブランチでの作業
