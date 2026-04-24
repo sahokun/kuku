@@ -33,6 +33,10 @@
       --pastel-purple: #9370DB; /* Medium Purple */
       --mint: #4ECDC4;
       --gold: #FFD700;
+      --sky: #65D6FF;
+      --coral: #FF7A90;
+      --lime: #A8F04F;
+      --deep: #3B247C;
       --text-color: #555;
       --white: #ffffff;
       --shadow: 0 4px 0 rgba(0,0,0,0.1);
@@ -54,7 +58,10 @@
       width: 100%;
       min-height: 100vh;
       min-height: 100dvh;
-      background-color: var(--bg-color);
+      background:
+        radial-gradient(circle at 20% 18%, rgba(255, 255, 255, 0.9) 0 8%, transparent 26%),
+        linear-gradient(135deg, #ffeaf6 0%, #d9f8ff 42%, #fff4a8 100%);
+      background-size: 160% 160%;
       font-family: 'M PLUS Rounded 1c', sans-serif;
       color: var(--text-color);
       overflow: hidden;
@@ -66,6 +73,7 @@
       left: 0;
       right: 0;
       bottom: 0;
+      animation: dreamySky 12s ease-in-out infinite;
     }
 
     #app {
@@ -75,9 +83,177 @@
       position: relative;
       display: flex;
       flex-direction: column;
-      background-image: 
-        radial-gradient(circle at 10% 20%, rgba(255, 105, 180, 0.1) 0%, transparent 20%),
-        radial-gradient(circle at 90% 80%, rgba(78, 205, 196, 0.1) 0%, transparent 20%);
+      overflow: hidden;
+      isolation: isolate;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0.1)),
+        radial-gradient(circle at 10% 20%, rgba(255, 105, 180, 0.22) 0%, transparent 24%),
+        radial-gradient(circle at 90% 80%, rgba(78, 205, 196, 0.22) 0%, transparent 24%);
+    }
+
+    #app::before {
+      content: "";
+      position: absolute;
+      inset: -35%;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        conic-gradient(from 40deg, rgba(255, 122, 144, 0.2), rgba(101, 214, 255, 0.2), rgba(168, 240, 79, 0.16), rgba(255, 215, 0, 0.2), rgba(255, 122, 144, 0.2));
+      filter: blur(18px);
+      opacity: 0.9;
+      animation: colorSpin 16s linear infinite;
+    }
+
+    .scene-backdrop {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+      perspective: 720px;
+      transform-style: preserve-3d;
+    }
+
+    .sky-ribbon {
+      position: absolute;
+      left: 50%;
+      top: 5%;
+      width: 88%;
+      height: 34%;
+      border: 14px solid rgba(255, 255, 255, 0.45);
+      border-left-color: rgba(255, 105, 180, 0.28);
+      border-right-color: rgba(78, 205, 196, 0.32);
+      border-radius: 50%;
+      transform: translateX(-50%) rotateX(58deg) rotateZ(-12deg);
+      filter: drop-shadow(0 0 22px rgba(255, 255, 255, 0.65));
+      animation: ribbonRoll 7s ease-in-out infinite;
+    }
+
+    .warp-grid {
+      position: absolute;
+      left: -18%;
+      right: -18%;
+      bottom: -17%;
+      height: 48%;
+      background-image:
+        linear-gradient(rgba(59, 36, 124, 0.22) 2px, transparent 2px),
+        linear-gradient(90deg, rgba(59, 36, 124, 0.2) 2px, transparent 2px);
+      background-size: 34px 34px;
+      transform: rotateX(64deg) translateZ(-60px);
+      transform-origin: center bottom;
+      opacity: 0.5;
+      animation: gridRun 1.4s linear infinite;
+    }
+
+    .floating-kuku span {
+      position: absolute;
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.62);
+      color: var(--deep);
+      font-size: 1.1rem;
+      font-weight: 900;
+      box-shadow: 0 12px 28px rgba(59, 36, 124, 0.14), inset 0 0 0 2px rgba(255,255,255,0.7);
+      transform-style: preserve-3d;
+      animation: floatCube 5.5s ease-in-out infinite;
+    }
+
+    .floating-kuku span:nth-child(1) { left: 5%; top: 12%; animation-delay: -0.2s; }
+    .floating-kuku span:nth-child(2) { right: 4%; top: 16%; animation-delay: -1.3s; }
+    .floating-kuku span:nth-child(3) { left: 9%; bottom: 18%; animation-delay: -2.2s; }
+    .floating-kuku span:nth-child(4) { right: 9%; bottom: 20%; animation-delay: -3.1s; }
+    .floating-kuku span:nth-child(5) { left: 43%; top: 7%; animation-delay: -4s; }
+
+    #burst-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 60;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .spark {
+      position: absolute;
+      left: var(--left);
+      top: var(--top);
+      width: 18px;
+      height: 18px;
+      display: grid;
+      place-items: center;
+      color: var(--spark-color);
+      font-size: var(--spark-size);
+      font-weight: 900;
+      text-shadow: 0 2px 0 rgba(255,255,255,0.9), 0 0 14px currentColor;
+      transform: translate3d(-50%, -50%, 0) scale(0.5) rotate(0deg);
+      animation: sparkFly var(--spark-life) cubic-bezier(0.12, 0.75, 0.2, 1) forwards;
+    }
+
+    #app.hit-correct .question-area {
+      animation: correctPunch 0.62s cubic-bezier(0.2, 1.4, 0.3, 1);
+    }
+
+    #app.hit-incorrect .question-area {
+      animation: wrongShake 0.42s ease-in-out;
+    }
+
+    #app.combo-fever .sky-ribbon {
+      border-top-color: rgba(255, 215, 0, 0.75);
+      filter: drop-shadow(0 0 28px rgba(255, 215, 0, 0.6));
+      animation-duration: 3.8s;
+    }
+
+    #app.combo-fever .warp-grid {
+      opacity: 0.78;
+      animation-duration: 0.78s;
+    }
+
+    #app[data-screen="game"] .floating-kuku span {
+      animation-duration: 3.9s;
+    }
+
+    @keyframes dreamySky {
+      0%, 100% { background-position: 0% 45%; }
+      50% { background-position: 100% 55%; }
+    }
+
+    @keyframes colorSpin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes ribbonRoll {
+      0%, 100% { transform: translateX(-50%) rotateX(58deg) rotateZ(-12deg) translateY(0); }
+      50% { transform: translateX(-50%) rotateX(64deg) rotateZ(10deg) translateY(12px); }
+    }
+
+    @keyframes gridRun {
+      to { background-position: 0 34px, 34px 0; }
+    }
+
+    @keyframes floatCube {
+      0%, 100% { transform: translate3d(0, 0, 16px) rotateX(12deg) rotateY(-18deg); }
+      50% { transform: translate3d(0, -18px, 70px) rotateX(-18deg) rotateY(24deg) rotateZ(8deg); }
+    }
+
+    @keyframes sparkFly {
+      0% { opacity: 1; transform: translate3d(-50%, -50%, 0) scale(0.45) rotate(0deg); }
+      72% { opacity: 1; }
+      100% { opacity: 0; transform: translate3d(calc(var(--x) - 50%), calc(var(--y) - 50%), 0) scale(1.35) rotate(var(--spin)); }
+    }
+
+    @keyframes correctPunch {
+      0% { transform: rotateX(0deg) scale(1); }
+      42% { transform: rotateX(10deg) scale(1.055); }
+      100% { transform: rotateX(0deg) scale(1); }
+    }
+
+    @keyframes wrongShake {
+      0%, 100% { transform: translateX(0); }
+      22% { transform: translateX(-10px) rotateZ(-1.5deg); }
+      48% { transform: translateX(8px) rotateZ(1.5deg); }
+      72% { transform: translateX(-5px) rotateZ(-1deg); }
     }
 
     /* 共通スタイル */
@@ -95,7 +271,7 @@
       transition: opacity 0.3s ease;
       opacity: 0;
       pointer-events: none;
-      z-index: 0;
+      z-index: 1;
       overflow-y: auto;
       overflow-x: hidden;
     }
@@ -103,7 +279,7 @@
     .screen.active {
       opacity: 1;
       pointer-events: auto;
-      z-index: 1;
+      z-index: 3;
     }
 
     h1 {
@@ -137,6 +313,7 @@
       align-items: center;
       justify-content: center;
       min-width: 65px;
+      transform: translateZ(0);
     }
 
     .btn:active {
@@ -163,11 +340,13 @@
 
     .mode-section {
       width: 100%;
-      background: rgba(255,255,255,0.6);
+      background: rgba(255,255,255,0.72);
       border-radius: 12px;
       padding: 8px;
       margin-bottom: 8px;
       text-align: center;
+      box-shadow: 0 10px 24px rgba(59, 36, 124, 0.08), inset 0 0 0 1px rgba(255,255,255,0.75);
+      backdrop-filter: blur(8px);
     }
 
     .mode-grid {
@@ -215,6 +394,142 @@
       pointer-events: none;
     }
 
+    .status-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      line-height: 1.1;
+      gap: 2px;
+      min-width: 72px;
+    }
+
+    .combo-display {
+      color: var(--coral);
+      font-size: 0.66rem;
+      text-shadow: 0 1px 0 #fff;
+    }
+
+    .power-stage {
+      width: 100%;
+      min-height: clamp(88px, 18vh, 130px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      perspective: 780px;
+      transform-style: preserve-3d;
+      margin: 0 0 -4px;
+    }
+
+    .stage-core {
+      position: relative;
+      width: clamp(82px, 24vw, 112px);
+      height: clamp(82px, 24vw, 112px);
+      display: grid;
+      place-items: center;
+      border-radius: 28px;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.9), rgba(255,255,255,0.18)),
+        conic-gradient(from 120deg, var(--main-pink), var(--sky), var(--lime), var(--gold), var(--main-pink));
+      color: #fff;
+      font-size: clamp(1.6rem, 8vw, 2.7rem);
+      font-weight: 900;
+      text-shadow: 0 3px 0 rgba(59, 36, 124, 0.22), 0 0 18px rgba(255,255,255,0.9);
+      box-shadow: 0 18px 42px rgba(59, 36, 124, 0.22), inset 0 0 0 3px rgba(255,255,255,0.62);
+      transform-style: preserve-3d;
+      animation: coreFloat 2.4s ease-in-out infinite;
+    }
+
+    .stage-core::before,
+    .stage-core::after {
+      content: "";
+      position: absolute;
+      inset: 10px;
+      border-radius: 22px;
+      border: 2px solid rgba(255,255,255,0.6);
+      transform: translateZ(-18px) rotate(10deg);
+    }
+
+    .stage-core::after {
+      inset: -10px;
+      border-color: rgba(255, 215, 0, 0.48);
+      transform: translateZ(-34px) rotate(-14deg);
+    }
+
+    .stage-ring {
+      position: absolute;
+      width: min(78vw, 360px);
+      height: clamp(48px, 12vh, 72px);
+      border: 8px solid rgba(255,255,255,0.58);
+      border-left-color: rgba(255, 105, 180, 0.6);
+      border-right-color: rgba(78, 205, 196, 0.65);
+      border-radius: 50%;
+      transform: rotateX(70deg) rotateZ(0deg);
+      animation: stageRing 2.2s linear infinite;
+      filter: drop-shadow(0 0 14px rgba(255,255,255,0.7));
+    }
+
+    .stage-ring.back {
+      width: min(62vw, 290px);
+      height: clamp(42px, 10vh, 64px);
+      border-width: 5px;
+      opacity: 0.6;
+      animation-direction: reverse;
+      animation-duration: 3.4s;
+    }
+
+    .stage-comet {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 0 8px rgba(255,215,0,0.22), 0 0 28px rgba(255,215,0,0.8);
+      transform-origin: 108px 50%;
+      animation: cometRun 1.7s linear infinite;
+    }
+
+    .stage-mini {
+      position: absolute;
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.76);
+      color: var(--pastel-purple);
+      font-weight: 900;
+      box-shadow: 0 8px 18px rgba(59,36,124,0.12);
+      animation: miniHop 1.7s ease-in-out infinite;
+    }
+
+    .stage-mini.one { left: 18%; top: 20%; animation-delay: -0.4s; }
+    .stage-mini.two { right: 18%; bottom: 18%; animation-delay: -1s; }
+
+    #app.combo-fever .stage-core {
+      animation-duration: 1.2s;
+      box-shadow: 0 18px 52px rgba(255, 105, 180, 0.36), 0 0 36px rgba(255, 215, 0, 0.42), inset 0 0 0 3px rgba(255,255,255,0.68);
+    }
+
+    @keyframes coreFloat {
+      0%, 100% { transform: rotateX(10deg) rotateY(-16deg) translateY(0) translateZ(20px); }
+      50% { transform: rotateX(-8deg) rotateY(18deg) translateY(-10px) translateZ(44px); }
+    }
+
+    @keyframes stageRing {
+      to { transform: rotateX(70deg) rotateZ(360deg); }
+    }
+
+    @keyframes cometRun {
+      0% { transform: rotate(0deg) translateX(108px) rotate(0deg); }
+      100% { transform: rotate(360deg) translateX(108px) rotate(-360deg); }
+    }
+
+    @keyframes miniHop {
+      0%, 100% { transform: translateY(0) rotateZ(-6deg); }
+      50% { transform: translateY(-12px) rotateZ(8deg); }
+    }
+
     .question-area {
       display: flex;
       flex-direction: column;
@@ -223,13 +538,36 @@
       width: 100%;
       margin: 6px 0;
       min-height: 7rem;
+      position: relative;
+      border-radius: 18px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.72);
+      box-shadow: 0 16px 34px rgba(59,36,124,0.12), inset 0 0 0 2px rgba(255,255,255,0.85);
+      transform-style: preserve-3d;
+      backdrop-filter: blur(8px);
+    }
+
+    .question-area::before {
+      content: "";
+      position: absolute;
+      inset: -7px;
+      z-index: -1;
+      border-radius: 24px;
+      background: conic-gradient(from 0deg, rgba(255,105,180,0.55), rgba(101,214,255,0.45), rgba(255,215,0,0.45), rgba(168,240,79,0.42), rgba(255,105,180,0.55));
+      opacity: 0.68;
+      filter: blur(1px);
+      animation: questionGlow 4s linear infinite;
+    }
+
+    @keyframes questionGlow {
+      to { transform: rotate(360deg); }
     }
 
     .question-text {
       font-size: 2.2rem;
       font-weight: 900;
       color: var(--main-pink);
-      text-shadow: 2px 2px 0 #fff;
+      text-shadow: 2px 2px 0 #fff, 0 10px 22px rgba(255, 105, 180, 0.22);
       margin-bottom: 6px;
       letter-spacing: 1px;
       min-height: 2.5rem;
@@ -246,6 +584,7 @@
       text-align: center;
       background: rgba(255,255,255,0.5);
       border-radius: 6px;
+      box-shadow: inset 0 -4px 0 rgba(78, 205, 196, 0.12);
     }
 
     /* 九九よみがな表示 */
@@ -341,7 +680,8 @@
     }
 
     .num-btn {
-      background-color: var(--white);
+      background:
+        linear-gradient(145deg, rgba(255,255,255,1), rgba(236, 250, 255, 0.9));
       border: 2px solid var(--mint);
       color: var(--mint);
       font-size: 1.1rem;
@@ -353,6 +693,12 @@
       justify-content: center;
       box-shadow: var(--btn-shadow);
       cursor: pointer;
+      transition: transform 0.12s, box-shadow 0.12s, filter 0.12s;
+    }
+
+    .num-btn:hover {
+      filter: saturate(1.15);
+      transform: translateY(-2px) scale(1.02);
     }
 
     .num-btn:active {
@@ -391,7 +737,7 @@
       justify-content: center;
       align-items: center;
       pointer-events: none;
-      z-index: 10;
+      z-index: 70;
       opacity: 0;
       transition: opacity 0.2s;
     }
@@ -399,7 +745,7 @@
     .feedback-icon {
       font-size: 8rem;
       font-weight: 900;
-      text-shadow: 0 0 20px rgba(255,255,255,0.8);
+      text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 14px 34px rgba(59,36,124,0.22);
       transform: scale(0);
       transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
@@ -417,13 +763,14 @@
     }
 
     .score-board {
-      background: white;
+      background: rgba(255,255,255,0.82);
       padding: 15px;
       border-radius: 15px;
       border: 3px solid var(--gold);
       text-align: center;
       margin-bottom: 15px;
       box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+      backdrop-filter: blur(8px);
     }
 
     .score-text {
@@ -736,11 +1083,64 @@
       cursor: not-allowed;
     }
 
+    @media (max-height: 620px) {
+      .power-stage {
+        min-height: 72px;
+      }
+
+      .stage-core {
+        width: 72px;
+        height: 72px;
+        border-radius: 22px;
+        font-size: 1.5rem;
+      }
+
+      .stage-ring {
+        width: 250px;
+        height: 44px;
+      }
+
+      .stage-mini {
+        width: 28px;
+        height: 28px;
+        font-size: 0.8rem;
+      }
+
+      .question-area {
+        min-height: 6.4rem;
+        margin: 2px 0;
+      }
+
+      .question-text {
+        font-size: 2rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+      }
+    }
+
   </style>
 </head>
 <body>
 
   <div id="app">
+    <div class="scene-backdrop" aria-hidden="true">
+      <div class="sky-ribbon"></div>
+      <div class="warp-grid"></div>
+      <div class="floating-kuku">
+        <span>2×3</span>
+        <span>7×8</span>
+        <span>4×6</span>
+        <span>9×9</span>
+        <span>5×5</span>
+      </div>
+    </div>
+    <div id="burst-layer" aria-hidden="true"></div>
     <div id="mute-btn" class="mute-btn" onclick="toggleMute()">🔇</div>
     <!-- タイトル画面 -->
     <div id="title-screen" class="screen active">
@@ -809,7 +1209,19 @@
       <div class="status-bar">
         <button class="btn" style="font-size: 0.65rem; padding: 4px 10px; margin: 0;" onclick="showTitle()">やめる</button>
         <span id="question-counter" class="status-bar-center">もんだい 1/10</span>
-        <span id="score-display">スコア: 0</span>
+        <span class="status-right">
+          <span id="score-display">スコア: 0</span>
+          <span id="combo-display" class="combo-display">れんぞく: 0</span>
+        </span>
+      </div>
+
+      <div class="power-stage" aria-hidden="true">
+        <div class="stage-ring back"></div>
+        <div class="stage-ring"></div>
+        <div class="stage-comet"></div>
+        <div class="stage-mini one" id="stage-left">?</div>
+        <div class="stage-mini two" id="stage-right">?</div>
+        <div class="stage-core" id="stage-number">GO</div>
       </div>
 
       <div class="question-area">
@@ -982,6 +1394,7 @@
     let currentQuestions = [];
     let currentQuestionIndex = 0;
     let score = 0;
+    let streak = 0;
     let currentInput = "";
     let isProcessing = false;
     let currentQuestionType = "answer"; // "answer"（通常）or "equation"（逆問題: Q5, Q10）
@@ -1028,6 +1441,7 @@
         el.classList.remove('active');
       });
       document.getElementById(screenId).classList.add('active');
+      document.getElementById('app').dataset.screen = screenId.replace('-screen', '');
     }
 
     // ゲーム開始
@@ -1039,6 +1453,8 @@
 
       isFreeMode = false;
       score = 0;
+      streak = 0;
+      document.getElementById('app').classList.remove('combo-fever', 'hit-correct', 'hit-incorrect');
       currentQuestionIndex = 0;
       currentInput = "";
       isProcessing = false;
@@ -1102,6 +1518,7 @@
       // 5問ごとに逆問題（自由選択モードでは逆問題なし）
       const isEquationType = !isFreeMode && ((currentQuestionIndex + 1) % 5 === 0);
       currentQuestionType = isEquationType ? "equation" : "answer";
+      updateStage(q);
 
       // 入力状態リセット
       currentInput = "";
@@ -1153,6 +1570,26 @@
     function updateStatusBar() {
       document.getElementById('question-counter').textContent = `もんだい ${currentQuestionIndex + 1}/${totalQuestions}`;
       document.getElementById('score-display').textContent = `スコア: ${score}`;
+      document.getElementById('combo-display').textContent = `れんぞく: ${streak}`;
+    }
+
+    function updateStage(q) {
+      const stageNumber = document.getElementById('stage-number');
+      const stageLeft = document.getElementById('stage-left');
+      const stageRight = document.getElementById('stage-right');
+      if (!stageNumber || !q) return;
+
+      stageNumber.textContent = currentQuestionType === "equation" ? `${q.a}×?` : `${q.a}×${q.b}`;
+      stageLeft.textContent = q.a;
+      stageRight.textContent = q.b;
+      stageNumber.animate(
+        [
+          { transform: 'rotateX(10deg) rotateY(-16deg) translateY(0) translateZ(20px) scale(0.88)' },
+          { transform: 'rotateX(-8deg) rotateY(18deg) translateY(-10px) translateZ(44px) scale(1.08)' },
+          { transform: 'rotateX(10deg) rotateY(-16deg) translateY(0) translateZ(20px) scale(1)' }
+        ],
+        { duration: 520, easing: 'cubic-bezier(0.2, 1.4, 0.3, 1)' }
+      );
     }
 
     function inputNum(num) {
@@ -1225,12 +1662,15 @@
 
         if (isCorrect) {
           score++;
+          streak++;
           showFeedback(true);
           playSe('correct');
         } else {
+          streak = 0;
           showFeedback(false);
           playSe('incorrect');
         }
+        updateStatusBar();
 
         // よみがな: 式部分(q_read)を公開して完成
         kukuReadingEl.innerHTML =
@@ -1259,12 +1699,15 @@
 
         if (isCorrect) {
           score++;
+          streak++;
           showFeedback(true);
           playSe('correct');
         } else {
+          streak = 0;
           showFeedback(false);
           playSe('incorrect');
         }
+        updateStatusBar();
 
         // よみがな: 答え部分(a_read)を公開して完成
         kukuReadingEl.innerHTML =
@@ -1287,10 +1730,16 @@
     function showFeedback(isCorrect) {
       const overlay = document.getElementById('feedback-overlay');
       const icon = document.getElementById('feedback-icon');
+      const app = document.getElementById('app');
       
       overlay.style.opacity = 1;
       icon.textContent = isCorrect ? '⭕' : '❌';
       icon.className = 'feedback-icon ' + (isCorrect ? 'correct' : 'incorrect');
+      app.classList.toggle('combo-fever', streak >= 3);
+      app.classList.remove('hit-correct', 'hit-incorrect');
+      void app.offsetWidth;
+      app.classList.add(isCorrect ? 'hit-correct' : 'hit-incorrect');
+      launchBurst(isCorrect, streak >= 3);
       
       // アニメーション
       requestAnimationFrame(() => {
@@ -1300,12 +1749,54 @@
       setTimeout(() => {
         icon.style.transform = 'scale(0)';
         overlay.style.opacity = 0;
+        app.classList.remove('hit-correct', 'hit-incorrect');
       }, 1500);
+    }
+
+    function launchBurst(isCorrect, isBig) {
+      const layer = document.getElementById('burst-layer');
+      const app = document.getElementById('app');
+      if (!layer || !app) return;
+
+      const appRect = app.getBoundingClientRect();
+      const target = document.querySelector('.screen.active .question-area, .screen.active .score-board') || document.querySelector('.question-area');
+      const questionRect = target.getBoundingClientRect();
+      const centerX = questionRect.left - appRect.left + questionRect.width / 2;
+      const centerY = questionRect.top - appRect.top + questionRect.height / 2;
+      const count = isBig ? 42 : (isCorrect ? 28 : 18);
+      const symbols = isCorrect ? ['★', '×', '+', '♪'] : ['×', '?', '！'];
+      const colors = isCorrect
+        ? ['#FFD700', '#FF69B4', '#4ECDC4', '#A8F04F', '#65D6FF']
+        : ['#FF7A90', '#9370DB', '#FFD700'];
+
+      for (let i = 0; i < count; i++) {
+        const spark = document.createElement('span');
+        const angle = (Math.PI * 2 * i / count) + Math.random() * 0.45;
+        const distance = (isBig ? 180 : 120) + Math.random() * (isBig ? 120 : 70);
+        const x = Math.cos(angle) * distance;
+        const y = Math.sin(angle) * distance - Math.random() * 45;
+        spark.className = 'spark';
+        spark.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+        spark.style.setProperty('--left', `${centerX}px`);
+        spark.style.setProperty('--top', `${centerY}px`);
+        spark.style.setProperty('--x', `${x}px`);
+        spark.style.setProperty('--y', `${y}px`);
+        spark.style.setProperty('--spin', `${(Math.random() * 720 - 360).toFixed(0)}deg`);
+        spark.style.setProperty('--spark-color', colors[i % colors.length]);
+        spark.style.setProperty('--spark-size', `${14 + Math.random() * (isBig ? 18 : 12)}px`);
+        spark.style.setProperty('--spark-life', `${780 + Math.random() * 420}ms`);
+        layer.appendChild(spark);
+        setTimeout(() => spark.remove(), 1300);
+      }
     }
 
     function endGame() {
       showScreen('result-screen');
       playSe('result');
+      document.getElementById('app').classList.toggle('combo-fever', score === totalQuestions);
+      setTimeout(() => {
+        if (score > 0) launchBurst(true, score === totalQuestions);
+      }, 180);
       document.getElementById('final-score').textContent = `${score} / ${totalQuestions}`;
       
       const msgEl = document.getElementById('perfect-msg');
@@ -1327,6 +1818,8 @@
       playSe('cancel');
       stopTablePlayback();
       isFreeMode = false;
+      streak = 0;
+      document.getElementById('app').classList.remove('combo-fever', 'hit-correct', 'hit-incorrect');
       // くみあわせモードをリセット
       if (isCombinationMode) {
         toggleCombinationMode();
@@ -1457,6 +1950,8 @@
       currentQuestions = currentQuestions.slice(0, totalQuestions);
 
       score = 0;
+      streak = 0;
+      document.getElementById('app').classList.remove('combo-fever', 'hit-correct', 'hit-incorrect');
       currentQuestionIndex = 0;
       currentInput = "";
       equationInputB = "";
@@ -1787,6 +2282,7 @@
     // 初期化: localStorage からBGMと問題数を復元
     (function init() {
       const savedBgm = parseInt(localStorage.getItem('kuku_bgm') || '0');
+      document.getElementById('app').dataset.screen = 'title';
       if (savedBgm !== 0) {
         currentSongIndex = savedBgm;
         document.querySelectorAll('.bgm-option').forEach((el, i) => {
