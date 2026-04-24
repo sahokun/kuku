@@ -1296,7 +1296,9 @@
 
   <script>
     // 九九データ (読み仮名付き)
-    // q_read: 問題読み上げ（〜が、まで）, a_read: 答え読み上げ
+    // q_read / a_read: 画面表示用（ひらがな）
+    // q_speak / a_speak: 読み上げ用（省略時は q_read / a_read を使用）
+    //   語末の「は」は iPhone 等で助詞「わ」と解釈されるため、カタカナ「ハ」で指定して回避する
     const kukuData = [
       // 1の段
       { a: 1, b: 1, q_read: "いんいちが", a_read: "いち" },
@@ -1336,7 +1338,7 @@
       { a: 4, b: 5, q_read: "しご", a_read: "にじゅう" },
       { a: 4, b: 6, q_read: "しろく", a_read: "にじゅうし" },
       { a: 4, b: 7, q_read: "ししち", a_read: "にじゅうはち" },
-      { a: 4, b: 8, q_read: "しは", a_read: "さんじゅうに" },
+      { a: 4, b: 8, q_read: "しは", a_read: "さんじゅうに", q_speak: "しハ" },
       { a: 4, b: 9, q_read: "しく", a_read: "さんじゅうろく" },
       // 5の段
       { a: 5, b: 1, q_read: "ごいちが", a_read: "ご" },
@@ -1346,7 +1348,7 @@
       { a: 5, b: 5, q_read: "ごご", a_read: "にじゅうご" },
       { a: 5, b: 6, q_read: "ごろく", a_read: "さんじゅう" },
       { a: 5, b: 7, q_read: "ごしち", a_read: "さんじゅうご" },
-      { a: 5, b: 8, q_read: "ごは", a_read: "しじゅう" },
+      { a: 5, b: 8, q_read: "ごは", a_read: "しじゅう", q_speak: "ごハ" },
       { a: 5, b: 9, q_read: "ごく", a_read: "しじゅうご" },
       // 6の段
       { a: 6, b: 1, q_read: "ろくいちが", a_read: "ろく" },
@@ -1356,7 +1358,7 @@
       { a: 6, b: 5, q_read: "ろくご", a_read: "さんじゅう" },
       { a: 6, b: 6, q_read: "ろくろく", a_read: "さんじゅうろく" },
       { a: 6, b: 7, q_read: "ろくしち", a_read: "しじゅうに" },
-      { a: 6, b: 8, q_read: "ろくは", a_read: "しじゅうはち" },
+      { a: 6, b: 8, q_read: "ろくは", a_read: "しじゅうはち", q_speak: "ろくハ" },
       { a: 6, b: 9, q_read: "ろっく", a_read: "ごじゅうし" },
       // 7の段
       { a: 7, b: 1, q_read: "しちいちが", a_read: "しち" },
@@ -1366,7 +1368,7 @@
       { a: 7, b: 5, q_read: "しちご", a_read: "さんじゅうご" },
       { a: 7, b: 6, q_read: "しちろく", a_read: "しじゅうに" },
       { a: 7, b: 7, q_read: "しちしち", a_read: "しじゅうく" },
-      { a: 7, b: 8, q_read: "しちは", a_read: "ごじゅうろく" },
+      { a: 7, b: 8, q_read: "しちは", a_read: "ごじゅうろく", q_speak: "しちハ" },
       { a: 7, b: 9, q_read: "しちく", a_read: "ろくじゅうさん" },
       // 8の段
       { a: 8, b: 1, q_read: "はちいちが", a_read: "はち" },
@@ -1386,7 +1388,7 @@
       { a: 9, b: 5, q_read: "くご", a_read: "しじゅうご" },
       { a: 9, b: 6, q_read: "くろく", a_read: "ごじゅうし" },
       { a: 9, b: 7, q_read: "くしち", a_read: "ろくじゅうさん" },
-      { a: 9, b: 8, q_read: "くは", a_read: "しちじゅうに" },
+      { a: 9, b: 8, q_read: "くは", a_read: "しちじゅうに", q_speak: "くハ" },
       { a: 9, b: 9, q_read: "くく", a_read: "はちじゅういち" },
     ];
 
@@ -1434,6 +1436,11 @@
       utterThis.pitch = 1.2; // 子供向けに少し高め
       synth.speak(utterThis);
     }
+
+    // 九九データから読み上げ用テキストを取得（q_speak/a_speak 優先、無ければ q_read/a_read）
+    function getQSpeak(q) { return q.q_speak || q.q_read; }
+    function getASpeak(q) { return q.a_speak || q.a_read; }
+    function getFullSpeak(q) { return getQSpeak(q) + getASpeak(q); }
 
     // 画面切り替え
     function showScreen(screenId) {
@@ -1559,7 +1566,7 @@
         answerDisplayEl.style.display = '';
 
         // 式の読みを読み上げ
-        speak(q.q_read);
+        speak(getQSpeak(q));
       }
 
       updateInputDisplay();
@@ -1679,7 +1686,7 @@
 
         // 正解の読み上げ
         setTimeout(() => {
-          speak(q.q_read + q.a_read);
+          speak(getFullSpeak(q));
         }, 500);
 
         // 次の問題へ
@@ -1716,7 +1723,7 @@
 
         // 正解の読み上げ
         setTimeout(() => {
-          speak(q.q_read + q.a_read);
+          speak(getFullSpeak(q));
         }, 500);
 
         // 次の問題へ
@@ -2035,7 +2042,7 @@
         setTimeout(() => row.classList.remove('playing'), 2000);
       }
 
-      speak(data.q_read + data.a_read);
+      speak(getFullSpeak(data));
     }
 
     function playDan(dan) {
@@ -2072,7 +2079,7 @@
         row.classList.add('playing');
       }
 
-      speak(item.data.q_read + item.data.a_read);
+      speak(getFullSpeak(item.data));
 
       tablePlaybackIndex++;
       setTimeout(() => playNextTableRow(), 2000);
