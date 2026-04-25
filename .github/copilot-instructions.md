@@ -49,8 +49,8 @@ kuku/
 | ブランチ | 役割 | 誰が操作 |
 |---------|------|---------|
 | `main` | 本番リリース | ユーザーのみ |
-| `develop` | 動作確認 | Claude (squash merge のみ) |
-| `feature/*` | 開発作業 | Claude (自由にコミット) |
+| `develop` | 動作確認 | Copilot (squash merge のみ) |
+| `feature/*` | 開発作業 | Copilot (自由にコミット) |
 
 ### feature/* ブランチでの作業
 - `develop` から作成（例: `git checkout -b feature/22-branch-strategy develop`）
@@ -70,7 +70,7 @@ kuku/
 
   Fixes #N
 
-  Co-Authored-By: Claude Code <noreply@anthropic.com>
+  Co-Authored-By: xxxx
   ```
 - マージ後に feature ブランチを削除（ローカル + リモート）
 - **squash merge 後は `git push origin develop` まで行う**（ユーザーがすぐ動作確認できるように）
@@ -78,7 +78,7 @@ kuku/
 
 ### develop → main: ユーザー指示のみ
 - ユーザーが develop で動作確認後に実施
-- Claudeは `main` に直接 push/merge しない
+- Copilotは `main` に直接 push/merge しない
 
 ### 大きな機能（複数回の動作確認が必要な場合）
 - サブ機能に分割: `feature/22-part1-api`, `feature/22-part2-ui`
