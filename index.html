@@ -61,7 +61,7 @@
       background:
         radial-gradient(circle at 20% 18%, rgba(255, 255, 255, 0.9) 0 8%, transparent 26%),
         linear-gradient(135deg, #ffeaf6 0%, #d9f8ff 42%, #fff4a8 100%);
-      background-size: 160% 160%;
+      background-size: 220% 220%;
       font-family: 'M PLUS Rounded 1c', sans-serif;
       color: var(--text-color);
       overflow: hidden;
@@ -73,7 +73,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      animation: dreamySky 12s ease-in-out infinite;
+      animation: dreamySky 6s ease-in-out infinite;
     }
 
     #app {
@@ -94,14 +94,178 @@
     #app::before {
       content: "";
       position: absolute;
-      inset: -35%;
+      inset: -45%;
       z-index: 0;
       pointer-events: none;
       background:
-        conic-gradient(from 40deg, rgba(255, 122, 144, 0.2), rgba(101, 214, 255, 0.2), rgba(168, 240, 79, 0.16), rgba(255, 215, 0, 0.2), rgba(255, 122, 144, 0.2));
-      filter: blur(18px);
-      opacity: 0.9;
-      animation: colorSpin 16s linear infinite;
+        conic-gradient(from 40deg, rgba(255, 47, 168, 0.32), rgba(34, 217, 255, 0.32), rgba(168, 240, 79, 0.28), rgba(255, 215, 0, 0.34), rgba(255, 47, 168, 0.32));
+      filter: blur(24px) saturate(1.4);
+      opacity: 1;
+      animation: colorSpin 8s linear infinite;
+      mix-blend-mode: screen;
+    }
+
+    #app::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        repeating-linear-gradient(45deg, transparent 0 14px, rgba(255,255,255,0.04) 14px 16px),
+        radial-gradient(ellipse at center, transparent 40%, rgba(59, 36, 124, 0.18) 100%);
+      animation: vignettePulse 3.6s ease-in-out infinite;
+    }
+
+    @keyframes vignettePulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+
+    /* スクリーン全体フラッシュ */
+    .screen-flash {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 80;
+      opacity: 0;
+      mix-blend-mode: screen;
+    }
+
+    .screen-flash.active {
+      animation: screenFlash 0.6s ease-out forwards;
+    }
+
+    .screen-flash.correct {
+      background: radial-gradient(circle at center, rgba(255,255,255,0.95) 0%, rgba(255, 215, 0, 0.7) 30%, rgba(78, 205, 196, 0.4) 60%, transparent 80%);
+    }
+
+    .screen-flash.incorrect {
+      background: radial-gradient(circle at center, rgba(255, 100, 130, 0.85) 0%, rgba(255, 47, 168, 0.55) 35%, transparent 75%);
+    }
+
+    .screen-flash.fever {
+      background:
+        conic-gradient(from 0deg, #ff2fa8, #ffd700, #4ecdc4, #65d6ff, #a8f04f, #ff2fa8);
+      animation: feverFlash 1.1s ease-out forwards;
+    }
+
+    @keyframes screenFlash {
+      0% { opacity: 0; transform: scale(0.7); }
+      30% { opacity: 0.95; transform: scale(1.1); }
+      100% { opacity: 0; transform: scale(1.4); }
+    }
+
+    @keyframes feverFlash {
+      0% { opacity: 0; transform: rotate(0deg) scale(0.5); filter: blur(18px); }
+      40% { opacity: 0.85; transform: rotate(120deg) scale(1.2); filter: blur(8px); }
+      100% { opacity: 0; transform: rotate(360deg) scale(1.8); filter: blur(28px); }
+    }
+
+    /* 全画面シェイク */
+    #app.shake-correct {
+      animation: appShakeCorrect 0.55s cubic-bezier(0.2, 1.4, 0.3, 1);
+    }
+
+    #app.shake-incorrect {
+      animation: appShakeIncorrect 0.5s ease-in-out;
+    }
+
+    #app.zoom-pop {
+      animation: appZoomPop 0.6s cubic-bezier(0.2, 1.5, 0.3, 1);
+    }
+
+    @keyframes appShakeCorrect {
+      0% { transform: scale(1) rotate(0deg); }
+      30% { transform: scale(1.04) rotate(0.6deg); }
+      60% { transform: scale(0.99) rotate(-0.4deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+
+    @keyframes appShakeIncorrect {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      15% { transform: translate(-12px, 4px) rotate(-1deg); }
+      30% { transform: translate(11px, -3px) rotate(1.2deg); }
+      45% { transform: translate(-9px, 5px) rotate(-0.8deg); }
+      60% { transform: translate(8px, -4px) rotate(0.6deg); }
+      80% { transform: translate(-4px, 2px) rotate(-0.3deg); }
+    }
+
+    @keyframes appZoomPop {
+      0% { transform: scale(1); }
+      40% { transform: scale(1.06); }
+      100% { transform: scale(1); }
+    }
+
+    /* レーザービーム放射 */
+    .laser-burst {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 6px;
+      height: 0;
+      background: linear-gradient(to bottom, transparent, var(--laser-color), transparent);
+      transform-origin: top center;
+      transform: translate(-50%, 0) rotate(var(--angle));
+      filter: drop-shadow(0 0 10px var(--laser-color));
+      pointer-events: none;
+      animation: laserShoot 0.7s ease-out forwards;
+    }
+
+    @keyframes laserShoot {
+      0% { height: 0; opacity: 1; }
+      40% { height: 120%; opacity: 1; }
+      100% { height: 130%; opacity: 0; }
+    }
+
+    /* 紙吹雪 */
+    .confetti {
+      position: absolute;
+      left: var(--cx);
+      top: -20px;
+      width: var(--csize);
+      height: calc(var(--csize) * 1.6);
+      background: var(--ccolor);
+      border-radius: 2px;
+      transform: rotate(var(--crot));
+      pointer-events: none;
+      animation: confettiFall var(--clife) linear forwards;
+    }
+
+    @keyframes confettiFall {
+      0% { transform: translate(0, 0) rotate(var(--crot)); opacity: 1; }
+      100% { transform: translate(var(--cdx), 110vh) rotate(calc(var(--crot) + 720deg)); opacity: 0.85; }
+    }
+
+    /* 流れ星 */
+    .shooting-star {
+      position: absolute;
+      left: var(--ssx);
+      top: var(--ssy);
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 0 12px white, 0 0 24px var(--ssc);
+      pointer-events: none;
+      animation: shootStar 1.4s linear forwards;
+    }
+
+    .shooting-star::after {
+      content: "";
+      position: absolute;
+      right: 4px;
+      top: 50%;
+      width: 80px;
+      height: 2px;
+      background: linear-gradient(to left, var(--ssc), transparent);
+      transform: translateY(-50%);
+    }
+
+    @keyframes shootStar {
+      0% { transform: translate(0, 0); opacity: 0; }
+      15% { opacity: 1; }
+      100% { transform: translate(var(--ssdx), var(--ssdy)); opacity: 0; }
     }
 
     .scene-backdrop {
@@ -134,15 +298,30 @@
       left: -18%;
       right: -18%;
       bottom: -17%;
-      height: 48%;
+      height: 52%;
       background-image:
-        linear-gradient(rgba(59, 36, 124, 0.22) 2px, transparent 2px),
-        linear-gradient(90deg, rgba(59, 36, 124, 0.2) 2px, transparent 2px);
+        linear-gradient(rgba(255, 47, 168, 0.45) 2px, transparent 2px),
+        linear-gradient(90deg, rgba(34, 217, 255, 0.45) 2px, transparent 2px);
       background-size: 34px 34px;
       transform: rotateX(64deg) translateZ(-60px);
       transform-origin: center bottom;
-      opacity: 0.5;
-      animation: gridRun 1.4s linear infinite;
+      opacity: 0.7;
+      filter: drop-shadow(0 0 12px rgba(255, 47, 168, 0.5));
+      animation: gridRun 0.8s linear infinite;
+    }
+
+    .warp-grid::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(255, 215, 0, 0.35), transparent 60%);
+      mix-blend-mode: screen;
+      animation: gridGlow 2.5s ease-in-out infinite;
+    }
+
+    @keyframes gridGlow {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
     }
 
     .floating-kuku span {
@@ -207,22 +386,56 @@
     }
 
     #app.hit-correct .question-area {
-      animation: correctPunch 0.62s cubic-bezier(0.2, 1.4, 0.3, 1);
+      animation: correctPunch 0.85s cubic-bezier(0.2, 1.6, 0.3, 1);
+    }
+
+    #app.hit-correct .stage-core {
+      animation: corePunchUp 0.7s cubic-bezier(0.2, 1.6, 0.3, 1);
     }
 
     #app.hit-incorrect .question-area {
-      animation: wrongShake 0.42s ease-in-out;
+      animation: wrongShake 0.55s ease-in-out;
+    }
+
+    #app.hit-incorrect .stage-core {
+      filter: hue-rotate(-50deg) saturate(1.5);
+      animation: coreShake 0.55s ease-in-out;
+    }
+
+    @keyframes corePunchUp {
+      0% { transform: rotateX(10deg) rotateY(-16deg) translateY(0) translateZ(20px) scale(1); }
+      40% { transform: rotateX(-20deg) rotateY(30deg) translateY(-30px) translateZ(120px) scale(1.35); }
+      100% { transform: rotateX(10deg) rotateY(-16deg) translateY(0) translateZ(20px) scale(1); }
+    }
+
+    @keyframes coreShake {
+      0%, 100% { transform: translateX(0) rotate(0deg); }
+      25% { transform: translateX(-12px) rotate(-6deg) scale(0.95); }
+      50% { transform: translateX(10px) rotate(6deg) scale(1.05); }
+      75% { transform: translateX(-6px) rotate(-3deg); }
     }
 
     #app.combo-fever .sky-ribbon {
-      border-top-color: rgba(255, 215, 0, 0.75);
-      filter: drop-shadow(0 0 28px rgba(255, 215, 0, 0.6));
-      animation-duration: 3.8s;
+      border-top-color: rgba(255, 215, 0, 0.95);
+      border-left-color: rgba(255, 47, 168, 0.7);
+      border-right-color: rgba(34, 217, 255, 0.85);
+      filter: drop-shadow(0 0 38px rgba(255, 215, 0, 0.85));
+      animation-duration: 2.2s;
     }
 
     #app.combo-fever .warp-grid {
-      opacity: 0.78;
-      animation-duration: 0.78s;
+      opacity: 1;
+      animation-duration: 0.4s;
+      filter: drop-shadow(0 0 22px rgba(255, 215, 0, 0.7));
+    }
+
+    #app.combo-fever::before {
+      animation-duration: 3.5s;
+      filter: blur(18px) saturate(2);
+    }
+
+    #app.combo-fever .floating-kuku span {
+      filter: saturate(2) drop-shadow(0 0 24px rgba(255, 215, 0, 0.8)) brightness(1.2);
     }
 
     #app[data-screen="game"] .floating-kuku span {
@@ -276,22 +489,26 @@
     }
 
     @keyframes sparkFly {
-      0% { opacity: 1; transform: translate3d(-50%, -50%, 0) scale(0.45) rotate(0deg); }
-      72% { opacity: 1; }
-      100% { opacity: 0; transform: translate3d(calc(var(--x) - 50%), calc(var(--y) - 50%), 0) scale(1.35) rotate(var(--spin)); }
+      0% { opacity: 1; transform: translate3d(-50%, -50%, 0) scale(0.3) rotate(0deg); filter: brightness(2); }
+      30% { opacity: 1; transform: translate3d(calc(var(--x) * 0.45 - 50%), calc(var(--y) * 0.4 - 50%), 0) scale(1.6) rotate(calc(var(--spin) * 0.4)); }
+      72% { opacity: 1; transform: translate3d(calc(var(--x) * 0.85 - 50%), calc(var(--y) * 0.85 - 50%), 0) scale(1.4) rotate(calc(var(--spin) * 0.8)); }
+      100% { opacity: 0; transform: translate3d(calc(var(--x) - 50%), calc(var(--y) + 60px - 50%), 0) scale(0.6) rotate(var(--spin)); filter: brightness(0.6); }
     }
 
     @keyframes correctPunch {
-      0% { transform: rotateX(0deg) scale(1); }
-      42% { transform: rotateX(10deg) scale(1.055); }
-      100% { transform: rotateX(0deg) scale(1); }
+      0% { transform: rotateX(0deg) rotateY(0deg) scale(1); box-shadow: 0 16px 34px rgba(59,36,124,0.12), inset 0 0 0 2px rgba(255,255,255,0.85); }
+      30% { transform: rotateX(15deg) rotateY(-8deg) scale(1.12); box-shadow: 0 22px 60px rgba(255, 215, 0, 0.55), 0 0 80px rgba(255, 105, 180, 0.4), inset 0 0 0 3px rgba(255, 215, 0, 0.95); }
+      55% { transform: rotateX(-10deg) rotateY(10deg) scale(0.98); box-shadow: 0 22px 60px rgba(78, 205, 196, 0.5), 0 0 60px rgba(101, 214, 255, 0.5), inset 0 0 0 3px rgba(78, 205, 196, 0.85); }
+      78% { transform: rotateX(6deg) rotateY(-4deg) scale(1.04); }
+      100% { transform: rotateX(0deg) rotateY(0deg) scale(1); }
     }
 
     @keyframes wrongShake {
-      0%, 100% { transform: translateX(0); }
-      22% { transform: translateX(-10px) rotateZ(-1.5deg); }
-      48% { transform: translateX(8px) rotateZ(1.5deg); }
-      72% { transform: translateX(-5px) rotateZ(-1deg); }
+      0%, 100% { transform: translateX(0) rotate(0deg); border-color: transparent; }
+      15% { transform: translateX(-16px) rotateZ(-2.5deg); box-shadow: 0 16px 34px rgba(255, 47, 168, 0.4), inset 0 0 0 3px rgba(255, 47, 168, 0.6); }
+      35% { transform: translateX(14px) rotateZ(2.5deg); box-shadow: 0 16px 34px rgba(255, 47, 168, 0.5), inset 0 0 0 3px rgba(255, 47, 168, 0.7); }
+      55% { transform: translateX(-10px) rotateZ(-1.8deg); box-shadow: 0 16px 34px rgba(255, 47, 168, 0.4), inset 0 0 0 3px rgba(255, 47, 168, 0.6); }
+      75% { transform: translateX(7px) rotateZ(1deg); }
     }
 
     /* 共通スタイル */
@@ -473,10 +690,15 @@
       color: #fff;
       font-size: clamp(1.6rem, 8vw, 2.7rem);
       font-weight: 900;
-      text-shadow: 0 3px 0 rgba(59, 36, 124, 0.22), 0 0 18px rgba(255,255,255,0.9);
-      box-shadow: 0 18px 42px rgba(59, 36, 124, 0.22), inset 0 0 0 3px rgba(255,255,255,0.62);
+      text-shadow: 0 3px 0 rgba(59, 36, 124, 0.22), 0 0 18px rgba(255,255,255,0.9), 0 0 30px var(--gold);
+      box-shadow: 0 18px 42px rgba(59, 36, 124, 0.22), 0 0 35px rgba(255, 105, 180, 0.45), inset 0 0 0 3px rgba(255,255,255,0.62);
       transform-style: preserve-3d;
-      animation: coreFloat 2.4s ease-in-out infinite;
+      animation: coreFloat 2.4s ease-in-out infinite, coreGlow 2.8s ease-in-out infinite;
+    }
+
+    @keyframes coreGlow {
+      0%, 100% { box-shadow: 0 18px 42px rgba(59, 36, 124, 0.22), 0 0 30px rgba(255, 105, 180, 0.45), inset 0 0 0 3px rgba(255,255,255,0.62); }
+      50% { box-shadow: 0 18px 50px rgba(59, 36, 124, 0.3), 0 0 60px rgba(255, 215, 0, 0.7), 0 0 90px rgba(78, 205, 196, 0.4), inset 0 0 0 3px rgba(255,255,255,0.85); }
     }
 
     .stage-core::before,
@@ -519,13 +741,25 @@
 
     .stage-comet {
       position: absolute;
-      width: 18px;
-      height: 18px;
+      width: 22px;
+      height: 22px;
       border-radius: 50%;
       background: var(--gold);
-      box-shadow: 0 0 0 8px rgba(255,215,0,0.22), 0 0 28px rgba(255,215,0,0.8);
+      box-shadow: 0 0 0 10px rgba(255,215,0,0.32), 0 0 40px rgba(255,215,0,1), 0 0 80px rgba(255, 105, 180, 0.6);
       transform-origin: 108px 50%;
-      animation: cometRun 1.7s linear infinite;
+      animation: cometRun 1.1s linear infinite;
+    }
+
+    .stage-comet::after {
+      content: "";
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      width: 60px;
+      height: 4px;
+      background: linear-gradient(to left, rgba(255, 215, 0, 0.85), transparent);
+      transform: translateY(-50%);
+      filter: blur(2px);
     }
 
     .stage-mini {
@@ -747,6 +981,7 @@
     }
 
     .num-btn {
+      position: relative;
       background:
         linear-gradient(145deg, rgba(255,255,255,1), rgba(236, 250, 255, 0.9));
       border: 2px solid var(--mint);
@@ -758,21 +993,46 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: var(--btn-shadow);
+      box-shadow: var(--btn-shadow), 0 0 0 0 rgba(78, 205, 196, 0);
       cursor: pointer;
       transition: transform 0.12s, box-shadow 0.12s, filter 0.12s;
+      overflow: hidden;
+    }
+
+    .num-btn::before {
+      content: "";
+      position: absolute;
+      inset: 50%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(78, 205, 196, 0.7), transparent 70%);
+      opacity: 0;
+      pointer-events: none;
     }
 
     .num-btn:hover {
-      filter: saturate(1.15);
-      transform: translateY(-2px) scale(1.02);
+      filter: saturate(1.3) brightness(1.05);
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 8px 16px rgba(78, 205, 196, 0.35), 0 0 18px rgba(78, 205, 196, 0.4);
     }
 
     .num-btn:active {
-      transform: translateY(4px);
-      box-shadow: var(--btn-active-shadow);
+      transform: translateY(4px) scale(0.92);
+      box-shadow: var(--btn-active-shadow), 0 0 24px rgba(78, 205, 196, 0.7);
       background-color: var(--mint);
       color: var(--white);
+    }
+
+    .num-btn:active::before {
+      animation: btnRipple 0.5s ease-out;
+    }
+
+    @keyframes btnRipple {
+      0% { inset: 50%; opacity: 1; }
+      100% { inset: -20%; opacity: 0; }
+    }
+
+    .num-btn.btn-enter:active {
+      box-shadow: var(--btn-active-shadow), 0 0 28px rgba(255, 105, 180, 0.85);
     }
 
     .action-btn {
@@ -810,11 +1070,66 @@
     }
 
     .feedback-icon {
-      font-size: 8rem;
+      font-size: 12rem;
       font-weight: 900;
-      text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 14px 34px rgba(59,36,124,0.22);
-      transform: scale(0);
-      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      text-shadow:
+        0 0 30px rgba(255,255,255,1),
+        0 0 60px currentColor,
+        0 0 90px currentColor,
+        0 18px 44px rgba(59,36,124,0.4);
+      transform: scale(0) rotate(-180deg);
+      transition: none;
+      filter: drop-shadow(0 0 22px currentColor);
+    }
+
+    .feedback-icon.pop-correct {
+      animation: feedbackPopCorrect 1.4s cubic-bezier(0.2, 1.6, 0.3, 1) forwards;
+    }
+
+    .feedback-icon.pop-incorrect {
+      animation: feedbackPopIncorrect 1.4s cubic-bezier(0.2, 1.4, 0.3, 1) forwards;
+    }
+
+    @keyframes feedbackPopCorrect {
+      0% { transform: scale(0) rotate(-360deg); opacity: 0; }
+      35% { transform: scale(1.4) rotate(20deg); opacity: 1; }
+      55% { transform: scale(1.1) rotate(-12deg); opacity: 1; }
+      70% { transform: scale(1.25) rotate(8deg); opacity: 1; }
+      85% { transform: scale(1.15) rotate(0deg); opacity: 0.9; }
+      100% { transform: scale(2.5) rotate(0deg); opacity: 0; }
+    }
+
+    @keyframes feedbackPopIncorrect {
+      0% { transform: scale(0) rotate(0deg); opacity: 0; }
+      20% { transform: scale(1.5) rotate(-15deg); opacity: 1; }
+      35% { transform: scale(1.3) rotate(15deg); opacity: 1; }
+      50% { transform: scale(1.4) rotate(-10deg); opacity: 1; }
+      65% { transform: scale(1.2) rotate(8deg); opacity: 1; }
+      80% { transform: scale(1.3) rotate(0deg); opacity: 0.85; }
+      100% { transform: scale(0.5) rotate(0deg); opacity: 0; }
+    }
+
+    /* フィードバックリング */
+    .feedback-ring {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 8px solid currentColor;
+      transform: translate(-50%, -50%) scale(0);
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    .feedback-ring.active {
+      animation: ringExpand 1s ease-out forwards;
+    }
+
+    @keyframes ringExpand {
+      0% { transform: translate(-50%, -50%) scale(0); opacity: 1; border-width: 16px; }
+      100% { transform: translate(-50%, -50%) scale(8); opacity: 0; border-width: 1px; }
     }
 
     .correct {
@@ -830,15 +1145,48 @@
     }
 
     .score-board {
-      background: rgba(255,255,255,0.82);
-      padding: 15px;
-      border-radius: 15px;
-      border: 3px solid var(--gold);
+      background: rgba(255,255,255,0.88);
+      padding: 22px 30px;
+      border-radius: 22px;
+      border: 4px solid var(--gold);
       text-align: center;
       margin-bottom: 15px;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-      -webkit-backdrop-filter: blur(8px);
-      backdrop-filter: blur(8px);
+      box-shadow:
+        0 10px 30px rgba(255, 215, 0, 0.45),
+        0 0 60px rgba(255, 105, 180, 0.35),
+        inset 0 0 0 2px rgba(255,255,255,0.95);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      animation: scoreBoardFloat 3s ease-in-out infinite, scoreBoardEnter 0.9s cubic-bezier(0.2, 1.5, 0.3, 1);
+      position: relative;
+      overflow: visible;
+    }
+
+    .score-board::before {
+      content: "";
+      position: absolute;
+      inset: -8px;
+      border-radius: 28px;
+      background: conic-gradient(from 0deg, #ff2fa8, #ffd700, #4ecdc4, #65d6ff, #a8f04f, #ff2fa8);
+      filter: blur(12px);
+      opacity: 0.55;
+      z-index: -1;
+      animation: scoreBoardSpin 4s linear infinite;
+    }
+
+    @keyframes scoreBoardEnter {
+      0% { transform: scale(0.3) rotate(-12deg); opacity: 0; }
+      60% { transform: scale(1.1) rotate(4deg); opacity: 1; }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+
+    @keyframes scoreBoardFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    @keyframes scoreBoardSpin {
+      to { transform: rotate(360deg); }
     }
 
     .score-text {
@@ -847,17 +1195,32 @@
     }
 
     .final-score {
-      font-size: 2.8rem;
+      font-size: 3.6rem;
       font-weight: 900;
       color: var(--main-pink);
       line-height: 1.2;
+      text-shadow: 3px 3px 0 #fff, 0 0 30px rgba(255, 105, 180, 0.7), 0 0 60px var(--gold);
+      animation: scorePulse 1.2s ease-in-out infinite;
+    }
+
+    @keyframes scorePulse {
+      0%, 100% { transform: scale(1); filter: hue-rotate(0deg); }
+      50% { transform: scale(1.08); filter: hue-rotate(15deg); }
     }
 
     .perfect-msg {
-      color: var(--gold);
-      font-weight: bold;
-      font-size: 0.9rem;
-      margin-top: 6px;
+      color: var(--main-pink);
+      font-weight: 900;
+      font-size: 1.1rem;
+      margin-top: 10px;
+      text-shadow: 0 2px 0 #fff, 0 0 18px var(--gold);
+      animation: perfectMsgWave 1.6s ease-in-out infinite;
+    }
+
+    @keyframes perfectMsgWave {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      25% { transform: translateY(-3px) rotate(-1deg); }
+      75% { transform: translateY(2px) rotate(1deg); }
     }
 
     .mute-btn {
@@ -1184,6 +1547,149 @@
       }
     }
 
+    /* === 演出切替: シンプル(legacy) モード === */
+    body.legacy-fx { background-size: 160% 160%; animation-duration: 12s; }
+
+    body.legacy-fx #screen-flash,
+    body.legacy-fx .feedback-ring,
+    body.legacy-fx .laser-burst,
+    body.legacy-fx .confetti,
+    body.legacy-fx .shooting-star { display: none !important; }
+
+    body.legacy-fx #app::before {
+      inset: -35%;
+      background:
+        conic-gradient(from 40deg, rgba(255, 122, 144, 0.2), rgba(101, 214, 255, 0.2), rgba(168, 240, 79, 0.16), rgba(255, 215, 0, 0.2), rgba(255, 122, 144, 0.2));
+      filter: blur(18px);
+      opacity: 0.9;
+      animation-duration: 16s;
+      mix-blend-mode: normal;
+    }
+    body.legacy-fx #app::after { display: none !important; }
+
+    body.legacy-fx .warp-grid {
+      height: 48%;
+      background-image:
+        linear-gradient(rgba(59, 36, 124, 0.22) 2px, transparent 2px),
+        linear-gradient(90deg, rgba(59, 36, 124, 0.2) 2px, transparent 2px);
+      opacity: 0.5;
+      filter: none;
+      animation-duration: 1.4s;
+    }
+    body.legacy-fx .warp-grid::after { display: none !important; }
+
+    body.legacy-fx #app.combo-fever .sky-ribbon {
+      border-top-color: rgba(255, 215, 0, 0.75);
+      border-left-color: rgba(255, 105, 180, 0.28);
+      border-right-color: rgba(78, 205, 196, 0.32);
+      filter: drop-shadow(0 0 28px rgba(255, 215, 0, 0.6));
+      animation-duration: 3.8s;
+    }
+    body.legacy-fx #app.combo-fever .warp-grid {
+      opacity: 0.78;
+      animation-duration: 0.78s;
+      filter: none;
+    }
+    body.legacy-fx #app.combo-fever::before { animation-duration: 16s; filter: blur(18px); }
+    body.legacy-fx #app.combo-fever .floating-kuku span { filter: saturate(1.45) drop-shadow(0 0 18px rgba(255, 215, 0, 0.42)); }
+
+    body.legacy-fx #app.hit-correct .question-area { animation: correctPunchLegacy 0.62s cubic-bezier(0.2, 1.4, 0.3, 1); }
+    body.legacy-fx #app.hit-incorrect .question-area { animation: wrongShakeLegacy 0.42s ease-in-out; }
+    body.legacy-fx #app.hit-correct .stage-core,
+    body.legacy-fx #app.hit-incorrect .stage-core { animation: coreFloat 2.4s ease-in-out infinite; filter: none; }
+    body.legacy-fx #app.shake-correct,
+    body.legacy-fx #app.shake-incorrect,
+    body.legacy-fx #app.zoom-pop { animation: none !important; }
+
+    @keyframes correctPunchLegacy {
+      0% { transform: rotateX(0deg) scale(1); }
+      42% { transform: rotateX(10deg) scale(1.055); }
+      100% { transform: rotateX(0deg) scale(1); }
+    }
+    @keyframes wrongShakeLegacy {
+      0%, 100% { transform: translateX(0); }
+      22% { transform: translateX(-10px) rotateZ(-1.5deg); }
+      48% { transform: translateX(8px) rotateZ(1.5deg); }
+      72% { transform: translateX(-5px) rotateZ(-1deg); }
+    }
+
+    body.legacy-fx .feedback-icon {
+      font-size: 8rem;
+      text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 14px 34px rgba(59,36,124,0.22);
+      filter: none;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      animation: none !important;
+    }
+    body.legacy-fx .feedback-icon.pop-correct,
+    body.legacy-fx .feedback-icon.pop-incorrect { animation: none !important; }
+
+    body.legacy-fx .stage-core {
+      text-shadow: 0 3px 0 rgba(59, 36, 124, 0.22), 0 0 18px rgba(255,255,255,0.9);
+      box-shadow: 0 18px 42px rgba(59, 36, 124, 0.22), inset 0 0 0 3px rgba(255,255,255,0.62);
+      animation: coreFloat 2.4s ease-in-out infinite;
+    }
+
+    body.legacy-fx .stage-comet {
+      width: 18px;
+      height: 18px;
+      box-shadow: 0 0 0 8px rgba(255,215,0,0.22), 0 0 28px rgba(255,215,0,0.8);
+      animation-duration: 1.7s;
+    }
+    body.legacy-fx .stage-comet::after { display: none !important; }
+
+    body.legacy-fx .num-btn::before { display: none !important; }
+    body.legacy-fx .num-btn:hover {
+      filter: saturate(1.15);
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: var(--btn-shadow);
+    }
+    body.legacy-fx .num-btn:active {
+      box-shadow: var(--btn-active-shadow);
+    }
+    body.legacy-fx .num-btn:active::before { animation: none !important; }
+    body.legacy-fx .num-btn.btn-enter:active { box-shadow: var(--btn-active-shadow); }
+
+    body.legacy-fx .score-board {
+      padding: 15px;
+      border-radius: 15px;
+      border-width: 3px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+      animation: none !important;
+    }
+    body.legacy-fx .score-board::before { display: none !important; }
+    body.legacy-fx .final-score {
+      font-size: 2.8rem;
+      text-shadow: none;
+      animation: none !important;
+    }
+    body.legacy-fx .perfect-msg {
+      color: var(--gold);
+      font-weight: bold;
+      font-size: 0.9rem;
+      text-shadow: none;
+      animation: none !important;
+    }
+
+    /* 演出セレクタ */
+    .fx-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 4px;
+    }
+    .fx-option {
+      font-size: 0.7rem;
+      padding: 5px 2px;
+      min-width: auto;
+      border-color: var(--pastel-purple);
+      color: var(--pastel-purple);
+      transition: all 0.2s;
+    }
+    .fx-option.fx-active {
+      background-color: var(--pastel-purple);
+      color: var(--white);
+      border-color: var(--white);
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: 0.001ms !important;
@@ -1193,6 +1699,7 @@
     }
 
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/15.3.5/Tone.js"></script>
 </head>
 <body>
 
@@ -1209,6 +1716,7 @@
       </div>
     </div>
     <div id="burst-layer" aria-hidden="true"></div>
+    <div id="screen-flash" class="screen-flash" aria-hidden="true"></div>
     <div id="mute-btn" class="mute-btn" onclick="toggleMute()">🔇</div>
     <!-- タイトル画面 -->
     <div id="title-screen" class="screen active">
@@ -1218,9 +1726,9 @@
         <h2>おんがく</h2>
         <div class="bgm-grid">
           <button class="btn bgm-option bgm-active" onclick="selectSong(0)">ゆったり</button>
-          <button class="btn bgm-option" onclick="selectSong(1)">わくわく</button>
           <button class="btn bgm-option" onclick="selectSong(2)">たのしい</button>
           <button class="btn bgm-option" onclick="selectSong(3)">キラキラ</button>
+          <button class="btn bgm-option" onclick="selectSong(1)">わくわく</button>
           <button class="btn bgm-option" onclick="selectSong(4)">ノリノリ</button>
         </div>
       </div>
@@ -1271,6 +1779,13 @@
         <span class="settings-unit">もん</span>
       </div>
 
+      <div class="mode-section bgm-selector">
+        <h2>えんしゅつ</h2>
+        <div class="fx-grid">
+          <button id="fx-btn-new" class="btn fx-option fx-active" onclick="selectFx('new')">ごうか</button>
+          <button id="fx-btn-legacy" class="btn fx-option" onclick="selectFx('legacy')">ふつう</button>
+        </div>
+      </div>
     </div>
 
     <!-- ゲーム画面 -->
@@ -1318,6 +1833,8 @@
 
     <!-- フィードバック -->
     <div id="feedback-overlay">
+      <div id="feedback-ring" class="feedback-ring"></div>
+      <div id="feedback-ring-2" class="feedback-ring" style="transition-delay: 0.15s;"></div>
       <div id="feedback-icon" class="feedback-icon"></div>
     </div>
 
@@ -1654,6 +2171,21 @@
         window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     }
 
+    function isLegacyFx() {
+      return document.body.classList.contains('legacy-fx');
+    }
+
+    function selectFx(mode) {
+      const isLegacy = mode === 'legacy';
+      document.body.classList.toggle('legacy-fx', isLegacy);
+      localStorage.setItem('kuku_fx', mode);
+      const newBtn = document.getElementById('fx-btn-new');
+      const legacyBtn = document.getElementById('fx-btn-legacy');
+      if (newBtn) newBtn.classList.toggle('fx-active', !isLegacy);
+      if (legacyBtn) legacyBtn.classList.toggle('fx-active', isLegacy);
+      playSe('btn');
+    }
+
     function updateStage(q) {
       const stageNumber = document.getElementById('stage-number');
       const stageLeft = document.getElementById('stage-left');
@@ -1813,27 +2345,133 @@
     function showFeedback(isCorrect) {
       const overlay = document.getElementById('feedback-overlay');
       const icon = document.getElementById('feedback-icon');
+      const ring = document.getElementById('feedback-ring');
+      const ring2 = document.getElementById('feedback-ring-2');
       const app = document.getElementById('app');
-      
+      const flash = document.getElementById('screen-flash');
+      const isFever = streak >= 3;
+      const legacy = isLegacyFx();
+
       overlay.style.opacity = 1;
       icon.textContent = isCorrect ? '⭕' : '❌';
       icon.className = 'feedback-icon ' + (isCorrect ? 'correct' : 'incorrect');
-      app.classList.toggle('combo-fever', streak >= 3);
-      app.classList.remove('hit-correct', 'hit-incorrect');
+
+      // シンプル(legacy) モード
+      if (legacy) {
+        icon.style.transform = 'scale(0)';
+        app.classList.toggle('combo-fever', isFever);
+        app.classList.remove('hit-correct', 'hit-incorrect', 'shake-correct', 'shake-incorrect', 'zoom-pop');
+        void app.offsetWidth;
+        app.classList.add(isCorrect ? 'hit-correct' : 'hit-incorrect');
+        launchBurst(isCorrect, isFever);
+        requestAnimationFrame(() => { icon.style.transform = 'scale(1)'; });
+        setTimeout(() => {
+          icon.style.transform = 'scale(0)';
+          overlay.style.opacity = 0;
+          app.classList.remove('hit-correct', 'hit-incorrect');
+        }, 1500);
+        return;
+      }
+
+      // ド派手モード
+      ring.className = 'feedback-ring ' + (isCorrect ? 'correct' : 'incorrect');
+      ring2.className = 'feedback-ring ' + (isCorrect ? 'correct' : 'incorrect');
+      ring.style.transitionDelay = '';
+      ring2.style.transitionDelay = '';
+
+      // 画面フラッシュ
+      flash.className = 'screen-flash';
+      void flash.offsetWidth;
+      if (isFever && isCorrect) {
+        flash.classList.add('active', 'fever');
+      } else {
+        flash.classList.add('active', isCorrect ? 'correct' : 'incorrect');
+      }
+
+      app.classList.toggle('combo-fever', isFever);
+      app.classList.remove('hit-correct', 'hit-incorrect', 'shake-correct', 'shake-incorrect', 'zoom-pop');
       void app.offsetWidth;
       app.classList.add(isCorrect ? 'hit-correct' : 'hit-incorrect');
-      launchBurst(isCorrect, streak >= 3);
-      
-      // アニメーション
-      requestAnimationFrame(() => {
-        icon.style.transform = 'scale(1)';
-      });
+      app.classList.add(isCorrect ? 'shake-correct' : 'shake-incorrect');
+      if (isCorrect) app.classList.add('zoom-pop');
+
+      // アニメ再起動 トリック
+      void icon.offsetWidth;
+      icon.classList.add(isCorrect ? 'pop-correct' : 'pop-incorrect');
+      void ring.offsetWidth;
+      ring.classList.add('active');
+      setTimeout(() => {
+        void ring2.offsetWidth;
+        ring2.classList.add('active');
+      }, 120);
+
+      launchBurst(isCorrect, isFever);
+      if (isCorrect) {
+        launchLasers(isFever);
+        if (isFever) launchConfetti(20);
+      }
 
       setTimeout(() => {
-        icon.style.transform = 'scale(0)';
         overlay.style.opacity = 0;
-        app.classList.remove('hit-correct', 'hit-incorrect');
+        icon.classList.remove('pop-correct', 'pop-incorrect');
+        ring.classList.remove('active');
+        ring2.classList.remove('active');
+        flash.classList.remove('active', 'correct', 'incorrect', 'fever');
+        app.classList.remove('hit-correct', 'hit-incorrect', 'shake-correct', 'shake-incorrect', 'zoom-pop');
       }, 1500);
+    }
+
+    function launchLasers(isBig) {
+      if (prefersReducedMotion() || isLegacyFx()) return;
+      const layer = document.getElementById('burst-layer');
+      if (!layer) return;
+      const count = isBig ? 12 : 8;
+      const colors = ['#FFD700', '#FF69B4', '#4ECDC4', '#65D6FF', '#A8F04F'];
+      for (let i = 0; i < count; i++) {
+        const laser = document.createElement('div');
+        laser.className = 'laser-burst';
+        laser.style.setProperty('--angle', `${(360 / count) * i + Math.random() * 12}deg`);
+        laser.style.setProperty('--laser-color', colors[i % colors.length]);
+        layer.appendChild(laser);
+        setTimeout(() => laser.remove(), 800);
+      }
+    }
+
+    function launchConfetti(count) {
+      if (prefersReducedMotion() || isLegacyFx()) return;
+      const layer = document.getElementById('burst-layer');
+      if (!layer) return;
+      const colors = ['#FFD700', '#FF2FA8', '#22D9FF', '#A8F04F', '#FF7A90', '#9370DB'];
+      for (let i = 0; i < count; i++) {
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        c.style.setProperty('--cx', `${Math.random() * 100}%`);
+        c.style.setProperty('--csize', `${6 + Math.random() * 8}px`);
+        c.style.setProperty('--ccolor', colors[i % colors.length]);
+        c.style.setProperty('--crot', `${Math.random() * 360}deg`);
+        c.style.setProperty('--cdx', `${(Math.random() - 0.5) * 280}px`);
+        c.style.setProperty('--clife', `${1800 + Math.random() * 1400}ms`);
+        layer.appendChild(c);
+        setTimeout(() => c.remove(), 3400);
+      }
+    }
+
+    function launchShootingStar() {
+      if (prefersReducedMotion() || isLegacyFx()) return;
+      const layer = document.getElementById('burst-layer');
+      if (!layer) return;
+      const colors = ['#FFD700', '#65D6FF', '#FF69B4', '#A8F04F'];
+      const star = document.createElement('div');
+      star.className = 'shooting-star';
+      const startX = Math.random() * 60;
+      const startY = Math.random() * 30;
+      star.style.setProperty('--ssx', `${startX}%`);
+      star.style.setProperty('--ssy', `${startY}%`);
+      star.style.setProperty('--ssdx', `${200 + Math.random() * 200}px`);
+      star.style.setProperty('--ssdy', `${150 + Math.random() * 150}px`);
+      star.style.setProperty('--ssc', colors[Math.floor(Math.random() * colors.length)]);
+      layer.appendChild(star);
+      setTimeout(() => star.remove(), 1500);
     }
 
     function launchBurst(isCorrect, isBig) {
@@ -1842,50 +2480,138 @@
       if (!layer || !app) return;
       if (prefersReducedMotion()) return;
 
+      const legacy = isLegacyFx();
       const appRect = app.getBoundingClientRect();
       const target = document.querySelector('.screen.active .question-area, .screen.active .score-board') || document.querySelector('.question-area');
       if (!target) return;
       const questionRect = target.getBoundingClientRect();
       const centerX = questionRect.left - appRect.left + questionRect.width / 2;
       const centerY = questionRect.top - appRect.top + questionRect.height / 2;
-      const count = isBig ? 42 : (isCorrect ? 28 : 18);
-      const symbols = isCorrect ? ['★', '×', '+', '♪'] : ['×', '?', '！'];
+      const count = legacy
+        ? (isBig ? 42 : (isCorrect ? 28 : 18))
+        : (isBig ? 90 : (isCorrect ? 60 : 36));
+      const symbols = isCorrect
+        ? (legacy ? ['★', '×', '+', '♪'] : ['★', '✦', '♥', '♪', '✿', '◆', '✺'])
+        : (legacy ? ['×', '?', '！'] : ['×', '?', '！', '✗']);
       const colors = isCorrect
-        ? ['#FFD700', '#FF69B4', '#4ECDC4', '#A8F04F', '#65D6FF']
+        ? (legacy
+          ? ['#FFD700', '#FF69B4', '#4ECDC4', '#A8F04F', '#65D6FF']
+          : ['#FFD700', '#FF69B4', '#4ECDC4', '#A8F04F', '#65D6FF', '#FF2FA8', '#FFFFFF'])
         : ['#FF7A90', '#9370DB', '#FFD700'];
 
       for (let i = 0; i < count; i++) {
         const spark = document.createElement('span');
-        const angle = (Math.PI * 2 * i / count) + Math.random() * 0.45;
-        const distance = (isBig ? 180 : 120) + Math.random() * (isBig ? 120 : 70);
+        const angle = (Math.PI * 2 * i / count) + Math.random() * (legacy ? 0.45 : 0.6);
+        const distance = legacy
+          ? (isBig ? 180 : 120) + Math.random() * (isBig ? 120 : 70)
+          : (isBig ? 240 : 160) + Math.random() * (isBig ? 180 : 110);
         const x = Math.cos(angle) * distance;
-        const y = Math.sin(angle) * distance - Math.random() * 45;
+        const y = Math.sin(angle) * distance - Math.random() * (legacy ? 45 : 70);
         spark.className = 'spark';
         spark.textContent = symbols[Math.floor(Math.random() * symbols.length)];
         spark.style.setProperty('--left', `${centerX}px`);
         spark.style.setProperty('--top', `${centerY}px`);
         spark.style.setProperty('--x', `${x}px`);
         spark.style.setProperty('--y', `${y}px`);
-        spark.style.setProperty('--spin', `${(Math.random() * 720 - 360).toFixed(0)}deg`);
+        spark.style.setProperty('--spin', `${(Math.random() * (legacy ? 720 : 1080) - (legacy ? 360 : 540)).toFixed(0)}deg`);
         spark.style.setProperty('--spark-color', colors[i % colors.length]);
-        spark.style.setProperty('--spark-size', `${14 + Math.random() * (isBig ? 18 : 12)}px`);
-        spark.style.setProperty('--spark-life', `${780 + Math.random() * 420}ms`);
+        spark.style.setProperty('--spark-size', legacy
+          ? `${14 + Math.random() * (isBig ? 18 : 12)}px`
+          : `${18 + Math.random() * (isBig ? 28 : 18)}px`);
+        spark.style.setProperty('--spark-life', legacy
+          ? `${780 + Math.random() * 420}ms`
+          : `${900 + Math.random() * 600}ms`);
         layer.appendChild(spark);
-        setTimeout(() => spark.remove(), 1300);
+        setTimeout(() => spark.remove(), legacy ? 1300 : 1600);
+      }
+
+      if (legacy) return;
+
+      // 二次バースト（少し遅れて 別方向に）
+      if (isCorrect) {
+        setTimeout(() => {
+          const secondCount = isBig ? 50 : 30;
+          for (let i = 0; i < secondCount; i++) {
+            const spark = document.createElement('span');
+            const angle = (Math.PI * 2 * i / secondCount) + Math.PI / secondCount;
+            const distance = (isBig ? 200 : 140) + Math.random() * 100;
+            const x = Math.cos(angle) * distance;
+            const y = Math.sin(angle) * distance - Math.random() * 50;
+            spark.className = 'spark';
+            spark.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+            spark.style.setProperty('--left', `${centerX}px`);
+            spark.style.setProperty('--top', `${centerY}px`);
+            spark.style.setProperty('--x', `${x}px`);
+            spark.style.setProperty('--y', `${y}px`);
+            spark.style.setProperty('--spin', `${(Math.random() * 720 - 360).toFixed(0)}deg`);
+            spark.style.setProperty('--spark-color', colors[i % colors.length]);
+            spark.style.setProperty('--spark-size', `${16 + Math.random() * 14}px`);
+            spark.style.setProperty('--spark-life', `${800 + Math.random() * 500}ms`);
+            layer.appendChild(spark);
+            setTimeout(() => spark.remove(), 1400);
+          }
+        }, 180);
       }
     }
 
     function endGame() {
       showScreen('result-screen');
       playSe('result');
-      document.getElementById('app').classList.toggle('combo-fever', score === totalQuestions);
-      setTimeout(() => {
-        if (score > 0) launchBurst(true, score === totalQuestions);
-      }, 180);
-      document.getElementById('final-score').textContent = `${score} / ${totalQuestions}`;
-      
+      const isPerfect = score === totalQuestions;
+      document.getElementById('app').classList.toggle('combo-fever', isPerfect);
+
+      const finalScoreEl = document.getElementById('final-score');
+      const legacy = isLegacyFx();
+
+      if (legacy) {
+        finalScoreEl.textContent = `${score} / ${totalQuestions}`;
+        setTimeout(() => {
+          if (score > 0) launchBurst(true, isPerfect);
+        }, 180);
+      } else {
+        finalScoreEl.textContent = `0 / ${totalQuestions}`;
+
+        // スコアカウントアップ
+        const stepDuration = Math.max(60, Math.min(180, 1200 / Math.max(1, score)));
+        let displayed = 0;
+        const tickScore = () => {
+          if (displayed >= score) return;
+          displayed++;
+          finalScoreEl.textContent = `${displayed} / ${totalQuestions}`;
+          playSe('btn');
+          if (displayed < score) setTimeout(tickScore, stepDuration);
+        };
+        setTimeout(tickScore, 400);
+
+        // 初回 大バースト
+        setTimeout(() => {
+          if (score > 0) launchBurst(true, isPerfect);
+        }, 180);
+
+        // 紙吹雪 連発
+        if (score > 0) {
+          const burstCount = isPerfect ? 8 : Math.min(5, Math.ceil(score / 2));
+          for (let i = 0; i < burstCount; i++) {
+            setTimeout(() => launchConfetti(isPerfect ? 30 : 18), 300 + i * 280);
+          }
+        }
+
+        // パーフェクト時 花火連発＋流れ星
+        if (isPerfect) {
+          for (let i = 0; i < 6; i++) {
+            setTimeout(() => {
+              launchBurst(true, true);
+              launchLasers(true);
+            }, 700 + i * 450);
+          }
+          for (let i = 0; i < 8; i++) {
+            setTimeout(launchShootingStar, 600 + i * 250);
+          }
+        }
+      }
+
       const msgEl = document.getElementById('perfect-msg');
-      if (score === totalQuestions) {
+      if (isPerfect) {
         msgEl.textContent = "すごい！ぜんもんせいかい！";
         speak("すごい！ぜんもんせいかい！");
       } else if (score >= 7) {
@@ -2226,13 +2952,9 @@
       },
       {
         name: "わくわく",
-        tempo: 0.2,
-        waveType: "square",
-        gain: 0.015,
-        melody: [523.25, 523.25, 783.99, 783.99, 659.25, 783.99, 523.25, 392.00,
-                 440.00, 523.25, 659.25, 523.25, 783.99, 659.25, 523.25, 440.00,
-                 523.25, 659.25, 783.99, 1046.50, 783.99, 659.25, 523.25, 659.25,
-                 783.99, 523.25, 440.00, 392.00, 440.00, 523.25, 659.25, 523.25]
+        useTone: true,
+        toneBuilder: "wakuwaku",
+        tempo: 0.2
       },
       {
         name: "たのしい",
@@ -2257,19 +2979,9 @@
       },
       {
         name: "ノリノリ",
-        tempo: 0.12,
-        waveType: "sawtooth",
-        gain: 0.018,
-        harmonyGain: 0.011,
-        bassGain: 0.022,
-        beat: true,
-        melody: [1046.50, 1318.51, 1567.98, 1318.51, 1174.66, 1567.98, 1760.00, 1567.98,
-                 1318.51, 1046.50, 1174.66, 1318.51, 1567.98, 1760.00, 2093.00, 0,
-                 1567.98, 1760.00, 2093.00, 1760.00, 1567.98, 1318.51, 1174.66, 1318.51,
-                 1046.50, 1174.66, 1318.51, 1567.98, 1760.00, 1567.98, 1318.51, 0],
-        harmony: [659.25, 783.99, 1046.50, 783.99, 698.46, 1046.50, 1174.66, 1046.50,
-                  783.99, 659.25, 698.46, 783.99, 1046.50, 1174.66, 1318.51, 0],
-        bass: [130.81, 130.81, 196.00, 196.00, 174.61, 174.61, 220.00, 220.00]
+        useTone: true,
+        toneBuilder: "norinori",
+        tempo: 0.12
       }
     ];
     let currentSongIndex = 0;
@@ -2292,11 +3004,18 @@
 
     function startBgm() {
       if (isMuted || bgmTimer) return;
+      const song = BGM_SONGS[currentSongIndex];
+      if (song.useTone) {
+        startToneEngine();
+        bgmTimer = 'tone';
+        return;
+      }
       scheduleNextNote();
     }
 
     function stopBgm() {
-      clearTimeout(bgmTimer);
+      stopToneEngine();
+      if (bgmTimer && bgmTimer !== 'tone') clearTimeout(bgmTimer);
       bgmTimer = null;
     }
 
@@ -2305,6 +3024,7 @@
       if (!audioCtx) return;
 
       const song = BGM_SONGS[currentSongIndex];
+      if (song.useTone) { bgmTimer = 'tone'; return; }
       const freq = song.melody[noteIndex % song.melody.length];
       const now = audioCtx.currentTime;
 
@@ -2373,6 +3093,474 @@
       }
     }
 
+    // --- Tone.js engines ---
+    let toneEngines = {};
+    let activeToneId = null;
+    let toneRunning = false;
+
+    function buildToneEngineNoriNori() {
+      const limiter = new Tone.Limiter(-2).toDestination();
+      const masterComp = new Tone.Compressor({ threshold: -16, ratio: 3.5, attack: 0.005, release: 0.12 }).connect(limiter);
+      const reverb = new Tone.Reverb({ decay: 3.2, wet: 0.22 }).connect(masterComp);
+      const pingpong = new Tone.PingPongDelay({ delayTime: '8n.', feedback: 0.32, wet: 0.2 }).connect(reverb);
+
+      // Lead: super-saw
+      const leadFilter = new Tone.Filter({ frequency: 2400, type: 'lowpass', rolloff: -24, Q: 1.5 });
+      const leadAuto = new Tone.AutoFilter({ frequency: '2m', baseFrequency: 500, octaves: 3.2, depth: 0.9, wet: 0.55 }).start();
+      const lead = new Tone.PolySynth(Tone.Synth, {
+        oscillator: { type: 'fatsawtooth', count: 3, spread: 28 },
+        envelope: { attack: 0.005, decay: 0.18, sustain: 0.25, release: 0.18 }
+      });
+      lead.chain(leadFilter, leadAuto, pingpong);
+      lead.volume.value = -16;
+
+      // Bass: rubber/acid
+      const bass = new Tone.MonoSynth({
+        oscillator: { type: 'sawtooth' },
+        filter: { Q: 3, type: 'lowpass', rolloff: -24 },
+        envelope: { attack: 0.004, decay: 0.18, sustain: 0.35, release: 0.1 },
+        filterEnvelope: { attack: 0.004, decay: 0.16, sustain: 0.25, release: 0.2, baseFrequency: 140, octaves: 3.6 }
+      }).connect(masterComp);
+      bass.volume.value = -10;
+
+      // Pad
+      const pad = new Tone.PolySynth(Tone.Synth, {
+        oscillator: { type: 'fatsine', count: 3, spread: 32 },
+        envelope: { attack: 0.9, decay: 0.5, sustain: 0.65, release: 2.2 }
+      }).connect(reverb);
+      pad.volume.value = -28;
+
+      // Pluck (counter-melody)
+      const pluck = new Tone.PluckSynth({ attackNoise: 0.6, dampening: 4200, resonance: 0.8 }).connect(pingpong);
+      pluck.volume.value = -18;
+
+      // Kick
+      const kick = new Tone.MembraneSynth({
+        pitchDecay: 0.04, octaves: 6,
+        envelope: { attack: 0.001, decay: 0.36, sustain: 0.01, release: 1.0 }
+      }).connect(masterComp);
+      kick.volume.value = -3;
+
+      // Clap (white noise + filter)
+      const clapFilter = new Tone.Filter(1800, 'bandpass');
+      const clap = new Tone.NoiseSynth({
+        noise: { type: 'white' },
+        envelope: { attack: 0.001, decay: 0.18, sustain: 0 }
+      });
+      clap.chain(clapFilter, masterComp);
+      clap.volume.value = -14;
+
+      // Hat
+      const hatHp = new Tone.Filter(7500, 'highpass');
+      const hat = new Tone.MetalSynth({
+        envelope: { attack: 0.001, decay: 0.05, release: 0.01 },
+        harmonicity: 5.1, modulationIndex: 32, resonance: 4000, octaves: 1.5
+      });
+      hat.chain(hatHp, masterComp);
+      hat.volume.value = -34;
+
+      // Open hat (longer)
+      const openHat = new Tone.MetalSynth({
+        envelope: { attack: 0.001, decay: 0.25, release: 0.05 },
+        harmonicity: 5.1, modulationIndex: 32, resonance: 4000, octaves: 1.5
+      });
+      openHat.chain(hatHp, masterComp);
+      openHat.volume.value = -36;
+
+      // ---- Patterns ----
+      // 16-bar progression: Cm - Cm - Gm - Cm - Abmaj7 - Fm - Gm - Cm (per 2bar)
+      const chordProg = [
+        ['C4','Eb4','G4'], ['C4','Eb4','G4'],
+        ['G3','Bb3','D4'], ['C4','Eb4','G4'],
+        ['Ab3','C4','Eb4','G4'], ['F3','Ab3','C4'],
+        ['G3','Bb3','D4'], ['C4','Eb4','G4']
+      ];
+      const bassRoots = ['C2','C2','G1','C2','Ab1','F1','G1','C2'];
+
+      // Lead arpeggio per bar (16 sixteenth notes each)
+      const arpFor = (root) => {
+        const map = {
+          'C2': ['C5','G5','Eb5','Bb5','C5','G5','Eb5','Bb5','D5','G5','Eb5','Bb5','C5','G5','Eb5','Bb5'],
+          'G1': ['G4','D5','Bb4','F5','G4','D5','Bb4','F5','A4','D5','Bb4','F5','G4','D5','Bb4','F5'],
+          'Ab1':['Ab4','Eb5','C5','G5','Ab4','Eb5','C5','G5','Bb4','Eb5','C5','G5','Ab4','Eb5','C5','G5'],
+          'F1': ['F4','C5','Ab4','Eb5','F4','C5','Ab4','Eb5','G4','C5','Ab4','Eb5','F4','C5','Ab4','Eb5']
+        };
+        return map[root] || map['C2'];
+      };
+
+      let bar = 0;
+      let sixteenth = 0;
+
+      // 4-on-the-floor kick (eighth-note based with empty beats)
+      const kickLoop = new Tone.Loop((time) => {
+        kick.triggerAttackRelease('C2', '8n', time);
+      }, '4n');
+
+      // Clap on beats 2 & 4
+      const clapLoop = new Tone.Loop((time) => {
+        clap.triggerAttackRelease('16n', time);
+      }, '2n');
+
+      // Hats: 8th notes, accents on offbeats
+      let hatStep = 0;
+      const hatLoop = new Tone.Loop((time) => {
+        const onBeat = hatStep % 2 === 0;
+        if (hatStep % 8 === 7) {
+          openHat.triggerAttackRelease('C5', '16n', time, 0.6);
+        } else {
+          hat.triggerAttackRelease('C5', '32n', time, onBeat ? 0.35 : 0.7);
+        }
+        hatStep++;
+      }, '8n');
+
+      // Bass: octave-jumping eighths with occasional ghost notes
+      let bassStep = 0;
+      const bassLoop = new Tone.Loop((time) => {
+        const root = bassRoots[bar % bassRoots.length];
+        const high = Tone.Frequency(root).transpose(12).toNote();
+        const pos = bassStep % 8;
+        const note = (pos % 2 === 0) ? root : high;
+        const vel = (pos === 0) ? 0.95 : (pos % 2 === 0 ? 0.7 : 0.55);
+        bass.triggerAttackRelease(note, '8n', time, vel);
+        bassStep++;
+      }, '8n');
+
+      // Pad: hold chord per bar
+      const padLoop = new Tone.Loop((time) => {
+        const ch = chordProg[bar % chordProg.length];
+        pad.triggerAttackRelease(ch, '1m', time, 0.6);
+      }, '1m');
+
+      // Lead arpeggio: 16th notes, drops out on bar 4 & 12 for variation
+      const leadLoop = new Tone.Loop((time) => {
+        const localBar = bar % 8;
+        const skipBar = (localBar === 3 || localBar === 7);
+        if (!skipBar) {
+          const root = bassRoots[bar % bassRoots.length];
+          const arp = arpFor(root);
+          const n = arp[sixteenth % arp.length];
+          lead.triggerAttackRelease(n, '16n', time, 0.55);
+        }
+        sixteenth++;
+      }, '16n');
+
+      // Pluck counter-melody: every other bar, syncopated
+      let pluckStep = 0;
+      const pluckLoop = new Tone.Loop((time) => {
+        if (bar % 2 === 1) {
+          const root = bassRoots[bar % bassRoots.length];
+          const arp = arpFor(root);
+          const n = arp[(pluckStep * 3) % arp.length];
+          pluck.triggerAttackRelease(Tone.Frequency(n).transpose(12).toNote(), time);
+        }
+        pluckStep++;
+      }, '4n');
+
+      // Bar counter
+      const barLoop = new Tone.Loop((time) => {
+        bar++;
+      }, '1m');
+
+      // Riser/sweep effect every 8 bars (simple filter automation on lead)
+      const sweepLoop = new Tone.Loop((time) => {
+        if (bar % 8 === 7) {
+          leadFilter.frequency.cancelScheduledValues(time);
+          leadFilter.frequency.setValueAtTime(400, time);
+          leadFilter.frequency.exponentialRampToValueAtTime(8000, time + Tone.Time('1m').toSeconds());
+        }
+      }, '1m');
+
+      return {
+        bpm: 128,
+        loops: [kickLoop, clapLoop, hatLoop, bassLoop, padLoop, leadLoop, pluckLoop, barLoop, sweepLoop],
+        reset() {
+          bar = 0; sixteenth = 0; hatStep = 0; bassStep = 0; pluckStep = 0;
+        },
+        start() {
+          this.reset();
+          Tone.Transport.bpm.value = this.bpm;
+          kickLoop.start(0);
+          clapLoop.start('0:1');
+          hatLoop.start(0);
+          bassLoop.start(0);
+          padLoop.start(0);
+          leadLoop.start('0:0:2');
+          pluckLoop.start(0);
+          barLoop.start('0:3:3');
+          sweepLoop.start(0);
+        },
+        stop() {
+          this.loops.forEach(l => l.stop());
+        }
+      };
+    }
+
+    function buildToneEngineWakuwaku() {
+      const limiter = new Tone.Limiter(-2).toDestination();
+      const masterComp = new Tone.Compressor({ threshold: -16, ratio: 3, attack: 0.005, release: 0.15 }).connect(limiter);
+      const reverb = new Tone.Reverb({ decay: 4.2, wet: 0.28 }).connect(masterComp);
+      const delay = new Tone.FeedbackDelay({ delayTime: '8n.', feedback: 0.22, wet: 0.18 }).connect(reverb);
+      const chorus = new Tone.Chorus({ frequency: 1.4, depth: 0.7, wet: 0.55 }).start().connect(reverb);
+
+      // Strings pad
+      const strings = new Tone.PolySynth(Tone.Synth, {
+        oscillator: { type: 'fatsawtooth', count: 3, spread: 30 },
+        envelope: { attack: 0.55, decay: 0.4, sustain: 0.85, release: 1.6 }
+      });
+      const stringsFilter = new Tone.Filter(2400, 'lowpass');
+      strings.chain(stringsFilter, chorus);
+      strings.volume.value = -22;
+
+      // Bell (FM)
+      const bell = new Tone.PolySynth(Tone.FMSynth, {
+        harmonicity: 3.01,
+        modulationIndex: 14,
+        oscillator: { type: 'sine' },
+        envelope: { attack: 0.001, decay: 1.2, sustain: 0, release: 1.4 },
+        modulation: { type: 'sine' },
+        modulationEnvelope: { attack: 0.001, decay: 0.4, sustain: 0, release: 0.5 }
+      }).connect(delay);
+      bell.volume.value = -22;
+
+      // Chiptune lead (square)
+      const chip = new Tone.PolySynth(Tone.Synth, {
+        oscillator: { type: 'square' },
+        envelope: { attack: 0.005, decay: 0.08, sustain: 0.2, release: 0.1 }
+      });
+      const chipFilter = new Tone.Filter(3800, 'lowpass');
+      chip.chain(chipFilter, delay);
+      chip.volume.value = -16;
+
+      // Pluck/piano-ish
+      const pluck = new Tone.PluckSynth({ attackNoise: 0.4, dampening: 4500, resonance: 0.85 }).connect(reverb);
+      pluck.volume.value = -14;
+
+      // Bouncy bass
+      const bass = new Tone.MonoSynth({
+        oscillator: { type: 'triangle' },
+        filter: { Q: 1.5, type: 'lowpass' },
+        envelope: { attack: 0.005, decay: 0.18, sustain: 0.4, release: 0.2 },
+        filterEnvelope: { attack: 0.005, decay: 0.14, sustain: 0.4, release: 0.2, baseFrequency: 220, octaves: 2.5 }
+      }).connect(masterComp);
+      bass.volume.value = -10;
+
+      // Drums
+      const kick = new Tone.MembraneSynth({
+        pitchDecay: 0.04, octaves: 5,
+        envelope: { attack: 0.001, decay: 0.3, sustain: 0.01, release: 0.8 }
+      }).connect(masterComp);
+      kick.volume.value = -6;
+
+      const snareFilter = new Tone.Filter(1500, 'highpass');
+      const snare = new Tone.NoiseSynth({
+        noise: { type: 'pink' },
+        envelope: { attack: 0.002, decay: 0.13, sustain: 0 }
+      });
+      snare.chain(snareFilter, masterComp);
+      snare.volume.value = -16;
+
+      const shakerHp = new Tone.Filter(8000, 'highpass');
+      const shaker = new Tone.NoiseSynth({
+        noise: { type: 'white' },
+        envelope: { attack: 0.002, decay: 0.04, sustain: 0 }
+      });
+      shaker.chain(shakerHp, masterComp);
+      shaker.volume.value = -28;
+
+      const crash = new Tone.MetalSynth({
+        envelope: { attack: 0.001, decay: 0.6, release: 0.2 },
+        harmonicity: 5.1, modulationIndex: 18, resonance: 6000, octaves: 1
+      }).connect(reverb);
+      crash.volume.value = -22;
+
+      // ---- Patterns ----
+      // 8-bar diatonic progression (C major): C - G - Am - F - C - G - F - G
+      const chordProg = [
+        ['C4','E4','G4'], ['G3','B3','D4'], ['A3','C4','E4'], ['F3','A3','C4'],
+        ['C4','E4','G4'], ['G3','B3','D4'], ['F3','A3','C4'], ['G3','B3','D4']
+      ];
+      const bassRoots = ['C2','G2','A1','F1','C2','G2','F1','G2'];
+
+      // Chip melody (16 sixteenths per bar, 8 bars)
+      const melodyByBar = [
+        ['C5','E5','G5','C6','G5','E5','G5','C6','E6','G6','E6','C6','G5','E5','D5','C5'],
+        ['D5','G5','B5','D6','B5','G5','B5','D6','G6','D6','B5','G5','D5','B4','A4','G4'],
+        ['E5','A5','C6','E6','C6','A5','C6','E6','A6','E6','C6','A5','E5','C5','B4','A4'],
+        ['F5','A5','C6','F6','C6','A5','F5','C5','A4','F4','A4','C5','F5','A5','G5','F5'],
+        ['C5','E5','G5','C6','E6','G6','E6','C6','G5','E5','C5','G4','C5','E5','G5','C6'],
+        ['B4','D5','G5','B5','D6','G6','D6','B5','G5','D5','B4','G4','D5','B4','A4','G4'],
+        ['F5','A5','C6','F6','A6','F6','C6','A5','F5','C5','A4','F4','C5','F5','A5','C6'],
+        ['G5','B5','D6','G6','B6','G6','D6','B5','G5','D5','B4','G4','G5','B5','D6','G6']
+      ];
+
+      let bar = 0;
+      let sixteenth = 0;
+      let bassStep = 0;
+      let shakerStep = 0;
+      let kickStep = 0;
+      let bellStep = 0;
+      let pluckStep = 0;
+
+      // Kick: 1 & 3
+      const kickLoop = new Tone.Loop((time) => {
+        if (kickStep % 2 === 0) {
+          kick.triggerAttackRelease('C2', '8n', time);
+        }
+        kickStep++;
+      }, '4n');
+
+      // Snare: beats 2 & 4
+      const snareLoop = new Tone.Loop((time) => {
+        snare.triggerAttackRelease('16n', time);
+      }, '2n');
+
+      // Shaker 16ths
+      const shakerLoop = new Tone.Loop((time) => {
+        const accent = (shakerStep % 4 === 2) ? 0.55 : ((shakerStep % 2 === 1) ? 0.45 : 0.25);
+        shaker.triggerAttackRelease('64n', time, accent);
+        shakerStep++;
+      }, '16n');
+
+      // Bouncy bass: octave-jumping eighths
+      const bassLoop = new Tone.Loop((time) => {
+        const root = bassRoots[bar % bassRoots.length];
+        const high = Tone.Frequency(root).transpose(12).toNote();
+        const pos = bassStep % 8;
+        const note = (pos % 2 === 0) ? root : high;
+        const vel = (pos === 0) ? 0.95 : 0.7;
+        bass.triggerAttackRelease(note, '16n', time, vel);
+        bassStep++;
+      }, '8n');
+
+      // Strings pad: hold chord per bar
+      const stringsLoop = new Tone.Loop((time) => {
+        const ch = chordProg[bar % chordProg.length];
+        strings.triggerAttackRelease(ch, '1m', time, 0.5);
+      }, '1m');
+
+      // Bell arpeggio every other bar
+      const bellLoop = new Tone.Loop((time) => {
+        if (bar % 2 === 1) {
+          const ch = chordProg[bar % chordProg.length];
+          const note = ch[bellStep % ch.length];
+          const up = Tone.Frequency(note).transpose(12).toNote();
+          bell.triggerAttackRelease(up, '8n', time, 0.55);
+        }
+        bellStep++;
+      }, '8n');
+
+      // Chiptune lead: 16ths, drops on bar 4 & 8 of cycle
+      const chipLoop = new Tone.Loop((time) => {
+        const localBar = bar % 8;
+        const skip = (localBar === 3 || localBar === 7);
+        if (!skip) {
+          const mel = melodyByBar[bar % melodyByBar.length];
+          const n = mel[sixteenth % mel.length];
+          chip.triggerAttackRelease(n, '16n', time, 0.55);
+        }
+        sixteenth++;
+      }, '16n');
+
+      // Pluck counter: every other bar offbeats
+      const pluckLoop = new Tone.Loop((time) => {
+        if (bar % 2 === 0 && pluckStep % 2 === 1) {
+          const ch = chordProg[bar % chordProg.length];
+          const n = ch[pluckStep % ch.length];
+          pluck.triggerAttackRelease(Tone.Frequency(n).transpose(12).toNote(), time);
+        }
+        pluckStep++;
+      }, '4n');
+
+      // Crash on cycle start
+      const crashLoop = new Tone.Loop((time) => {
+        if (bar % 8 === 0) {
+          crash.triggerAttackRelease('C5', '2n', time, 0.45);
+        }
+      }, '1m');
+
+      // Bar advance (end of bar)
+      const barLoop = new Tone.Loop((time) => {
+        bar++;
+      }, '1m');
+
+      return {
+        bpm: 138,
+        loops: [kickLoop, snareLoop, shakerLoop, bassLoop, stringsLoop, bellLoop, chipLoop, pluckLoop, crashLoop, barLoop],
+        reset() {
+          bar = 0; sixteenth = 0; bassStep = 0; shakerStep = 0;
+          kickStep = 0; bellStep = 0; pluckStep = 0;
+        },
+        start() {
+          this.reset();
+          Tone.Transport.bpm.value = this.bpm;
+          kickLoop.start(0);
+          snareLoop.start('0:1');
+          shakerLoop.start(0);
+          bassLoop.start(0);
+          stringsLoop.start(0);
+          bellLoop.start('0:0:2');
+          chipLoop.start('0:0:2');
+          pluckLoop.start(0);
+          crashLoop.start(0);
+          barLoop.start('0:3:3');
+        },
+        stop() {
+          this.loops.forEach(l => l.stop());
+        }
+      };
+    }
+
+    const TONE_BUILDERS = {
+      norinori: buildToneEngineNoriNori,
+      wakuwaku: buildToneEngineWakuwaku
+    };
+
+    async function startToneEngine() {
+      if (typeof Tone === 'undefined') return;
+      const song = BGM_SONGS[currentSongIndex];
+      const id = song && song.toneBuilder;
+      if (!id || !TONE_BUILDERS[id]) return;
+      try {
+        if (Tone.context.state !== 'running') await Tone.start();
+
+        // Stop a different engine if running
+        if (toneRunning && activeToneId && activeToneId !== id) {
+          const prev = toneEngines[activeToneId];
+          if (prev) prev.stop();
+          toneRunning = false;
+        }
+
+        if (!toneEngines[id]) {
+          toneEngines[id] = TONE_BUILDERS[id]();
+        }
+        const eng = toneEngines[id];
+        if (!eng) return;
+        if (toneRunning && activeToneId === id) return;
+
+        eng.start();
+        if (Tone.Transport.state !== 'started') {
+          Tone.Transport.start('+0.05');
+        }
+        activeToneId = id;
+        toneRunning = true;
+      } catch (e) {
+        console.warn('Tone start failed', e);
+      }
+    }
+
+    function stopToneEngine() {
+      if (!toneRunning) return;
+      try {
+        if (activeToneId && toneEngines[activeToneId]) {
+          toneEngines[activeToneId].stop();
+        }
+        if (typeof Tone !== 'undefined' && Tone.Transport.state === 'started') {
+          Tone.Transport.stop();
+        }
+      } catch (_) {}
+      toneRunning = false;
+    }
+
     function playSe(type) {
       if (isMuted || !audioCtx) return;
       const now = audioCtx.currentTime;
@@ -2427,7 +3615,7 @@
       }
     }
 
-    // 初期化: localStorage からBGMと問題数を復元
+    // 初期化: localStorage からBGMと問題数と演出を復元
     (function init() {
       const savedBgmValue = parseInt(localStorage.getItem('kuku_bgm') || '0');
       const savedBgm = Number.isFinite(savedBgmValue)
@@ -2441,6 +3629,15 @@
         });
       }
       document.getElementById('question-count-display').textContent = totalQuestions;
+
+      // 演出 復元（デフォルト: 'new'）
+      const savedFx = localStorage.getItem('kuku_fx') === 'legacy' ? 'legacy' : 'new';
+      const isLegacy = savedFx === 'legacy';
+      document.body.classList.toggle('legacy-fx', isLegacy);
+      const newBtn = document.getElementById('fx-btn-new');
+      const legacyBtn = document.getElementById('fx-btn-legacy');
+      if (newBtn) newBtn.classList.toggle('fx-active', !isLegacy);
+      if (legacyBtn) legacyBtn.classList.toggle('fx-active', isLegacy);
     })();
 
   </script>
