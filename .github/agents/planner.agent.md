@@ -1,7 +1,7 @@
 ---
 name: planner
 description: "Use when: planning a feature, researching implementation approaches, breaking down tasks, creating actionable plans, outlining multi-step changes before coding begins. Performs codebase exploration directly and produces a detailed actionable plan."
-disable-model-invocation: true
+disable-model-invocation: false
 # Tools: aliases (search/read/web/agent/todo) work in both VS Code and Copilot CLI.
 # vscode/* and github.vscode-pull-request-github/* are VS Code-only (silently ignored by CLI).
 # github/* are CLI/Cloud-only (silently ignored by VS Code).
