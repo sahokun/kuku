@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="screen-orientation" content="portrait">
-  <title>九九学習アプリ</title>
+  <title>九九がくしゅうアプリ</title>
   
   <!--
   ゲーム要件:
@@ -152,13 +152,28 @@
       width: 48px;
       height: 48px;
       border-radius: 16px;
-      background: rgba(255, 255, 255, 0.62);
-      color: var(--deep);
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.72), rgba(255,255,255,0.12)),
+        conic-gradient(from 90deg, #ff2fa8, #22d9ff, #fff047, #6cff57, #ff2fa8);
+      color: #fff;
       font-size: 1.1rem;
       font-weight: 900;
-      box-shadow: 0 12px 28px rgba(59, 36, 124, 0.14), inset 0 0 0 2px rgba(255,255,255,0.7);
+      text-shadow: 0 2px 0 rgba(59, 36, 124, 0.38), 0 0 14px rgba(255,255,255,0.9);
+      box-shadow: 0 16px 32px rgba(59, 36, 124, 0.18), 0 0 26px rgba(255,105,180,0.36), inset 0 0 0 2px rgba(255,255,255,0.62);
       transform-style: preserve-3d;
       animation: floatCube 5.5s ease-in-out infinite;
+    }
+
+    .floating-kuku span:nth-child(2n) {
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.72), rgba(255,255,255,0.1)),
+        conic-gradient(from 20deg, #00d7ff, #8b5cff, #ffdf2e, #ff4e8a, #00d7ff);
+    }
+
+    .floating-kuku span:nth-child(3n) {
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.68), rgba(255,255,255,0.08)),
+        conic-gradient(from 160deg, #90ff00, #00e2c8, #ff37d2, #ffe600, #90ff00);
     }
 
     .floating-kuku span:nth-child(1) { left: 5%; top: 12%; animation-delay: -0.2s; }
@@ -211,7 +226,25 @@
     }
 
     #app[data-screen="game"] .floating-kuku span {
-      animation-duration: 3.9s;
+      width: clamp(58px, 16vw, 74px);
+      height: clamp(58px, 16vw, 74px);
+      border-radius: 22px;
+      font-size: clamp(1rem, 4vw, 1.32rem);
+      opacity: 0.92;
+      animation: neonSideFloat 3.4s ease-in-out infinite;
+      filter: saturate(1.45) drop-shadow(0 0 18px rgba(255, 215, 0, 0.42));
+    }
+
+    #app[data-screen="game"] .floating-kuku span:nth-child(1) { left: -28px; top: 7%; }
+    #app[data-screen="game"] .floating-kuku span:nth-child(2) { right: -30px; top: 9%; }
+    #app[data-screen="game"] .floating-kuku span:nth-child(3) { left: -34px; bottom: 5%; }
+    #app[data-screen="game"] .floating-kuku span:nth-child(4) { right: -36px; bottom: 5%; }
+    #app[data-screen="game"] .floating-kuku span:nth-child(5) {
+      left: calc(50% - 43px);
+      top: -50px;
+      width: 86px;
+      height: 86px;
+      opacity: 0.62;
     }
 
     @keyframes dreamySky {
@@ -235,6 +268,11 @@
     @keyframes floatCube {
       0%, 100% { transform: translate3d(0, 0, 16px) rotateX(12deg) rotateY(-18deg); }
       50% { transform: translate3d(0, -18px, 70px) rotateX(-18deg) rotateY(24deg) rotateZ(8deg); }
+    }
+
+    @keyframes neonSideFloat {
+      0%, 100% { transform: translate3d(0, 0, 18px) rotateZ(-8deg) scale(1); }
+      50% { transform: translate3d(0, -14px, 62px) rotateZ(9deg) scale(1.08); }
     }
 
     @keyframes sparkFly {
@@ -542,7 +580,10 @@
       position: relative;
       border-radius: 18px;
       padding: 10px;
-      background: rgba(255, 255, 255, 0.72);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.78)),
+        radial-gradient(circle at 18% 22%, rgba(255, 105, 180, 0.18), transparent 38%),
+        radial-gradient(circle at 82% 82%, rgba(78, 205, 196, 0.16), transparent 40%);
       box-shadow: 0 16px 34px rgba(59,36,124,0.12), inset 0 0 0 2px rgba(255,255,255,0.85);
       transform-style: preserve-3d;
       -webkit-backdrop-filter: blur(8px);
@@ -555,14 +596,38 @@
       inset: -7px;
       z-index: -1;
       border-radius: 24px;
-      background: conic-gradient(from 0deg, rgba(255,105,180,0.55), rgba(101,214,255,0.45), rgba(255,215,0,0.45), rgba(168,240,79,0.42), rgba(255,105,180,0.55));
-      opacity: 0.68;
-      filter: blur(1px);
-      animation: questionGlow 4s linear infinite;
+      background:
+        linear-gradient(90deg, rgba(255,105,180,0.82), rgba(255,215,0,0.72), rgba(78,205,196,0.82)) top / 100% 5px no-repeat,
+        linear-gradient(90deg, rgba(101,214,255,0.82), rgba(168,240,79,0.68), rgba(255,105,180,0.82)) bottom / 100% 5px no-repeat,
+        linear-gradient(180deg, rgba(255,105,180,0.64), rgba(101,214,255,0.55)) left / 5px 100% no-repeat,
+        linear-gradient(180deg, rgba(255,215,0,0.68), rgba(168,240,79,0.58)) right / 5px 100% no-repeat;
+      opacity: 0.74;
+      filter: drop-shadow(0 0 12px rgba(255, 105, 180, 0.3));
+      animation: questionGlow 2.8s ease-in-out infinite;
+    }
+
+    .question-area::after {
+      content: "";
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: -13px;
+      height: 8px;
+      border-radius: 999px;
+      background:
+        repeating-linear-gradient(90deg, #ff2fa8 0 10px, #ffd700 10px 20px, #4ecdc4 20px 30px, #65d6ff 30px 40px);
+      box-shadow: 0 0 16px rgba(255, 215, 0, 0.34);
+      opacity: 0.72;
+      animation: questionMeter 0.7s steps(6) infinite;
     }
 
     @keyframes questionGlow {
-      to { transform: rotate(360deg); }
+      0%, 100% { opacity: 0.58; filter: drop-shadow(0 0 8px rgba(101, 214, 255, 0.22)); }
+      50% { opacity: 0.92; filter: drop-shadow(0 0 16px rgba(255, 105, 180, 0.38)); }
+    }
+
+    @keyframes questionMeter {
+      to { background-position: 40px 0; }
     }
 
     .question-text {
@@ -584,7 +649,7 @@
       padding: 0 12px;
       min-width: 80px;
       text-align: center;
-      background: rgba(255,255,255,0.5);
+      background: rgba(255,255,255,0.86);
       border-radius: 6px;
       box-shadow: inset 0 -4px 0 rgba(78, 205, 196, 0.12);
     }
@@ -921,7 +986,7 @@
     }
     .bgm-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap: 4px;
     }
     .bgm-option {
@@ -1147,7 +1212,7 @@
     <div id="mute-btn" class="mute-btn" onclick="toggleMute()">🔇</div>
     <!-- タイトル画面 -->
     <div id="title-screen" class="screen active">
-      <h1>九九学習アプリ</h1>
+      <h1>九九がくしゅうアプリ</h1>
 
       <div class="mode-section bgm-selector">
         <h2>おんがく</h2>
@@ -1156,6 +1221,7 @@
           <button class="btn bgm-option" onclick="selectSong(1)">わくわく</button>
           <button class="btn bgm-option" onclick="selectSong(2)">たのしい</button>
           <button class="btn bgm-option" onclick="selectSong(3)">キラキラ</button>
+          <button class="btn bgm-option" onclick="selectSong(4)">ノリノリ</button>
         </div>
       </div>
 
@@ -1270,9 +1336,9 @@
     <div id="free-select-screen" class="screen">
       <h1>もんだいをえらぼう</h1>
       <div class="free-select-controls">
-        <button class="btn btn-secondary" style="font-size: 0.7rem; padding: 5px 10px; min-width: auto;" onclick="selectAllFree()">すべて選ぶ</button>
+        <button class="btn btn-secondary" style="font-size: 0.7rem; padding: 5px 10px; min-width: auto;" onclick="selectAllFree()">すべてえらぶ</button>
         <button class="btn" style="font-size: 0.7rem; padding: 5px 10px; min-width: auto;" onclick="clearAllFree()">クリア</button>
-        <span id="free-select-count">0もん選択中</span>
+        <span id="free-select-count">0もんえらびちゅう</span>
       </div>
       <div id="free-select-table" class="compact-kuku-table">
         <!-- JS で生成 -->
@@ -1935,7 +2001,7 @@
 
     function updateFreeSelectUI() {
       const count = selectedFreeProblems.size;
-      document.getElementById('free-select-count').textContent = `${count}もん選択中`;
+      document.getElementById('free-select-count').textContent = `${count}もんえらびちゅう`;
       document.getElementById('free-start-btn').disabled = count === 0;
     }
 
@@ -2188,6 +2254,22 @@
                  783.99, 783.99, 698.46, 698.46, 659.25, 659.25, 587.33, 0,
                  1046.50, 1046.50, 783.99, 783.99, 880.00, 880.00, 783.99, 0,
                  698.46, 698.46, 659.25, 659.25, 587.33, 587.33, 523.25, 0]
+      },
+      {
+        name: "ノリノリ",
+        tempo: 0.12,
+        waveType: "sawtooth",
+        gain: 0.018,
+        harmonyGain: 0.011,
+        bassGain: 0.022,
+        beat: true,
+        melody: [1046.50, 1318.51, 1567.98, 1318.51, 1174.66, 1567.98, 1760.00, 1567.98,
+                 1318.51, 1046.50, 1174.66, 1318.51, 1567.98, 1760.00, 2093.00, 0,
+                 1567.98, 1760.00, 2093.00, 1760.00, 1567.98, 1318.51, 1174.66, 1318.51,
+                 1046.50, 1174.66, 1318.51, 1567.98, 1760.00, 1567.98, 1318.51, 0],
+        harmony: [659.25, 783.99, 1046.50, 783.99, 698.46, 1046.50, 1174.66, 1046.50,
+                  783.99, 659.25, 698.46, 783.99, 1046.50, 1174.66, 1318.51, 0],
+        bass: [130.81, 130.81, 196.00, 196.00, 174.61, 174.61, 220.00, 220.00]
       }
     ];
     let currentSongIndex = 0;
@@ -2224,24 +2306,71 @@
 
       const song = BGM_SONGS[currentSongIndex];
       const freq = song.melody[noteIndex % song.melody.length];
+      const now = audioCtx.currentTime;
 
       if (freq > 0) {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = song.waveType;
-        osc.frequency.value = freq;
+        playBgmTone(freq, song.waveType, song.gain, song.tempo * 0.92, now);
+      }
 
-        gain.gain.setValueAtTime(song.gain, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + song.tempo);
+      if (song.harmony && noteIndex % 2 === 0) {
+        const harmonyFreq = song.harmony[noteIndex % song.harmony.length];
+        if (harmonyFreq > 0) {
+          playBgmTone(harmonyFreq, 'triangle', song.harmonyGain || 0.01, song.tempo * 1.25, now + 0.015);
+        }
+      }
 
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + song.tempo);
+      if (song.bass && noteIndex % 2 === 0) {
+        const bassFreq = song.bass[Math.floor(noteIndex / 2) % song.bass.length];
+        playBgmTone(bassFreq, 'square', song.bassGain || 0.016, song.tempo * 1.65, now, -7);
+      }
+
+      if (song.beat) {
+        playBgmBeat(noteIndex, now, song.tempo);
       }
 
       noteIndex++;
       bgmTimer = setTimeout(scheduleNextNote, song.tempo * 1000);
+    }
+
+    function playBgmTone(freq, waveType, level, duration, startTime, detune = 0) {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = waveType;
+      osc.frequency.setValueAtTime(freq, startTime);
+      osc.detune.setValueAtTime(detune, startTime);
+      gain.gain.setValueAtTime(level, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(startTime);
+      osc.stop(startTime + duration);
+    }
+
+    function playBgmBeat(index, now, tempo) {
+      const hat = audioCtx.createOscillator();
+      const hatGain = audioCtx.createGain();
+      hat.type = 'square';
+      hat.frequency.setValueAtTime(index % 2 === 0 ? 4200 : 3100, now);
+      hatGain.gain.setValueAtTime(index % 4 === 0 ? 0.018 : 0.01, now);
+      hatGain.gain.exponentialRampToValueAtTime(0.001, now + Math.min(0.055, tempo * 0.55));
+      hat.connect(hatGain);
+      hatGain.connect(audioCtx.destination);
+      hat.start(now);
+      hat.stop(now + Math.min(0.06, tempo * 0.6));
+
+      if (index % 4 === 0) {
+        const kick = audioCtx.createOscillator();
+        const kickGain = audioCtx.createGain();
+        kick.type = 'sine';
+        kick.frequency.setValueAtTime(150, now);
+        kick.frequency.exponentialRampToValueAtTime(55, now + 0.09);
+        kickGain.gain.setValueAtTime(0.05, now);
+        kickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        kick.connect(kickGain);
+        kickGain.connect(audioCtx.destination);
+        kick.start(now);
+        kick.stop(now + 0.13);
+      }
     }
 
     function playSe(type) {
@@ -2300,7 +2429,10 @@
 
     // 初期化: localStorage からBGMと問題数を復元
     (function init() {
-      const savedBgm = parseInt(localStorage.getItem('kuku_bgm') || '0');
+      const savedBgmValue = parseInt(localStorage.getItem('kuku_bgm') || '0');
+      const savedBgm = Number.isFinite(savedBgmValue)
+        ? Math.min(Math.max(savedBgmValue, 0), BGM_SONGS.length - 1)
+        : 0;
       document.getElementById('app').dataset.screen = 'title';
       if (savedBgm !== 0) {
         currentSongIndex = savedBgm;
