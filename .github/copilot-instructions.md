@@ -7,7 +7,7 @@
 - 段ごと・範囲指定・くみあわせなど多彩な出題モード
 
 ## 技術スタック
-- HTML5 / CSS3 / Vanilla JavaScript（単一ファイル構成）
+- HTML5 / CSS3 / Vanilla JavaScript
 - Web Audio API（BGM・効果音の生成）
 - Web Speech API（九九の日本語読み上げ）
 - Google Fonts（M PLUS Rounded 1c）
@@ -20,15 +20,19 @@
 ## プロジェクト構造
 ```
 kuku/
-├── index.html    # アプリ本体（HTML/CSS/JS すべて含む）
+├── index.html    # HTML シェル（構造のみ。css/ と js/ を読み込む）
+├── css/          # スタイル分割（base, layout, title, game, feedback, table, result）
+└── js/           # スクリプト分割（state, speech, game, feedback, title,
+                  #   free-select, table, audio, tone-engines, se, init）
 ```
+- 詳細なファイル分割の意図と各ファイルの役割は `README.md` の「ファイル構成」を参照
 
 ## 設計方針
 - モバイルファースト・レスポンシブデザイン（最大幅500px）
 - かわいいデザイン（パステルカラー、丸ゴシック体、アニメーション）
 - 外部依存を最小限に（CDN のフォント読み込みのみ）
 - ブラウザ単体で完結（サーバー・ビルド不要）
-- 単一ファイル構成（`index.html` にすべて集約）
+- 関心分離のため CSS / JS を機能単位で分割（`index.html` から `<link>` / `<script>` で読み込む）
 - 個人情報などは無いためセキュリティ要件は緩く
 
 ## ターゲットユーザー
