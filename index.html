@@ -380,7 +380,7 @@
       color: var(--spark-color);
       font-size: var(--spark-size);
       font-weight: 900;
-      text-shadow: 0 2px 0 rgba(255,255,255,0.9), 0 0 14px currentColor;
+      text-shadow: 0 0 12px currentColor;
       transform: translate3d(-50%, -50%, 0) scale(0.5) rotate(0deg);
       animation: sparkFly var(--spark-life) cubic-bezier(0.12, 0.75, 0.2, 1) forwards;
     }
@@ -489,10 +489,10 @@
     }
 
     @keyframes sparkFly {
-      0% { opacity: 1; transform: translate3d(-50%, -50%, 0) scale(0.3) rotate(0deg); filter: brightness(2); }
+      0% { opacity: 1; transform: translate3d(-50%, -50%, 0) scale(0.3) rotate(0deg); }
       30% { opacity: 1; transform: translate3d(calc(var(--x) * 0.45 - 50%), calc(var(--y) * 0.4 - 50%), 0) scale(1.6) rotate(calc(var(--spin) * 0.4)); }
       72% { opacity: 1; transform: translate3d(calc(var(--x) * 0.85 - 50%), calc(var(--y) * 0.85 - 50%), 0) scale(1.4) rotate(calc(var(--spin) * 0.8)); }
-      100% { opacity: 0; transform: translate3d(calc(var(--x) - 50%), calc(var(--y) + 60px - 50%), 0) scale(0.6) rotate(var(--spin)); filter: brightness(0.6); }
+      100% { opacity: 0; transform: translate3d(calc(var(--x) - 50%), calc(var(--y) + 60px - 50%), 0) scale(0.6) rotate(var(--spin)); }
     }
 
     @keyframes correctPunch {
@@ -2421,11 +2421,22 @@
       }, 1500);
     }
 
+    // パーティクル同時生存数の上限。iPhone Safari のメモリ不足対策。
+    const PARTICLE_CAP = 200;
+    function getParticleBudget(layer, requested) {
+      if (!layer) return 0;
+      const remaining = PARTICLE_CAP - layer.childElementCount;
+      if (remaining <= 0) return 0;
+      return Math.min(requested, remaining);
+    }
+
     function launchLasers(isBig) {
       if (prefersReducedMotion() || isLegacyFx()) return;
       const layer = document.getElementById('burst-layer');
       if (!layer) return;
-      const count = isBig ? 12 : 8;
+      const requested = isBig ? 12 : 8;
+      const count = getParticleBudget(layer, requested);
+      if (count === 0) return;
       const colors = ['#FFD700', '#FF69B4', '#4ECDC4', '#65D6FF', '#A8F04F'];
       for (let i = 0; i < count; i++) {
         const laser = document.createElement('div');
@@ -2441,6 +2452,8 @@
       if (prefersReducedMotion() || isLegacyFx()) return;
       const layer = document.getElementById('burst-layer');
       if (!layer) return;
+      count = getParticleBudget(layer, count);
+      if (count === 0) return;
       const colors = ['#FFD700', '#FF2FA8', '#22D9FF', '#A8F04F', '#FF7A90', '#9370DB'];
       for (let i = 0; i < count; i++) {
         const c = document.createElement('div');
@@ -2460,6 +2473,7 @@
       if (prefersReducedMotion() || isLegacyFx()) return;
       const layer = document.getElementById('burst-layer');
       if (!layer) return;
+      if (getParticleBudget(layer, 1) === 0) return;
       const colors = ['#FFD700', '#65D6FF', '#FF69B4', '#A8F04F'];
       const star = document.createElement('div');
       star.className = 'shooting-star';
@@ -2487,9 +2501,10 @@
       const questionRect = target.getBoundingClientRect();
       const centerX = questionRect.left - appRect.left + questionRect.width / 2;
       const centerY = questionRect.top - appRect.top + questionRect.height / 2;
-      const count = legacy
+      const requested = legacy
         ? (isBig ? 42 : (isCorrect ? 28 : 18))
         : (isBig ? 90 : (isCorrect ? 60 : 36));
+      const count = getParticleBudget(layer, requested);
       const symbols = isCorrect
         ? (legacy ? ['★', '×', '+', '♪'] : ['★', '✦', '♥', '♪', '✿', '◆', '✺'])
         : (legacy ? ['×', '?', '！'] : ['×', '?', '！', '✗']);
@@ -2530,7 +2545,9 @@
       // 二次バースト（少し遅れて 別方向に）
       if (isCorrect) {
         setTimeout(() => {
-          const secondCount = isBig ? 50 : 30;
+          const secondRequested = isBig ? 50 : 30;
+          const secondCount = getParticleBudget(layer, secondRequested);
+          if (secondCount === 0) return;
           for (let i = 0; i < secondCount; i++) {
             const spark = document.createElement('span');
             const angle = (Math.PI * 2 * i / secondCount) + Math.PI / secondCount;
@@ -2590,7 +2607,7 @@
 
         // 紙吹雪 連発
         if (score > 0) {
-          const burstCount = isPerfect ? 8 : Math.min(5, Math.ceil(score / 2));
+          const burstCount = isPerfect ? 4 : Math.min(5, Math.ceil(score / 2));
           for (let i = 0; i < burstCount; i++) {
             setTimeout(() => launchConfetti(isPerfect ? 30 : 18), 300 + i * 280);
           }
@@ -2598,13 +2615,13 @@
 
         // パーフェクト時 花火連発＋流れ星
         if (isPerfect) {
-          for (let i = 0; i < 6; i++) {
+          for (let i = 0; i < 3; i++) {
             setTimeout(() => {
               launchBurst(true, true);
               launchLasers(true);
             }, 700 + i * 450);
           }
-          for (let i = 0; i < 8; i++) {
+          for (let i = 0; i < 4; i++) {
             setTimeout(launchShootingStar, 600 + i * 250);
           }
         }
