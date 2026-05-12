@@ -13,3 +13,7 @@
 # Claude Code (commands only committed)
 .claude/*
 !.claude/commands/
+
+.github/
+!.github/copilot-instructions.md
+!.github/workflows/
