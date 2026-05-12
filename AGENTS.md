@@ -8,7 +8,7 @@
 
 ## 技術スタック
 - HTML5 / CSS3 / Vanilla JavaScript
-- Web Audio API（BGM・効果音の生成）
+- Web Audio API / Tone.js（BGM・効果音の生成）
 - Web Speech API（九九の日本語読み上げ）
 - Google Fonts（M PLUS Rounded 1c）
 - ビルドツール・フレームワーク不使用
@@ -30,7 +30,7 @@ kuku/
 ## 設計方針
 - モバイルファースト・レスポンシブデザイン（最大幅500px）
 - かわいいデザイン（パステルカラー、丸ゴシック体、アニメーション）
-- 外部依存を最小限に（CDN のフォント読み込みのみ）
+- 外部依存を最小限に（Google Fonts と Tone.js CDN のみ）
 - ブラウザ単体で完結（サーバー・ビルド不要）
 - 関心分離のため CSS / JS を機能単位で分割（`index.html` から `<link>` / `<script>` で読み込む）
 - 個人情報などは無いためセキュリティ要件は緩く
