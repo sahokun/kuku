@@ -7,7 +7,7 @@
 - 段ごと・範囲指定・くみあわせなど多彩な出題モード
 
 ## 技術スタック
-- HTML5 / CSS3 / Vanilla JavaScript（単一ファイル構成）
+- HTML5 / CSS3 / Vanilla JavaScript
 - Web Audio API（BGM・効果音の生成）
 - Web Speech API（九九の日本語読み上げ）
 - Google Fonts（M PLUS Rounded 1c）
@@ -20,15 +20,19 @@
 ## プロジェクト構造
 ```
 kuku/
-├── index.html    # アプリ本体（HTML/CSS/JS すべて含む）
+├── index.html    # HTML シェル（構造のみ。css/ と js/ を読み込む）
+├── css/          # スタイル分割（base, layout, title, game, feedback, table, result）
+└── js/           # スクリプト分割（state, speech, game, feedback, title,
+                  #   free-select, table, audio, tone-engines, se, init）
 ```
+- 詳細なファイル分割の意図と各ファイルの役割は `README.md` の「ファイル構成」を参照
 
 ## 設計方針
 - モバイルファースト・レスポンシブデザイン（最大幅500px）
 - かわいいデザイン（パステルカラー、丸ゴシック体、アニメーション）
 - 外部依存を最小限に（CDN のフォント読み込みのみ）
 - ブラウザ単体で完結（サーバー・ビルド不要）
-- 単一ファイル構成（`index.html` にすべて集約）
+- 関心分離のため CSS / JS を機能単位で分割（`index.html` から `<link>` / `<script>` で読み込む）
 - 個人情報などは無いためセキュリティ要件は緩く
 
 ## ターゲットユーザー
@@ -45,14 +49,14 @@ kuku/
 
 | ブランチ | 役割 | 誰が操作 |
 |---------|------|---------|
-| `main` | 本番リリース | ユーザーのみ |
+| `main` | 本番リリース | ユーザーのみ (PR & merge のみ) |
 | `develop` | 動作確認 | Copilot (squash merge のみ) |
 | `feature/*` | 開発作業 | Copilot (自由にコミット) |
 
 ### feature/* ブランチでの作業
+- 作業前必ず `git fetch origin` でリモートの状態を確認し、ローカルが遅れていないかチェックする
 - `develop` から作成（例: `git checkout -b feature/22-branch-strategy develop`）
 - 細かいコミットOK（WIP、実験、修正など自由）
-- `git push -u origin feature/*` でリモートにバックアップ
 
 ### feature/* → develop: Squash Merge
 - 実装完了時に `git checkout develop && git merge --squash feature/xxx` で反映
@@ -69,17 +73,7 @@ kuku/
 
   Co-Authored-By: xxxx
   ```
-- マージ後に feature ブランチを削除（ローカル + リモート）
-- **squash merge 後は `git push origin develop` まで行う**（ユーザーがすぐ動作確認できるように）
-- push 前は必ず `git fetch origin` でリモートの状態を確認し、ローカルが遅れていないかチェックする
-
-### develop → main: ユーザー指示のみ
-- ユーザーが develop で動作確認後に実施
-- Copilotは `main` に直接 push/merge しない
-
-### 大きな機能（複数回の動作確認が必要な場合）
-- サブ機能に分割: `feature/22-part1-api`, `feature/22-part2-ui`
-- 各サブ機能を個別に squash merge = 個別の動作確認単位
+- マージ後に feature ブランチを削除（ローカルのみ）
 
 ## Issue駆動開発
 - 作業開始前にGitHub Issueを確認・作成する
