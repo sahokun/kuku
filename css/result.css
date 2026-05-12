@@ -1,0 +1,184 @@
+@media (max-height: 620px) {
+  .power-stage {
+    min-height: 72px;
+  }
+
+  .stage-core {
+    width: 72px;
+    height: 72px;
+    border-radius: 22px;
+    font-size: 1.5rem;
+  }
+
+  .stage-ring {
+    width: 250px;
+    height: 44px;
+  }
+
+  .stage-mini {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
+  }
+
+  .question-area {
+    min-height: 6.4rem;
+    margin: 2px 0;
+  }
+
+  .question-text {
+    font-size: 2rem;
+  }
+}
+
+/* === 演出切替: シンプル(legacy) モード === */
+body.legacy-fx { background-size: 160% 160%; animation-duration: 12s; }
+
+body.legacy-fx #screen-flash,
+body.legacy-fx .feedback-ring,
+body.legacy-fx .laser-burst,
+body.legacy-fx .confetti,
+body.legacy-fx .shooting-star { display: none !important; }
+
+body.legacy-fx #app::before {
+  inset: -35%;
+  background:
+    conic-gradient(from 40deg, rgba(255, 122, 144, 0.2), rgba(101, 214, 255, 0.2), rgba(168, 240, 79, 0.16), rgba(255, 215, 0, 0.2), rgba(255, 122, 144, 0.2));
+  filter: blur(18px);
+  opacity: 0.9;
+  animation-duration: 16s;
+  mix-blend-mode: normal;
+}
+body.legacy-fx #app::after { display: none !important; }
+
+body.legacy-fx .warp-grid {
+  height: 48%;
+  background-image:
+    linear-gradient(rgba(59, 36, 124, 0.22) 2px, transparent 2px),
+    linear-gradient(90deg, rgba(59, 36, 124, 0.2) 2px, transparent 2px);
+  opacity: 0.5;
+  filter: none;
+  animation-duration: 1.4s;
+}
+body.legacy-fx .warp-grid::after { display: none !important; }
+
+body.legacy-fx #app.combo-fever .sky-ribbon {
+  border-top-color: rgba(255, 215, 0, 0.75);
+  border-left-color: rgba(255, 105, 180, 0.28);
+  border-right-color: rgba(78, 205, 196, 0.32);
+  filter: drop-shadow(0 0 28px rgba(255, 215, 0, 0.6));
+  animation-duration: 3.8s;
+}
+body.legacy-fx #app.combo-fever .warp-grid {
+  opacity: 0.78;
+  animation-duration: 0.78s;
+  filter: none;
+}
+body.legacy-fx #app.combo-fever::before { animation-duration: 16s; filter: blur(18px); }
+body.legacy-fx #app.combo-fever .floating-kuku span { filter: saturate(1.45) drop-shadow(0 0 18px rgba(255, 215, 0, 0.42)); }
+
+body.legacy-fx #app.hit-correct .question-area { animation: correctPunchLegacy 0.62s cubic-bezier(0.2, 1.4, 0.3, 1); }
+body.legacy-fx #app.hit-incorrect .question-area { animation: wrongShakeLegacy 0.42s ease-in-out; }
+body.legacy-fx #app.hit-correct .stage-core,
+body.legacy-fx #app.hit-incorrect .stage-core { animation: coreFloat 2.4s ease-in-out infinite; filter: none; }
+body.legacy-fx #app.shake-correct,
+body.legacy-fx #app.shake-incorrect,
+body.legacy-fx #app.zoom-pop { animation: none !important; }
+
+@keyframes correctPunchLegacy {
+  0% { transform: rotateX(0deg) scale(1); }
+  42% { transform: rotateX(10deg) scale(1.055); }
+  100% { transform: rotateX(0deg) scale(1); }
+}
+@keyframes wrongShakeLegacy {
+  0%, 100% { transform: translateX(0); }
+  22% { transform: translateX(-10px) rotateZ(-1.5deg); }
+  48% { transform: translateX(8px) rotateZ(1.5deg); }
+  72% { transform: translateX(-5px) rotateZ(-1deg); }
+}
+
+body.legacy-fx .feedback-icon {
+  font-size: 8rem;
+  text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 14px 34px rgba(59,36,124,0.22);
+  filter: none;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: none !important;
+}
+body.legacy-fx .feedback-icon.pop-correct,
+body.legacy-fx .feedback-icon.pop-incorrect { animation: none !important; }
+
+body.legacy-fx .stage-core {
+  text-shadow: 0 3px 0 rgba(59, 36, 124, 0.22), 0 0 18px rgba(255,255,255,0.9);
+  box-shadow: 0 18px 42px rgba(59, 36, 124, 0.22), inset 0 0 0 3px rgba(255,255,255,0.62);
+  animation: coreFloat 2.4s ease-in-out infinite;
+}
+
+body.legacy-fx .stage-comet {
+  width: 18px;
+  height: 18px;
+  box-shadow: 0 0 0 8px rgba(255,215,0,0.22), 0 0 28px rgba(255,215,0,0.8);
+  animation-duration: 1.7s;
+}
+body.legacy-fx .stage-comet::after { display: none !important; }
+
+body.legacy-fx .num-btn::before { display: none !important; }
+body.legacy-fx .num-btn:hover {
+  filter: saturate(1.15);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: var(--btn-shadow);
+}
+body.legacy-fx .num-btn:active {
+  box-shadow: var(--btn-active-shadow);
+}
+body.legacy-fx .num-btn:active::before { animation: none !important; }
+body.legacy-fx .num-btn.btn-enter:active { box-shadow: var(--btn-active-shadow); }
+
+body.legacy-fx .score-board {
+  padding: 15px;
+  border-radius: 15px;
+  border-width: 3px;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+  animation: none !important;
+}
+body.legacy-fx .score-board::before { display: none !important; }
+body.legacy-fx .final-score {
+  font-size: 2.8rem;
+  text-shadow: none;
+  animation: none !important;
+}
+body.legacy-fx .perfect-msg {
+  color: var(--gold);
+  font-weight: bold;
+  font-size: 0.9rem;
+  text-shadow: none;
+  animation: none !important;
+}
+
+/* 演出セレクタ */
+.fx-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+}
+.fx-option {
+  font-size: 0.7rem;
+  padding: 5px 2px;
+  min-width: auto;
+  border-color: var(--pastel-purple);
+  color: var(--pastel-purple);
+  transition: all 0.2s;
+}
+.fx-option.fx-active {
+  background-color: var(--pastel-purple);
+  color: var(--white);
+  border-color: var(--white);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
