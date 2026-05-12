@@ -174,6 +174,7 @@ const BGM_SONGS = [
 let currentSongIndex = 0;
 let noteIndex = 0;
 // --- Tone.js engines ---
-let toneEngines = {};
+let activeToneEngine = null;
 let activeToneId = null;
 let toneRunning = false;
+let bgmStartToken = 0;

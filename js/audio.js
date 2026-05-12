@@ -55,14 +55,25 @@ function startBgm() {
   if (isMuted || bgmTimer) return;
   const song = BGM_SONGS[currentSongIndex];
   if (song.useTone) {
-    startToneEngine();
     bgmTimer = 'tone';
+    const token = ++bgmStartToken;
+    startToneEngine(() => token === bgmStartToken && bgmTimer === 'tone' && !isMuted)
+      .then((started) => {
+        if (token !== bgmStartToken) {
+          return;
+        }
+        if (!started && bgmTimer === 'tone') {
+          bgmTimer = null;
+        }
+      });
     return;
   }
+  bgmStartToken++;
   scheduleNextNote();
 }
 
 function stopBgm() {
+  bgmStartToken++;
   stopToneEngine();
   if (bgmTimer && bgmTimer !== 'tone') clearTimeout(bgmTimer);
   bgmTimer = null;
@@ -141,4 +152,3 @@ function playBgmBeat(index, now, tempo) {
     kick.stop(now + 0.13);
   }
 }
-
