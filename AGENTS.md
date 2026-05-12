@@ -49,14 +49,14 @@ kuku/
 
 | ブランチ | 役割 | 誰が操作 |
 |---------|------|---------|
-| `main` | 本番リリース | ユーザーのみ |
+| `main` | 本番リリース | ユーザーのみ (PR & merge のみ) |
 | `develop` | 動作確認 | Copilot (squash merge のみ) |
 | `feature/*` | 開発作業 | Copilot (自由にコミット) |
 
 ### feature/* ブランチでの作業
+- 作業前必ず `git fetch origin` でリモートの状態を確認し、ローカルが遅れていないかチェックする
 - `develop` から作成（例: `git checkout -b feature/22-branch-strategy develop`）
 - 細かいコミットOK（WIP、実験、修正など自由）
-- `git push -u origin feature/*` でリモートにバックアップ
 
 ### feature/* → develop: Squash Merge
 - 実装完了時に `git checkout develop && git merge --squash feature/xxx` で反映
@@ -73,17 +73,7 @@ kuku/
 
   Co-Authored-By: xxxx
   ```
-- マージ後に feature ブランチを削除（ローカル + リモート）
-- **squash merge 後は `git push origin develop` まで行う**（ユーザーがすぐ動作確認できるように）
-- push 前は必ず `git fetch origin` でリモートの状態を確認し、ローカルが遅れていないかチェックする
-
-### develop → main: ユーザー指示のみ
-- ユーザーが develop で動作確認後に実施
-- Copilotは `main` に直接 push/merge しない
-
-### 大きな機能（複数回の動作確認が必要な場合）
-- サブ機能に分割: `feature/22-part1-api`, `feature/22-part2-ui`
-- 各サブ機能を個別に squash merge = 個別の動作確認単位
+- マージ後に feature ブランチを削除（ローカルのみ）
 
 ## Issue駆動開発
 - 作業開始前にGitHub Issueを確認・作成する
