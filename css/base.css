@@ -169,19 +169,19 @@ body {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 6px;
+  width: 4px;
   height: 0;
   background: linear-gradient(to bottom, transparent, var(--laser-color), transparent);
   transform-origin: top center;
   transform: translate(-50%, 0) rotate(var(--angle));
   pointer-events: none;
-  animation: laserShoot 0.6s ease-out forwards;
+  animation: laserShoot 0.5s ease-out forwards;
 }
 
 @keyframes laserShoot {
   0% { height: 0; opacity: 1; }
-  40% { height: 120%; opacity: 1; }
-  100% { height: 130%; opacity: 0; }
+  45% { height: 80%; opacity: 0.8; }
+  100% { height: 92%; opacity: 0; }
 }
 
 /* 紙吹雪 */
@@ -200,7 +200,7 @@ body {
 
 @keyframes confettiFall {
   0% { transform: translate(0, 0) rotate(var(--crot)); opacity: 1; }
-  100% { transform: translate(var(--cdx), 110vh) rotate(calc(var(--crot) + 720deg)); opacity: 0.85; }
+  100% { transform: translate(var(--cdx), 82vh) rotate(calc(var(--crot) + 360deg)); opacity: 0.7; }
 }
 
 /* 流れ星 */
@@ -212,9 +212,9 @@ body {
   height: 4px;
   border-radius: 50%;
   background: white;
-  box-shadow: 0 0 10px var(--ssc);
+  box-shadow: 0 0 5px var(--ssc);
   pointer-events: none;
-  animation: shootStar 1.4s linear forwards;
+  animation: shootStar 0.9s linear forwards;
 }
 
 .shooting-star::after {
@@ -222,8 +222,8 @@ body {
   position: absolute;
   right: 4px;
   top: 50%;
-  width: 80px;
-  height: 2px;
+  width: 46px;
+  height: 1px;
   background: linear-gradient(to left, var(--ssc), transparent);
   transform: translateY(-50%);
 }
@@ -343,9 +343,9 @@ body {
   color: var(--spark-color);
   font-size: var(--spark-size);
   font-weight: 900;
-  text-shadow: 0 0 8px currentColor;
-  transform: translate3d(-50%, -50%, 0) scale(0.5) rotate(0deg);
-  animation: sparkFly var(--spark-life) cubic-bezier(0.12, 0.75, 0.2, 1) forwards;
+  text-shadow: 0 0 4px currentColor;
+  transform: translate(-50%, -50%) scale(0.5) rotate(0deg);
+  animation: sparkFly var(--spark-life) cubic-bezier(0.18, 0.7, 0.25, 1) forwards;
 }
 
 #app.hit-correct .question-area {
@@ -353,7 +353,7 @@ body {
 }
 
 #app.hit-correct .stage-core {
-  animation: corePunchUp 0.7s cubic-bezier(0.2, 1.6, 0.3, 1);
+  animation: corePunchUp 0.45s cubic-bezier(0.2, 1.2, 0.3, 1);
 }
 
 #app.hit-incorrect .question-area {
@@ -361,21 +361,21 @@ body {
 }
 
 #app.hit-incorrect .stage-core {
-  filter: hue-rotate(-50deg) saturate(1.5);
-  animation: coreShake 0.55s ease-in-out;
+  filter: hue-rotate(-30deg) saturate(1.15);
+  animation: coreShake 0.42s ease-in-out;
 }
 
 @keyframes corePunchUp {
-  0% { transform: rotateX(10deg) rotateY(-16deg) translateY(0) translateZ(20px) scale(1); }
-  40% { transform: rotateX(-20deg) rotateY(30deg) translateY(-30px) translateZ(120px) scale(1.35); }
-  100% { transform: rotateX(10deg) rotateY(-16deg) translateY(0) translateZ(20px) scale(1); }
+  0% { transform: rotate(-3deg) translateY(0) scale(1); }
+  45% { transform: rotate(4deg) translateY(-12px) scale(1.12); }
+  100% { transform: rotate(-3deg) translateY(0) scale(1); }
 }
 
 @keyframes coreShake {
   0%, 100% { transform: translateX(0) rotate(0deg); }
-  25% { transform: translateX(-12px) rotate(-6deg) scale(0.95); }
-  50% { transform: translateX(10px) rotate(6deg) scale(1.05); }
-  75% { transform: translateX(-6px) rotate(-3deg); }
+  25% { transform: translateX(-7px) rotate(-3deg) scale(0.97); }
+  50% { transform: translateX(6px) rotate(3deg) scale(1.03); }
+  75% { transform: translateX(-4px) rotate(-1.5deg); }
 }
 
 #app.combo-fever .sky-ribbon {
@@ -386,16 +386,15 @@ body {
 }
 
 #app.combo-fever .warp-grid {
-  opacity: 1;
-  opacity: 0.72;
+  opacity: 0.58;
 }
 
 #app.combo-fever::before {
-  filter: blur(8px);
+  filter: blur(10px);
 }
 
 #app.combo-fever .floating-kuku span {
-  filter: saturate(1.35) brightness(1.08);
+  filter: none;
 }
 
 #app[data-screen="game"] .floating-kuku span {
@@ -403,9 +402,9 @@ body {
   height: clamp(58px, 16vw, 74px);
   border-radius: 22px;
   font-size: clamp(1rem, 4vw, 1.32rem);
-  opacity: 0.92;
-  animation: neonSideFloat 3.4s ease-in-out infinite;
-  filter: saturate(1.18);
+  opacity: 0.58;
+  animation: none;
+  filter: none;
 }
 
 #app[data-screen="game"] .floating-kuku span:nth-child(1) { left: -28px; top: 7%; }
@@ -449,24 +448,21 @@ body {
 }
 
 @keyframes sparkFly {
-  0% { opacity: 1; transform: translate3d(-50%, -50%, 0) scale(0.3) rotate(0deg); }
-  30% { opacity: 1; transform: translate3d(calc(var(--x) * 0.45 - 50%), calc(var(--y) * 0.4 - 50%), 0) scale(1.35) rotate(calc(var(--spin) * 0.4)); }
-  72% { opacity: 1; transform: translate3d(calc(var(--x) * 0.85 - 50%), calc(var(--y) * 0.85 - 50%), 0) scale(1.15) rotate(calc(var(--spin) * 0.8)); }
-  100% { opacity: 0; transform: translate3d(calc(var(--x) - 50%), calc(var(--y) + 60px - 50%), 0) scale(0.6) rotate(var(--spin)); }
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(0.35) rotate(0deg); }
+  35% { opacity: 1; transform: translate(calc(var(--x) * 0.45 - 50%), calc(var(--y) * 0.4 - 50%)) scale(1.05) rotate(calc(var(--spin) * 0.35)); }
+  75% { opacity: 0.88; transform: translate(calc(var(--x) * 0.8 - 50%), calc(var(--y) * 0.78 - 50%)) scale(0.95) rotate(calc(var(--spin) * 0.7)); }
+  100% { opacity: 0; transform: translate(calc(var(--x) - 50%), calc(var(--y) + 28px - 50%)) scale(0.5) rotate(var(--spin)); }
 }
 
 @keyframes correctPunch {
-  0% { transform: rotateX(0deg) rotateY(0deg) scale(1); box-shadow: 0 16px 34px rgba(59,36,124,0.12), inset 0 0 0 2px rgba(255,255,255,0.85); }
-  30% { transform: rotateX(12deg) rotateY(-6deg) scale(1.08); box-shadow: 0 18px 36px rgba(255, 215, 0, 0.38), inset 0 0 0 3px rgba(255, 215, 0, 0.85); }
-  55% { transform: rotateX(-8deg) rotateY(8deg) scale(0.99); box-shadow: 0 18px 36px rgba(78, 205, 196, 0.35), inset 0 0 0 3px rgba(78, 205, 196, 0.75); }
-  78% { transform: rotateX(6deg) rotateY(-4deg) scale(1.04); }
-  100% { transform: rotateX(0deg) rotateY(0deg) scale(1); }
+  0% { transform: scale(1); box-shadow: 0 12px 24px rgba(59,36,124,0.1), inset 0 0 0 2px rgba(255,255,255,0.85); }
+  40% { transform: scale(1.04); box-shadow: 0 13px 26px rgba(255, 215, 0, 0.22), inset 0 0 0 2px rgba(255, 215, 0, 0.6); }
+  100% { transform: scale(1); }
 }
 
 @keyframes wrongShake {
   0%, 100% { transform: translateX(0) rotate(0deg); border-color: transparent; }
-  15% { transform: translateX(-16px) rotateZ(-2.5deg); box-shadow: 0 16px 34px rgba(255, 47, 168, 0.4), inset 0 0 0 3px rgba(255, 47, 168, 0.6); }
-  35% { transform: translateX(14px) rotateZ(2.5deg); box-shadow: 0 16px 34px rgba(255, 47, 168, 0.5), inset 0 0 0 3px rgba(255, 47, 168, 0.7); }
-  55% { transform: translateX(-10px) rotateZ(-1.8deg); box-shadow: 0 16px 34px rgba(255, 47, 168, 0.4), inset 0 0 0 3px rgba(255, 47, 168, 0.6); }
-  75% { transform: translateX(7px) rotateZ(1deg); }
+  20% { transform: translateX(-8px) rotateZ(-1deg); box-shadow: 0 12px 24px rgba(255, 47, 168, 0.22), inset 0 0 0 2px rgba(255, 47, 168, 0.42); }
+  45% { transform: translateX(7px) rotateZ(1deg); box-shadow: 0 12px 24px rgba(255, 47, 168, 0.24), inset 0 0 0 2px rgba(255, 47, 168, 0.45); }
+  70% { transform: translateX(-4px) rotateZ(-0.6deg); }
 }

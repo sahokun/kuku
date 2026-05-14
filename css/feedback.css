@@ -18,37 +18,33 @@
   font-size: 12rem;
   font-weight: 900;
   text-shadow:
-    0 0 18px rgba(255,255,255,0.95),
-    0 0 34px currentColor,
-    0 12px 28px rgba(59,36,124,0.28);
+    0 0 10px rgba(255,255,255,0.85),
+    0 0 18px currentColor,
+    0 8px 16px rgba(59,36,124,0.2);
   transform: scale(0) rotate(-180deg);
   transition: none;
 }
 
 .feedback-icon.pop-correct {
-  animation: feedbackPopCorrect 1.15s cubic-bezier(0.2, 1.4, 0.3, 1) forwards;
+  animation: feedbackPopCorrect 0.9s cubic-bezier(0.2, 1.2, 0.3, 1) forwards;
 }
 
 .feedback-icon.pop-incorrect {
-  animation: feedbackPopIncorrect 1.15s cubic-bezier(0.2, 1.3, 0.3, 1) forwards;
+  animation: feedbackPopIncorrect 0.9s cubic-bezier(0.2, 1.15, 0.3, 1) forwards;
 }
 
 @keyframes feedbackPopCorrect {
-  0% { transform: scale(0) rotate(-360deg); opacity: 0; }
-  35% { transform: scale(1.25) rotate(16deg); opacity: 1; }
-  55% { transform: scale(1.1) rotate(-12deg); opacity: 1; }
-  70% { transform: scale(1.25) rotate(8deg); opacity: 1; }
-  85% { transform: scale(1.15) rotate(0deg); opacity: 0.9; }
-  100% { transform: scale(1.9) rotate(0deg); opacity: 0; }
+  0% { transform: scale(0); opacity: 0; }
+  35% { transform: scale(1.18) rotate(8deg); opacity: 1; }
+  70% { transform: scale(1.08) rotate(0deg); opacity: 0.9; }
+  100% { transform: scale(1.45); opacity: 0; }
 }
 
 @keyframes feedbackPopIncorrect {
   0% { transform: scale(0) rotate(0deg); opacity: 0; }
-  20% { transform: scale(1.3) rotate(-12deg); opacity: 1; }
-  35% { transform: scale(1.15) rotate(12deg); opacity: 1; }
-  50% { transform: scale(1.24) rotate(-8deg); opacity: 1; }
-  65% { transform: scale(1.2) rotate(8deg); opacity: 1; }
-  80% { transform: scale(1.3) rotate(0deg); opacity: 0.85; }
+  28% { transform: scale(1.18) rotate(-8deg); opacity: 1; }
+  55% { transform: scale(1.06) rotate(7deg); opacity: 1; }
+  80% { transform: scale(1.12) rotate(0deg); opacity: 0.85; }
   100% { transform: scale(0.5) rotate(0deg); opacity: 0; }
 }
 
@@ -60,19 +56,19 @@
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  border: 8px solid currentColor;
+  border: 5px solid currentColor;
   transform: translate(-50%, -50%) scale(0);
   pointer-events: none;
   opacity: 0;
 }
 
 .feedback-ring.active {
-  animation: ringExpand 1s ease-out forwards;
+  animation: ringExpand 0.8s ease-out forwards;
 }
 
 @keyframes ringExpand {
-  0% { transform: translate(-50%, -50%) scale(0); opacity: 1; border-width: 16px; }
-  100% { transform: translate(-50%, -50%) scale(5.5); opacity: 0; border-width: 1px; }
+  0% { transform: translate(-50%, -50%) scale(0); opacity: 0.85; border-width: 8px; }
+  100% { transform: translate(-50%, -50%) scale(3.6); opacity: 0; border-width: 1px; }
 }
 
 .correct {
@@ -95,8 +91,8 @@
   text-align: center;
   margin-bottom: 15px;
   box-shadow:
-    0 8px 22px rgba(255, 215, 0, 0.3),
-    0 0 26px rgba(255, 105, 180, 0.22),
+    0 6px 16px rgba(255, 215, 0, 0.22),
+    0 0 14px rgba(255, 105, 180, 0.16),
     inset 0 0 0 2px rgba(255,255,255,0.95);
   animation: scoreBoardEnter 0.75s cubic-bezier(0.2, 1.4, 0.3, 1);
   position: relative;
@@ -138,7 +134,7 @@
   font-weight: 900;
   color: var(--main-pink);
   line-height: 1.2;
-  text-shadow: 3px 3px 0 #fff, 0 0 18px rgba(255, 105, 180, 0.45);
+  text-shadow: 2px 2px 0 #fff, 0 0 10px rgba(255, 105, 180, 0.3);
 }
 
 @keyframes scorePulse {
@@ -151,7 +147,7 @@
   font-weight: 900;
   font-size: 1.1rem;
   margin-top: 10px;
-  text-shadow: 0 2px 0 #fff, 0 0 10px rgba(255, 215, 0, 0.5);
+  text-shadow: 0 1px 0 #fff, 0 0 6px rgba(255, 215, 0, 0.35);
 }
 
 @keyframes perfectMsgWave {
