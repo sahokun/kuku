@@ -67,89 +67,63 @@ function createManagedToneEngine({ bpm, loops, disposables, start }) {
 }
 
 function buildToneEngineNoriNori() {
-  const limiter = new Tone.Limiter(-2).toDestination();
-  const masterComp = new Tone.Compressor({ threshold: -18, ratio: 3, attack: 0.006, release: 0.12 }).connect(limiter);
-  const delay = new Tone.PingPongDelay({ delayTime: '8n.', feedback: 0.2, wet: 0.12 }).connect(masterComp);
+  const masterGain = new Tone.Gain(0.55).toDestination();
 
   const kick = new Tone.MembraneSynth({
-    pitchDecay: 0.035,
-    octaves: 5,
-    envelope: { attack: 0.001, decay: 0.25, sustain: 0.01, release: 0.18 }
-  }).connect(masterComp);
-  kick.volume.value = -4;
+    pitchDecay: 0.03,
+    octaves: 4,
+    envelope: { attack: 0.001, decay: 0.18, sustain: 0, release: 0.08 }
+  }).connect(masterGain);
+  kick.volume.value = -7;
 
-  const bass = new Tone.MonoSynth({
-    oscillator: { type: 'sawtooth' },
-    filter: { Q: 1.5, type: 'lowpass', rolloff: -12 },
-    envelope: { attack: 0.004, decay: 0.14, sustain: 0.35, release: 0.08 },
-    filterEnvelope: { attack: 0.004, decay: 0.12, sustain: 0.2, release: 0.12, baseFrequency: 120, octaves: 2.5 }
-  }).connect(masterComp);
-  bass.volume.value = -11;
+  const bass = new Tone.Synth({
+    oscillator: { type: 'square' },
+    envelope: { attack: 0.003, decay: 0.09, sustain: 0.22, release: 0.05 }
+  }).connect(masterGain);
+  bass.volume.value = -16;
 
   const lead = new Tone.Synth({
     oscillator: { type: 'square' },
-    envelope: { attack: 0.004, decay: 0.08, sustain: 0.18, release: 0.08 }
-  }).connect(delay);
-  lead.volume.value = -17;
-
-  const clapFilter = new Tone.Filter(1800, 'bandpass').connect(masterComp);
-  const clap = new Tone.NoiseSynth({
-    noise: { type: 'white' },
-    envelope: { attack: 0.001, decay: 0.12, sustain: 0, release: 0.02 }
-  }).connect(clapFilter);
-  clap.volume.value = -15;
-
-  const hatFilter = new Tone.Filter(6500, 'highpass').connect(masterComp);
-  const hat = new Tone.NoiseSynth({
-    noise: { type: 'white' },
-    envelope: { attack: 0.001, decay: 0.025, sustain: 0, release: 0.01 }
-  }).connect(hatFilter);
-  hat.volume.value = -28;
+    envelope: { attack: 0.003, decay: 0.05, sustain: 0.12, release: 0.05 }
+  }).connect(masterGain);
+  lead.volume.value = -19;
 
   const bassRoots = ['C2', 'C2', 'G1', 'C2', 'Ab1', 'F1', 'G1', 'C2'];
-  const bassPattern = [0, 12, null, 12, 0, null, 12, null, 0, 12, null, 7, 0, null, 12, null];
+  const bassPattern = [0, 12, 7, null, 0, 12, 7, null];
   const leadByBar = [
-    ['C5', null, 'G5', null, 'Eb5', null, 'G5', null, 'Bb5', null, 'G5', null, 'Eb5', null, 'C5', null],
-    [null, 'G4', null, 'D5', 'Bb4', null, 'D5', null, 'F5', null, 'D5', null, 'Bb4', null, 'G4', null],
-    ['Ab4', null, 'Eb5', null, 'C5', null, 'Eb5', null, 'G5', null, 'Eb5', null, 'C5', null, 'Ab4', null],
-    ['F4', null, 'C5', null, 'Ab4', null, 'C5', null, 'Eb5', null, 'C5', null, 'Ab4', null, 'F4', null]
+    ['C5', null, 'G5', null, 'Eb5', null, 'G5', null],
+    ['G4', null, 'D5', null, 'Bb4', null, 'D5', null],
+    ['Ab4', null, 'Eb5', null, 'C5', null, 'Eb5', null],
+    ['F4', null, 'C5', null, 'Ab4', null, 'C5', null]
   ];
 
   let step = 0;
   const masterLoop = new Tone.Loop((time) => {
-    const bar = Math.floor(step / 16);
-    const beatStep = step % 16;
+    const bar = Math.floor(step / 8);
+    const beatStep = step % 8;
     const root = bassRoots[bar % bassRoots.length];
 
-    if (beatStep % 4 === 0) {
+    if (beatStep % 2 === 0) {
       kick.triggerAttackRelease('C2', '8n', time);
-    }
-
-    if (beatStep === 4 || beatStep === 12) {
-      clap.triggerAttackRelease('16n', time, 0.75);
-    } else if (beatStep === 2 || beatStep === 6 || beatStep === 10 || beatStep === 14) {
-      hat.triggerAttackRelease('32n', time, beatStep === 14 ? 0.55 : 0.38);
     }
 
     const bassOffset = bassPattern[beatStep];
     if (bassOffset !== null) {
       const bassNote = Tone.Frequency(root).transpose(bassOffset).toNote();
-      bass.triggerAttackRelease(bassNote, '16n', time, beatStep === 0 ? 0.9 : 0.65);
+      bass.triggerAttackRelease(bassNote, '8n', time, beatStep === 0 ? 0.72 : 0.5);
     }
 
-    if (beatStep % 2 === 0 || beatStep === 5 || beatStep === 13) {
-      const leadPattern = leadByBar[bar % leadByBar.length];
-      const leadNote = leadPattern[beatStep];
-      if (leadNote) {
-        lead.triggerAttackRelease(leadNote, '16n', time, 0.5);
-      }
+    const leadPattern = leadByBar[bar % leadByBar.length];
+    const leadNote = leadPattern[beatStep];
+    if (leadNote) {
+      lead.triggerAttackRelease(leadNote, '8n', time, 0.42);
     }
 
     step++;
-  }, '16n');
+  }, '8n');
 
   const loops = [masterLoop];
-  const disposables = [masterLoop, hat, hatFilter, clap, clapFilter, lead, bass, kick, delay, masterComp, limiter];
+  const disposables = [masterLoop, lead, bass, kick, masterGain];
 
   return createManagedToneEngine({
     bpm: 126,
@@ -164,101 +138,66 @@ function buildToneEngineNoriNori() {
 }
 
 function buildToneEngineWakuwaku() {
-  const limiter = new Tone.Limiter(-2).toDestination();
-  const masterComp = new Tone.Compressor({ threshold: -18, ratio: 2.8, attack: 0.006, release: 0.14 }).connect(limiter);
-  const delay = new Tone.FeedbackDelay({ delayTime: '8n.', feedback: 0.16, wet: 0.1 }).connect(masterComp);
+  const masterGain = new Tone.Gain(0.5).toDestination();
 
   const chip = new Tone.Synth({
     oscillator: { type: 'square' },
-    envelope: { attack: 0.004, decay: 0.07, sustain: 0.18, release: 0.07 }
-  }).connect(delay);
-  chip.volume.value = -16;
+    envelope: { attack: 0.003, decay: 0.06, sustain: 0.15, release: 0.05 }
+  }).connect(masterGain);
+  chip.volume.value = -18;
 
-  const bell = new Tone.Synth({
+  const bass = new Tone.Synth({
     oscillator: { type: 'triangle' },
-    envelope: { attack: 0.002, decay: 0.32, sustain: 0, release: 0.18 }
-  }).connect(delay);
-  bell.volume.value = -20;
+    envelope: { attack: 0.004, decay: 0.1, sustain: 0.25, release: 0.06 }
+  }).connect(masterGain);
+  bass.volume.value = -15;
 
-  const bass = new Tone.MonoSynth({
-    oscillator: { type: 'triangle' },
-    filter: { Q: 1.2, type: 'lowpass', rolloff: -12 },
-    envelope: { attack: 0.005, decay: 0.12, sustain: 0.35, release: 0.1 },
-    filterEnvelope: { attack: 0.005, decay: 0.12, sustain: 0.25, release: 0.12, baseFrequency: 180, octaves: 2 }
-  }).connect(masterComp);
-  bass.volume.value = -11;
-
-  const kick = new Tone.MembraneSynth({
-    pitchDecay: 0.035,
-    octaves: 4,
-    envelope: { attack: 0.001, decay: 0.22, sustain: 0.01, release: 0.16 }
-  }).connect(masterComp);
-  kick.volume.value = -7;
-
-  const rhythmFilter = new Tone.Filter(5200, 'highpass').connect(masterComp);
-  const rhythm = new Tone.NoiseSynth({
-    noise: { type: 'white' },
-    envelope: { attack: 0.001, decay: 0.045, sustain: 0, release: 0.01 }
-  }).connect(rhythmFilter);
-  rhythm.volume.value = -26;
-
-  const snareFilter = new Tone.Filter(1800, 'bandpass').connect(masterComp);
-  const snare = new Tone.NoiseSynth({
-    noise: { type: 'pink' },
-    envelope: { attack: 0.001, decay: 0.09, sustain: 0, release: 0.02 }
-  }).connect(snareFilter);
-  snare.volume.value = -18;
+  const accent = new Tone.Synth({
+    oscillator: { type: 'sine' },
+    envelope: { attack: 0.001, decay: 0.08, sustain: 0, release: 0.04 }
+  }).connect(masterGain);
+  accent.volume.value = -14;
 
   const bassRoots = ['C2', 'G2', 'A1', 'F1', 'C2', 'G2', 'F1', 'G2'];
-  const bassPattern = [0, null, 12, null, 0, 7, null, 12, 0, null, 12, null, 7, null, 12, null];
+  const bassPattern = [0, null, 12, null, 0, 7, null, 12];
   const melodyByBar = [
-    ['C5', null, 'E5', null, 'G5', null, 'C6', null, 'G5', null, 'E5', null, 'D5', null, 'C5', null],
-    ['D5', null, 'G5', null, 'B5', null, 'D6', null, 'B5', null, 'G5', null, 'A4', null, 'G4', null],
-    ['E5', null, 'A5', null, 'C6', null, 'E6', null, 'C6', null, 'A5', null, 'B4', null, 'A4', null],
-    ['F5', null, 'A5', null, 'C6', null, 'F6', null, 'C6', null, 'A5', null, 'G5', null, 'F5', null],
-    ['C5', null, 'E5', null, 'G5', null, 'C6', null, 'E6', null, 'G6', null, 'E6', null, 'C6', null],
-    ['B4', null, 'D5', null, 'G5', null, 'B5', null, 'D6', null, 'G6', null, 'A4', null, 'G4', null],
-    ['F5', null, 'A5', null, 'C6', null, 'F6', null, 'A6', null, 'F6', null, 'C6', null, 'A5', null],
-    ['G5', null, 'B5', null, 'D6', null, 'G6', null, 'B6', null, 'G6', null, 'D6', null, 'B5', null]
+    ['C5', null, 'E5', null, 'G5', null, 'C6', null],
+    ['D5', null, 'G5', null, 'B5', null, 'D6', null],
+    ['E5', null, 'A5', null, 'C6', null, 'E6', null],
+    ['F5', null, 'A5', null, 'C6', null, 'F6', null],
+    ['C5', null, 'E5', null, 'G5', null, 'C6', null],
+    ['B4', null, 'D5', null, 'G5', null, 'B5', null],
+    ['F5', null, 'A5', null, 'C6', null, 'F6', null],
+    ['G5', null, 'B5', null, 'D6', null, 'G6', null]
   ];
 
   let step = 0;
   const masterLoop = new Tone.Loop((time) => {
-    const bar = Math.floor(step / 16);
-    const beatStep = step % 16;
+    const bar = Math.floor(step / 8);
+    const beatStep = step % 8;
     const root = bassRoots[bar % bassRoots.length];
 
-    if (beatStep === 0 || beatStep === 8) {
-      kick.triggerAttackRelease('C2', '8n', time, beatStep === 0 ? 0.75 : 0.55);
-    }
-    if (beatStep === 4 || beatStep === 12) {
-      snare.triggerAttackRelease('16n', time, 0.5);
-    } else if (beatStep % 2 === 1) {
-      rhythm.triggerAttackRelease('64n', time, beatStep % 4 === 3 ? 0.45 : 0.28);
+    if (beatStep === 0) {
+      accent.triggerAttackRelease('C5', '8n', time, 0.5);
     }
 
     const bassOffset = bassPattern[beatStep];
     if (bassOffset !== null) {
       const bassNote = Tone.Frequency(root).transpose(bassOffset).toNote();
-      bass.triggerAttackRelease(bassNote, '16n', time, beatStep === 0 ? 0.82 : 0.58);
+      bass.triggerAttackRelease(bassNote, '8n', time, beatStep === 0 ? 0.62 : 0.46);
     }
 
     const melody = melodyByBar[bar % melodyByBar.length];
     const chipNote = melody[beatStep];
-    if (chipNote && bar % 8 !== 3 && bar % 8 !== 7) {
-      chip.triggerAttackRelease(chipNote, '16n', time, 0.48);
-    }
-
-    if ((beatStep === 0 || beatStep === 10) && bar % 2 === 0) {
-      const bellNote = Tone.Frequency(root).transpose(24).toNote();
-      bell.triggerAttackRelease(bellNote, '8n', time, beatStep === 0 ? 0.42 : 0.28);
+    if (chipNote) {
+      chip.triggerAttackRelease(chipNote, '8n', time, 0.42);
     }
 
     step++;
-  }, '16n');
+  }, '8n');
 
   const loops = [masterLoop];
-  const disposables = [masterLoop, snare, snareFilter, rhythm, rhythmFilter, kick, bass, bell, chip, delay, masterComp, limiter];
+  const disposables = [masterLoop, accent, bass, chip, masterGain];
 
   return createManagedToneEngine({
     bpm: 132,

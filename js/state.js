@@ -150,7 +150,7 @@ let selectedFreeProblems = new Set(); // "a,b" 形式
 const synth = window.speechSynthesis;
 let voice = null;
 // パーティクル同時生存数の上限。全端末共通で演出負荷を抑える。
-const PARTICLE_CAP = 100;
+const PARTICLE_CAP = 40;
 // 九九の表モード
 let isPlayingTable = false;
 let tablePlaybackData = [];
