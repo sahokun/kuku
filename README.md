@@ -47,7 +47,7 @@ open kuku/index.html   # macOS
 ## ぎじゅつ（技術スタック）
 
 - **HTML5 / CSS3 / Vanilla JavaScript**
-- **Web Audio API / Tone.js** — BGM・こうかおんのせいせい
+- **Web Audio API** — BGM・こうかおんのせいせい
 - **Web Speech API** — 九九の日本語よみあげ
 - **Google Fonts** — M PLUS Rounded 1c
 - ビルドツール・フレームワーク不使用
@@ -75,8 +75,7 @@ kuku/
     ├── title.js        # タイトル画面ロジック
     ├── free-select.js  # 自由選択モード
     ├── table.js        # 九九の表モード・読み上げ再生
-    ├── audio.js        # BGM 管理・曲切り替え
-    ├── tone-engines.js # Tone.js エンジン（ノリノリ・わくわく、軽量構成）
+    ├── audio.js        # Web Audio BGM 管理・曲切り替え
     ├── se.js           # 効果音（playSe）
     └── init.js         # 起動時初期化 IIFE
 ```

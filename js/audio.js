@@ -1,8 +1,8 @@
 
 let currentBgmKey = null;
-let isBgmStarting = false;
 let isBgmPlaying = false;
 let audioInitPromise = null;
+const activeBgmNodes = new Set();
 
 function initAudio() {
   if (!audioCtx) {
@@ -67,54 +67,22 @@ function startBgm() {
   const song = BGM_SONGS[currentSongIndex];
   if (!song) return;
   const requestedKey = getBgmKey(song, currentSongIndex);
-  if ((isBgmPlaying || isBgmStarting) && currentBgmKey === requestedKey) return;
-  if (bgmTimer || activeToneEngine || isBgmPlaying || isBgmStarting) {
+  if (isBgmPlaying && currentBgmKey === requestedKey) return;
+  if (bgmTimer || isBgmPlaying) {
     stopBgm();
   }
 
-  if (song.useTone) {
-    currentBgmKey = requestedKey;
-    isBgmStarting = true;
-    isBgmPlaying = false;
-    bgmTimer = 'tone';
-    const token = ++bgmStartToken;
-    startToneEngine(() => token === bgmStartToken && bgmTimer === 'tone' && !isMuted)
-      .then((started) => {
-        if (token !== bgmStartToken) {
-          return;
-        }
-        isBgmStarting = false;
-        isBgmPlaying = !!started;
-        if (!started && bgmTimer === 'tone') {
-          bgmTimer = null;
-          currentBgmKey = null;
-        }
-      })
-      .catch((error) => {
-        if (token !== bgmStartToken) return;
-        console.warn('BGM start failed', error);
-        isBgmStarting = false;
-        isBgmPlaying = false;
-        bgmTimer = null;
-        currentBgmKey = null;
-      });
-    return;
-  }
   currentBgmKey = requestedKey;
-  isBgmStarting = false;
   isBgmPlaying = true;
-  bgmStartToken++;
   scheduleNextNote();
 }
 
 function stopBgm() {
-  bgmStartToken++;
-  stopToneEngine();
-  if (bgmTimer && bgmTimer !== 'tone') clearTimeout(bgmTimer);
+  if (bgmTimer) clearTimeout(bgmTimer);
   bgmTimer = null;
   currentBgmKey = null;
-  isBgmStarting = false;
   isBgmPlaying = false;
+  stopActiveBgmNodes();
 }
 
 function scheduleNextNote() {
@@ -135,24 +103,23 @@ function scheduleNextNote() {
     currentBgmKey = null;
     return;
   }
-  if (song.useTone) { bgmTimer = 'tone'; return; }
   const freq = song.melody[noteIndex % song.melody.length];
   const now = audioCtx.currentTime;
 
   if (freq > 0) {
-    playBgmTone(freq, song.waveType, song.gain, song.tempo * 0.92, now);
+    playBgmVoice(freq, song.waveType, song.gain, song.tempo * 0.92, now);
   }
 
   if (song.harmony && noteIndex % 2 === 0) {
     const harmonyFreq = song.harmony[noteIndex % song.harmony.length];
     if (harmonyFreq > 0) {
-      playBgmTone(harmonyFreq, 'triangle', song.harmonyGain || 0.01, song.tempo * 1.25, now + 0.015);
+      playBgmVoice(harmonyFreq, 'triangle', song.harmonyGain || 0.01, song.tempo * 1.25, now + 0.015);
     }
   }
 
   if (song.bass && noteIndex % 2 === 0) {
     const bassFreq = song.bass[Math.floor(noteIndex / 2) % song.bass.length];
-    playBgmTone(bassFreq, 'square', song.bassGain || 0.016, song.tempo * 1.65, now, -7);
+    playBgmVoice(bassFreq, 'square', song.bassGain || 0.016, song.tempo * 1.65, now, -7);
   }
 
   if (song.beat) {
@@ -164,7 +131,7 @@ function scheduleNextNote() {
 }
 
 function getBgmKey(song, index) {
-  return song.useTone ? `tone:${song.toneBuilder}` : `web:${index}`;
+  return `web:${index}`;
 }
 
 function disconnectAudioNodes(nodes) {
@@ -178,7 +145,31 @@ function disconnectAudioNodes(nodes) {
   });
 }
 
-function playBgmTone(freq, waveType, level, duration, startTime, detune = 0) {
+function trackBgmNodes(source, gainNode) {
+  const entry = { source, gainNode };
+  activeBgmNodes.add(entry);
+  source.onended = () => {
+    activeBgmNodes.delete(entry);
+    disconnectAudioNodes([source, gainNode]);
+    source.onended = null;
+  };
+  return entry;
+}
+
+function stopActiveBgmNodes() {
+  activeBgmNodes.forEach(({ source, gainNode }) => {
+    try {
+      source.onended = null;
+      source.stop();
+    } catch (error) {
+      // 既に停止済み、または未開始のノードは切断だけ行う
+    }
+    disconnectAudioNodes([source, gainNode]);
+  });
+  activeBgmNodes.clear();
+}
+
+function playBgmVoice(freq, waveType, level, duration, startTime, detune = 0) {
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
   osc.type = waveType;
@@ -188,12 +179,9 @@ function playBgmTone(freq, waveType, level, duration, startTime, detune = 0) {
   gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
   osc.connect(gain);
   gain.connect(audioCtx.destination);
+  trackBgmNodes(osc, gain);
   osc.start(startTime);
   osc.stop(startTime + duration);
-  osc.onended = () => {
-    disconnectAudioNodes([osc, gain]);
-    osc.onended = null;
-  };
 }
 
 function playBgmBeat(index, now, tempo) {
@@ -205,12 +193,9 @@ function playBgmBeat(index, now, tempo) {
   hatGain.gain.exponentialRampToValueAtTime(0.001, now + Math.min(0.055, tempo * 0.55));
   hat.connect(hatGain);
   hatGain.connect(audioCtx.destination);
+  trackBgmNodes(hat, hatGain);
   hat.start(now);
   hat.stop(now + Math.min(0.06, tempo * 0.6));
-  hat.onended = () => {
-    disconnectAudioNodes([hat, hatGain]);
-    hat.onended = null;
-  };
 
   if (index % 4 === 0) {
     const kick = audioCtx.createOscillator();
@@ -222,11 +207,8 @@ function playBgmBeat(index, now, tempo) {
     kickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
     kick.connect(kickGain);
     kickGain.connect(audioCtx.destination);
+    trackBgmNodes(kick, kickGain);
     kick.start(now);
     kick.stop(now + 0.13);
-    kick.onended = () => {
-      disconnectAudioNodes([kick, kickGain]);
-      kick.onended = null;
-    };
   }
 }
