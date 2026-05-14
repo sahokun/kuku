@@ -1,4 +1,7 @@
 function showTitle() {
+  invalidateGameSession();
+  cleanupFeedbackEffects();
+  cleanupStageAnimation();
   showScreen('title-screen');
   synth.cancel();
   playSe('cancel');
@@ -68,4 +71,3 @@ function changeQuestionCount(delta) {
   document.getElementById('question-count-display').textContent = totalQuestions;
   playSe('btn');
 }
-

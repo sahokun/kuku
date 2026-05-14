@@ -2,6 +2,7 @@
 function disposeToneNodes(disposables) {
   disposables.forEach((node) => {
     if (!node || typeof node.dispose !== 'function') return;
+    if (node.disposed) return;
     try {
       node.dispose();
     } catch (error) {
@@ -23,13 +24,46 @@ function stopToneLoops(loops) {
 
 function resetToneTransport() {
   if (typeof Tone === 'undefined') return;
+  if (!Tone.Transport) return;
   try {
-    Tone.Transport.stop();
-    Tone.Transport.cancel(0);
+    if (typeof Tone.Transport.stop === 'function') Tone.Transport.stop();
+    if (typeof Tone.Transport.cancel === 'function') Tone.Transport.cancel(0);
     Tone.Transport.position = 0;
   } catch (error) {
     console.warn('Tone transport reset failed', error);
   }
+}
+
+function createManagedToneEngine({ bpm, loops, disposables, start }) {
+  let started = false;
+  let stopped = true;
+  let disposed = false;
+
+  return {
+    bpm,
+    loops,
+    disposables,
+    start() {
+      if (disposed || started) return;
+      started = true;
+      stopped = false;
+      start.call(this);
+    },
+    stop() {
+      if (disposed || stopped) return;
+      stopToneLoops(this.loops);
+      stopped = true;
+      started = false;
+    },
+    dispose() {
+      if (disposed) return;
+      this.stop();
+      disposeToneNodes(this.disposables);
+      this.loops = [];
+      this.disposables = [];
+      disposed = true;
+    }
+  };
 }
 
 function buildToneEngineNoriNori() {
@@ -117,7 +151,7 @@ function buildToneEngineNoriNori() {
   const loops = [masterLoop];
   const disposables = [masterLoop, hat, hatFilter, clap, clapFilter, lead, bass, kick, delay, masterComp, limiter];
 
-  return {
+  return createManagedToneEngine({
     bpm: 126,
     loops,
     disposables,
@@ -125,15 +159,8 @@ function buildToneEngineNoriNori() {
       step = 0;
       Tone.Transport.bpm.value = this.bpm;
       masterLoop.start(0);
-    },
-    stop() {
-      stopToneLoops(this.loops);
-    },
-    dispose() {
-      this.stop();
-      disposeToneNodes(this.disposables);
     }
-  };
+  });
 }
 
 function buildToneEngineWakuwaku() {
@@ -233,7 +260,7 @@ function buildToneEngineWakuwaku() {
   const loops = [masterLoop];
   const disposables = [masterLoop, snare, snareFilter, rhythm, rhythmFilter, kick, bass, bell, chip, delay, masterComp, limiter];
 
-  return {
+  return createManagedToneEngine({
     bpm: 132,
     loops,
     disposables,
@@ -241,15 +268,8 @@ function buildToneEngineWakuwaku() {
       step = 0;
       Tone.Transport.bpm.value = this.bpm;
       masterLoop.start(0);
-    },
-    stop() {
-      stopToneLoops(this.loops);
-    },
-    dispose() {
-      this.stop();
-      disposeToneNodes(this.disposables);
     }
-  };
+  });
 }
 
 const TONE_BUILDERS = {
@@ -259,19 +279,20 @@ const TONE_BUILDERS = {
 
 function disposeActiveToneEngine() {
   if (!activeToneEngine) return;
+  const engine = activeToneEngine;
+  activeToneEngine = null;
+  activeToneId = null;
+  toneRunning = false;
   try {
-    activeToneEngine.stop();
+    engine.stop();
   } catch (error) {
     console.warn('Tone engine stop failed', error);
   }
   try {
-    activeToneEngine.dispose();
+    engine.dispose();
   } catch (error) {
     console.warn('Tone engine dispose failed', error);
   }
-  activeToneEngine = null;
-  activeToneId = null;
-  toneRunning = false;
 }
 
 async function startToneEngine(shouldContinue) {
