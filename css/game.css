@@ -63,10 +63,10 @@
   color: #fff;
   font-size: clamp(1.6rem, 8vw, 2.7rem);
   font-weight: 900;
-  text-shadow: 0 3px 0 rgba(59, 36, 124, 0.22), 0 0 18px rgba(255,255,255,0.9), 0 0 30px var(--gold);
-  box-shadow: 0 18px 42px rgba(59, 36, 124, 0.22), 0 0 35px rgba(255, 105, 180, 0.45), inset 0 0 0 3px rgba(255,255,255,0.62);
+  text-shadow: 0 3px 0 rgba(59, 36, 124, 0.22), 0 0 12px rgba(255,255,255,0.8);
+  box-shadow: 0 14px 28px rgba(59, 36, 124, 0.18), 0 0 18px rgba(255, 105, 180, 0.26), inset 0 0 0 3px rgba(255,255,255,0.62);
   transform-style: preserve-3d;
-  animation: coreFloat 2.4s ease-in-out infinite, coreGlow 2.8s ease-in-out infinite;
+  animation: coreFloat 3s ease-in-out infinite;
 }
 
 @keyframes coreGlow {
@@ -99,8 +99,8 @@
   border-right-color: rgba(78, 205, 196, 0.65);
   border-radius: 50%;
   transform: rotateX(70deg) rotateZ(0deg);
-  animation: stageRing 2.2s linear infinite;
-  filter: drop-shadow(0 0 14px rgba(255,255,255,0.7));
+  animation: stageRing 4.2s linear infinite;
+  opacity: 0.72;
 }
 
 .stage-ring.back {
@@ -118,7 +118,7 @@
   height: 22px;
   border-radius: 50%;
   background: var(--gold);
-  box-shadow: 0 0 0 10px rgba(255,215,0,0.32), 0 0 40px rgba(255,215,0,1), 0 0 80px rgba(255, 105, 180, 0.6);
+  box-shadow: 0 0 0 7px rgba(255,215,0,0.22), 0 0 24px rgba(255,215,0,0.72);
   transform-origin: 108px 50%;
   animation: cometRun 1.1s linear infinite;
 }
@@ -132,7 +132,6 @@
   height: 4px;
   background: linear-gradient(to left, rgba(255, 215, 0, 0.85), transparent);
   transform: translateY(-50%);
-  filter: blur(2px);
 }
 
 .stage-mini {
@@ -154,7 +153,7 @@
 
 #app.combo-fever .stage-core {
   animation-duration: 1.2s;
-  box-shadow: 0 18px 52px rgba(255, 105, 180, 0.36), 0 0 36px rgba(255, 215, 0, 0.42), inset 0 0 0 3px rgba(255,255,255,0.68);
+  box-shadow: 0 14px 32px rgba(255, 105, 180, 0.28), 0 0 22px rgba(255, 215, 0, 0.28), inset 0 0 0 3px rgba(255,255,255,0.68);
 }
 
 @keyframes coreFloat {
@@ -191,10 +190,8 @@
     linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.78)),
     radial-gradient(circle at 18% 22%, rgba(255, 105, 180, 0.18), transparent 38%),
     radial-gradient(circle at 82% 82%, rgba(78, 205, 196, 0.16), transparent 40%);
-  box-shadow: 0 16px 34px rgba(59,36,124,0.12), inset 0 0 0 2px rgba(255,255,255,0.85);
+  box-shadow: 0 10px 22px rgba(59,36,124,0.1), inset 0 0 0 2px rgba(255,255,255,0.85);
   transform-style: preserve-3d;
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
 }
 
 .question-area::before {
@@ -209,8 +206,7 @@
     linear-gradient(180deg, rgba(255,105,180,0.64), rgba(101,214,255,0.55)) left / 5px 100% no-repeat,
     linear-gradient(180deg, rgba(255,215,0,0.68), rgba(168,240,79,0.58)) right / 5px 100% no-repeat;
   opacity: 0.74;
-  filter: drop-shadow(0 0 12px rgba(255, 105, 180, 0.3));
-  animation: questionGlow 2.8s ease-in-out infinite;
+  opacity: 0.62;
 }
 
 .question-area::after {
@@ -223,9 +219,7 @@
   border-radius: 999px;
   background:
     repeating-linear-gradient(90deg, #ff2fa8 0 10px, #ffd700 10px 20px, #4ecdc4 20px 30px, #65d6ff 30px 40px);
-  box-shadow: 0 0 16px rgba(255, 215, 0, 0.34);
-  opacity: 0.72;
-  animation: questionMeter 0.7s steps(6) infinite;
+  opacity: 0.58;
 }
 
 @keyframes questionGlow {
@@ -241,7 +235,7 @@
   font-size: 2.2rem;
   font-weight: 900;
   color: var(--main-pink);
-  text-shadow: 2px 2px 0 #fff, 0 10px 22px rgba(255, 105, 180, 0.22);
+  text-shadow: 2px 2px 0 #fff, 0 6px 14px rgba(255, 105, 180, 0.18);
   margin-bottom: 6px;
   letter-spacing: 1px;
   min-height: 2.5rem;
@@ -321,7 +315,7 @@
 .equation-slot.active-slot {
   border-color: var(--main-pink);
   background: rgba(255, 105, 180, 0.1);
-  animation: slotPulse 1s infinite;
+  animation: slotPulse 1.8s ease-in-out infinite;
 }
 
 .equation-slot.filled-slot {
@@ -366,7 +360,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--btn-shadow), 0 0 0 0 rgba(78, 205, 196, 0);
+  box-shadow: var(--btn-shadow);
   cursor: pointer;
   transition: transform 0.12s, box-shadow 0.12s, filter 0.12s;
   overflow: hidden;
@@ -385,12 +379,12 @@
 .num-btn:hover {
   filter: saturate(1.3) brightness(1.05);
   transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 8px 16px rgba(78, 205, 196, 0.35), 0 0 18px rgba(78, 205, 196, 0.4);
+  box-shadow: 0 7px 12px rgba(78, 205, 196, 0.24);
 }
 
 .num-btn:active {
   transform: translateY(4px) scale(0.92);
-  box-shadow: var(--btn-active-shadow), 0 0 24px rgba(78, 205, 196, 0.7);
+  box-shadow: var(--btn-active-shadow), 0 0 12px rgba(78, 205, 196, 0.36);
   background-color: var(--mint);
   color: var(--white);
 }
@@ -405,7 +399,7 @@
 }
 
 .num-btn.btn-enter:active {
-  box-shadow: var(--btn-active-shadow), 0 0 28px rgba(255, 105, 180, 0.85);
+  box-shadow: var(--btn-active-shadow), 0 0 14px rgba(255, 105, 180, 0.45);
 }
 
 .action-btn {
@@ -425,4 +419,3 @@
   border-color: white;
   grid-column: span 1;
 }
-

@@ -51,6 +51,7 @@ function clearAllFree() {
 
 function startFreeGame() {
   if (selectedFreeProblems.size === 0) return;
+  const sessionId = invalidateGameSession();
   isFreeMode = true;
 
   const candidates = [...selectedFreeProblems].map(key => {
@@ -80,6 +81,5 @@ function startFreeGame() {
   initVoice(); initAudio(); speak("");
   updateStatusBar();
   showScreen('game-screen');
-  setTimeout(showNextQuestion, 500);
+  scheduleGameProgressTimer(() => showNextQuestion(sessionId), 500, sessionId);
 }
-
