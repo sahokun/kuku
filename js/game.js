@@ -1,4 +1,6 @@
 
+let stageUpdateAnimation = null;
+
 // 画面切り替え
 function showScreen(screenId) {
   document.querySelectorAll('.screen').forEach(el => {
@@ -10,6 +12,9 @@ function showScreen(screenId) {
 
 // ゲーム開始
 function startGame(mode) {
+  const sessionId = invalidateGameSession();
+  cleanupFeedbackEffects();
+  cleanupStageAnimation();
   // 音声初期化（ユーザー操作トリガー）
   initVoice();
   initAudio();
@@ -57,7 +62,7 @@ function startGame(mode) {
   showScreen('game-screen');
   
   // 少し待ってから最初の問題を表示
-  setTimeout(showNextQuestion, 500);
+  scheduleGameProgressTimer(() => showNextQuestion(sessionId), 500, sessionId);
 }
 
 function shuffleArray(array) {
@@ -68,7 +73,9 @@ function shuffleArray(array) {
   return array;
 }
 
-function showNextQuestion() {
+function showNextQuestion(sessionId = getCurrentGameSessionId()) {
+  if (!isCurrentGameSession(sessionId)) return;
+
   if (currentQuestionIndex >= totalQuestions) {
     endGame();
     return;
@@ -166,8 +173,9 @@ function updateStage(q) {
   stageNumber.textContent = currentQuestionType === "equation" ? `${q.a}×?` : `${q.a}×${q.b}`;
   stageLeft.textContent = q.a;
   stageRight.textContent = currentQuestionType === "equation" ? "?" : q.b;
+  cleanupStageAnimation();
   if (!prefersReducedMotion()) {
-    stageNumber.animate(
+    stageUpdateAnimation = stageNumber.animate(
       [
         { transform: 'rotateX(10deg) rotateY(-16deg) translateY(0) translateZ(20px) scale(0.88)' },
         { transform: 'rotateX(-8deg) rotateY(18deg) translateY(-10px) translateZ(44px) scale(1.08)' },
@@ -175,7 +183,23 @@ function updateStage(q) {
       ],
       { duration: 520, easing: 'cubic-bezier(0.2, 1.4, 0.3, 1)' }
     );
+    stageUpdateAnimation.onfinish = () => {
+      stageUpdateAnimation = null;
+    };
+    stageUpdateAnimation.oncancel = () => {
+      stageUpdateAnimation = null;
+    };
   }
+}
+
+function cleanupStageAnimation() {
+  if (!stageUpdateAnimation) return;
+  try {
+    stageUpdateAnimation.cancel();
+  } catch (error) {
+    // 既に終了済みなら何もしない
+  }
+  stageUpdateAnimation = null;
 }
 
 function inputNum(num) {
@@ -233,6 +257,7 @@ function updateEquationDisplay() {
 function submitAnswer() {
   if (isProcessing) return;
 
+  const sessionId = getCurrentGameSessionId();
   const q = currentQuestions[currentQuestionIndex];
   const kukuReadingEl = document.getElementById('kuku-reading');
 
@@ -264,15 +289,15 @@ function submitAnswer() {
       '<span>' + q.a_read + '</span>';
 
     // 正解の読み上げ
-    setTimeout(() => {
+    scheduleGameProgressTimer(() => {
       speak(getFullSpeak(q));
-    }, 500);
+    }, 500, sessionId);
 
     // 次の問題へ
-    setTimeout(() => {
+    scheduleGameProgressTimer(() => {
       currentQuestionIndex++;
-      showNextQuestion();
-    }, 2500);
+      showNextQuestion(sessionId);
+    }, 2500, sessionId);
 
   } else {
     // 通常問題
@@ -301,14 +326,14 @@ function submitAnswer() {
       '<span class="kuku-revealed">' + q.a_read + '</span>';
 
     // 正解の読み上げ
-    setTimeout(() => {
+    scheduleGameProgressTimer(() => {
       speak(getFullSpeak(q));
-    }, 500);
+    }, 500, sessionId);
 
     // 次の問題へ
-    setTimeout(() => {
+    scheduleGameProgressTimer(() => {
       currentQuestionIndex++;
-      showNextQuestion();
-    }, 2500);
+      showNextQuestion(sessionId);
+    }, 2500, sessionId);
   }
 }

@@ -76,7 +76,7 @@ kuku/
     ├── free-select.js  # 自由選択モード
     ├── table.js        # 九九の表モード・読み上げ再生
     ├── audio.js        # BGM 管理・曲切り替え
-    ├── tone-engines.js # Tone.js エンジン（ノリノリ・わくわく、iPhone向け軽量構成）
+    ├── tone-engines.js # Tone.js エンジン（ノリノリ・わくわく、軽量構成）
     ├── se.js           # 効果音（playSe）
     └── init.js         # 起動時初期化 IIFE
 ```
