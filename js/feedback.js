@@ -1,5 +1,71 @@
 
+const feedbackTimers = new Set();
+const feedbackElements = new Set();
+
+function setFeedbackTimer(callback, delay) {
+  const timerId = setTimeout(() => {
+    feedbackTimers.delete(timerId);
+    callback();
+  }, delay);
+  feedbackTimers.add(timerId);
+  return timerId;
+}
+
+function trackFeedbackElement(element) {
+  if (element) feedbackElements.add(element);
+  return element;
+}
+
+function removeFeedbackElement(element) {
+  if (!element) return;
+  feedbackElements.delete(element);
+  try {
+    element.getAnimations().forEach((animation) => animation.cancel());
+  } catch (error) {
+    // getAnimations 非対応環境では何もしない
+  }
+  element.remove();
+}
+
+function cleanupFeedbackEffects() {
+  feedbackTimers.forEach((timerId) => clearTimeout(timerId));
+  feedbackTimers.clear();
+
+  Array.from(feedbackElements).forEach((element) => removeFeedbackElement(element));
+  feedbackElements.clear();
+
+  const burstLayer = document.getElementById('burst-layer');
+  if (burstLayer) {
+    Array.from(burstLayer.children).forEach((element) => removeFeedbackElement(element));
+  }
+
+  const overlay = document.getElementById('feedback-overlay');
+  const icon = document.getElementById('feedback-icon');
+  const ring = document.getElementById('feedback-ring');
+  const ring2 = document.getElementById('feedback-ring-2');
+  const flash = document.getElementById('screen-flash');
+  const app = document.getElementById('app');
+  [overlay, icon, ring, ring2, flash, app].forEach((element) => {
+    if (!element) return;
+    try {
+      element.getAnimations().forEach((animation) => animation.cancel());
+    } catch (error) {
+      // getAnimations 非対応環境では何もしない
+    }
+  });
+  if (overlay) overlay.style.opacity = 0;
+  if (icon) {
+    icon.style.transform = '';
+    icon.classList.remove('pop-correct', 'pop-incorrect', 'correct', 'incorrect');
+  }
+  if (ring) ring.classList.remove('active', 'correct', 'incorrect');
+  if (ring2) ring2.classList.remove('active', 'correct', 'incorrect');
+  if (flash) flash.classList.remove('active', 'correct', 'incorrect', 'fever');
+  if (app) app.classList.remove('hit-correct', 'hit-incorrect', 'shake-correct', 'shake-incorrect', 'zoom-pop');
+}
+
 function showFeedback(isCorrect) {
+  cleanupFeedbackEffects();
   const overlay = document.getElementById('feedback-overlay');
   const icon = document.getElementById('feedback-icon');
   const ring = document.getElementById('feedback-ring');
@@ -22,11 +88,11 @@ function showFeedback(isCorrect) {
     app.classList.add(isCorrect ? 'hit-correct' : 'hit-incorrect');
     launchBurst(isCorrect, isFever);
     requestAnimationFrame(() => { icon.style.transform = 'scale(1)'; });
-    setTimeout(() => {
+    setFeedbackTimer(() => {
       icon.style.transform = 'scale(0)';
       overlay.style.opacity = 0;
       app.classList.remove('hit-correct', 'hit-incorrect');
-    }, 1500);
+    }, 1200);
     return;
   }
 
@@ -57,25 +123,25 @@ function showFeedback(isCorrect) {
   icon.classList.add(isCorrect ? 'pop-correct' : 'pop-incorrect');
   void ring.offsetWidth;
   ring.classList.add('active');
-  setTimeout(() => {
+  setFeedbackTimer(() => {
     void ring2.offsetWidth;
     ring2.classList.add('active');
-  }, 120);
+  }, 100);
 
   launchBurst(isCorrect, isFever);
   if (isCorrect) {
     launchLasers(isFever);
-    if (isFever) launchConfetti(20);
+    if (isFever) launchConfetti(12);
   }
 
-  setTimeout(() => {
+  setFeedbackTimer(() => {
     overlay.style.opacity = 0;
     icon.classList.remove('pop-correct', 'pop-incorrect');
     ring.classList.remove('active');
     ring2.classList.remove('active');
     flash.classList.remove('active', 'correct', 'incorrect', 'fever');
     app.classList.remove('hit-correct', 'hit-incorrect', 'shake-correct', 'shake-incorrect', 'zoom-pop');
-  }, 1500);
+  }, 1200);
 }
 
 function getParticleBudget(layer, requested) {
@@ -89,7 +155,7 @@ function launchLasers(isBig) {
   if (prefersReducedMotion() || isLegacyFx()) return;
   const layer = document.getElementById('burst-layer');
   if (!layer) return;
-  const requested = isBig ? 12 : 8;
+  const requested = isBig ? 8 : 5;
   const count = getParticleBudget(layer, requested);
   if (count === 0) return;
   const colors = ['#FFD700', '#FF69B4', '#4ECDC4', '#65D6FF', '#A8F04F'];
@@ -99,7 +165,8 @@ function launchLasers(isBig) {
     laser.style.setProperty('--angle', `${(360 / count) * i + Math.random() * 12}deg`);
     laser.style.setProperty('--laser-color', colors[i % colors.length]);
     layer.appendChild(laser);
-    setTimeout(() => laser.remove(), 800);
+    trackFeedbackElement(laser);
+    setFeedbackTimer(() => removeFeedbackElement(laser), 650);
   }
 }
 
@@ -117,10 +184,11 @@ function launchConfetti(count) {
     c.style.setProperty('--csize', `${6 + Math.random() * 8}px`);
     c.style.setProperty('--ccolor', colors[i % colors.length]);
     c.style.setProperty('--crot', `${Math.random() * 360}deg`);
-    c.style.setProperty('--cdx', `${(Math.random() - 0.5) * 280}px`);
-    c.style.setProperty('--clife', `${1800 + Math.random() * 1400}ms`);
+    c.style.setProperty('--cdx', `${(Math.random() - 0.5) * 220}px`);
+    c.style.setProperty('--clife', `${1200 + Math.random() * 700}ms`);
     layer.appendChild(c);
-    setTimeout(() => c.remove(), 3400);
+    trackFeedbackElement(c);
+    setFeedbackTimer(() => removeFeedbackElement(c), 2100);
   }
 }
 
@@ -140,7 +208,8 @@ function launchShootingStar() {
   star.style.setProperty('--ssdy', `${150 + Math.random() * 150}px`);
   star.style.setProperty('--ssc', colors[Math.floor(Math.random() * colors.length)]);
   layer.appendChild(star);
-  setTimeout(() => star.remove(), 1500);
+  trackFeedbackElement(star);
+  setFeedbackTimer(() => removeFeedbackElement(star), 1100);
 }
 
 function launchBurst(isCorrect, isBig) {
@@ -157,8 +226,8 @@ function launchBurst(isCorrect, isBig) {
   const centerX = questionRect.left - appRect.left + questionRect.width / 2;
   const centerY = questionRect.top - appRect.top + questionRect.height / 2;
   const requested = legacy
-    ? (isBig ? 42 : (isCorrect ? 28 : 18))
-    : (isBig ? 90 : (isCorrect ? 60 : 36));
+    ? (isBig ? 30 : (isCorrect ? 22 : 14))
+    : (isBig ? 58 : (isCorrect ? 38 : 24));
   const count = getParticleBudget(layer, requested);
   const symbols = isCorrect
     ? (legacy ? ['★', '×', '+', '♪'] : ['★', '✦', '♥', '♪', '✿', '◆', '✺'])
@@ -189,18 +258,19 @@ function launchBurst(isCorrect, isBig) {
       ? `${14 + Math.random() * (isBig ? 18 : 12)}px`
       : `${18 + Math.random() * (isBig ? 28 : 18)}px`);
     spark.style.setProperty('--spark-life', legacy
-      ? `${780 + Math.random() * 420}ms`
-      : `${900 + Math.random() * 600}ms`);
+      ? `${650 + Math.random() * 300}ms`
+      : `${720 + Math.random() * 420}ms`);
     layer.appendChild(spark);
-    setTimeout(() => spark.remove(), legacy ? 1300 : 1600);
+    trackFeedbackElement(spark);
+    setFeedbackTimer(() => removeFeedbackElement(spark), legacy ? 1050 : 1300);
   }
 
   if (legacy) return;
 
   // 二次バースト（少し遅れて 別方向に）
   if (isCorrect) {
-    setTimeout(() => {
-      const secondRequested = isBig ? 50 : 30;
+    setFeedbackTimer(() => {
+      const secondRequested = isBig ? 26 : 18;
       const secondCount = getParticleBudget(layer, secondRequested);
       if (secondCount === 0) return;
       for (let i = 0; i < secondCount; i++) {
@@ -218,15 +288,19 @@ function launchBurst(isCorrect, isBig) {
         spark.style.setProperty('--spin', `${(Math.random() * 720 - 360).toFixed(0)}deg`);
         spark.style.setProperty('--spark-color', colors[i % colors.length]);
         spark.style.setProperty('--spark-size', `${16 + Math.random() * 14}px`);
-        spark.style.setProperty('--spark-life', `${800 + Math.random() * 500}ms`);
+        spark.style.setProperty('--spark-life', `${650 + Math.random() * 340}ms`);
         layer.appendChild(spark);
-        setTimeout(() => spark.remove(), 1400);
+        trackFeedbackElement(spark);
+        setFeedbackTimer(() => removeFeedbackElement(spark), 1100);
       }
-    }, 180);
+    }, 150);
   }
 }
 
 function endGame() {
+  invalidateGameSession();
+  cleanupFeedbackEffects();
+  cleanupStageAnimation();
   showScreen('result-screen');
   playSe('result');
   const isPerfect = score === totalQuestions;
@@ -237,7 +311,7 @@ function endGame() {
 
   if (legacy) {
     finalScoreEl.textContent = `${score} / ${totalQuestions}`;
-    setTimeout(() => {
+    setFeedbackTimer(() => {
       if (score > 0) launchBurst(true, isPerfect);
     }, 180);
   } else {
@@ -251,33 +325,33 @@ function endGame() {
       displayed++;
       finalScoreEl.textContent = `${displayed} / ${totalQuestions}`;
       playSe('btn');
-      if (displayed < score) setTimeout(tickScore, stepDuration);
+      if (displayed < score) setFeedbackTimer(tickScore, stepDuration);
     };
-    setTimeout(tickScore, 400);
+    setFeedbackTimer(tickScore, 400);
 
     // 初回 大バースト
-    setTimeout(() => {
+    setFeedbackTimer(() => {
       if (score > 0) launchBurst(true, isPerfect);
     }, 180);
 
     // 紙吹雪 連発
     if (score > 0) {
-      const burstCount = isPerfect ? 4 : Math.min(5, Math.ceil(score / 2));
+      const burstCount = isPerfect ? 3 : Math.min(3, Math.ceil(score / 3));
       for (let i = 0; i < burstCount; i++) {
-        setTimeout(() => launchConfetti(isPerfect ? 30 : 18), 300 + i * 280);
+        setFeedbackTimer(() => launchConfetti(isPerfect ? 18 : 12), 260 + i * 240);
       }
     }
 
     // パーフェクト時 花火連発＋流れ星
     if (isPerfect) {
-      for (let i = 0; i < 3; i++) {
-        setTimeout(() => {
+      for (let i = 0; i < 2; i++) {
+        setFeedbackTimer(() => {
           launchBurst(true, true);
           launchLasers(true);
-        }, 700 + i * 450);
+        }, 600 + i * 360);
       }
-      for (let i = 0; i < 4; i++) {
-        setTimeout(launchShootingStar, 600 + i * 250);
+      for (let i = 0; i < 2; i++) {
+        setFeedbackTimer(launchShootingStar, 540 + i * 240);
       }
     }
   }
@@ -294,4 +368,3 @@ function endGame() {
     speak("またチャレンジしてね！");
   }
 }
-

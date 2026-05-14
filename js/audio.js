@@ -1,10 +1,21 @@
 
+let currentBgmKey = null;
+let isBgmStarting = false;
+let isBgmPlaying = false;
+let audioInitPromise = null;
+
 function initAudio() {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   }
   if (audioCtx.state === 'suspended') {
-    audioCtx.resume();
+    audioInitPromise = audioInitPromise || audioCtx.resume()
+      .catch((error) => {
+        console.warn('Audio resume failed', error);
+      })
+      .finally(() => {
+        audioInitPromise = null;
+      });
   }
   if (!audioInitialized) {
     isMuted = false;
@@ -37,24 +48,34 @@ function updateMuteIcon() {
 
 
 function selectSong(index) {
+  const previousSongIndex = currentSongIndex;
   currentSongIndex = index;
   localStorage.setItem('kuku_bgm', index);
   noteIndex = 0;
   document.querySelectorAll('.bgm-option').forEach((el, i) => {
     el.classList.toggle('bgm-active', i === index);
   });
-  if (!isMuted && bgmTimer) {
+  if (!isMuted && previousSongIndex !== index) {
     stopBgm();
-    startBgm();
   }
   initAudio();
   playSe('btn');
 }
 
 function startBgm() {
-  if (isMuted || bgmTimer) return;
+  if (isMuted) return;
   const song = BGM_SONGS[currentSongIndex];
+  if (!song) return;
+  const requestedKey = getBgmKey(song, currentSongIndex);
+  if ((isBgmPlaying || isBgmStarting) && currentBgmKey === requestedKey) return;
+  if (bgmTimer || activeToneEngine || isBgmPlaying || isBgmStarting) {
+    stopBgm();
+  }
+
   if (song.useTone) {
+    currentBgmKey = requestedKey;
+    isBgmStarting = true;
+    isBgmPlaying = false;
     bgmTimer = 'tone';
     const token = ++bgmStartToken;
     startToneEngine(() => token === bgmStartToken && bgmTimer === 'tone' && !isMuted)
@@ -62,12 +83,26 @@ function startBgm() {
         if (token !== bgmStartToken) {
           return;
         }
+        isBgmStarting = false;
+        isBgmPlaying = !!started;
         if (!started && bgmTimer === 'tone') {
           bgmTimer = null;
+          currentBgmKey = null;
         }
+      })
+      .catch((error) => {
+        if (token !== bgmStartToken) return;
+        console.warn('BGM start failed', error);
+        isBgmStarting = false;
+        isBgmPlaying = false;
+        bgmTimer = null;
+        currentBgmKey = null;
       });
     return;
   }
+  currentBgmKey = requestedKey;
+  isBgmStarting = false;
+  isBgmPlaying = true;
   bgmStartToken++;
   scheduleNextNote();
 }
@@ -77,13 +112,29 @@ function stopBgm() {
   stopToneEngine();
   if (bgmTimer && bgmTimer !== 'tone') clearTimeout(bgmTimer);
   bgmTimer = null;
+  currentBgmKey = null;
+  isBgmStarting = false;
+  isBgmPlaying = false;
 }
 
 function scheduleNextNote() {
-  if (isMuted) { bgmTimer = null; return; }
-  if (!audioCtx) return;
+  if (isMuted) {
+    bgmTimer = null;
+    isBgmPlaying = false;
+    return;
+  }
+  if (!audioCtx) {
+    isBgmPlaying = false;
+    return;
+  }
 
   const song = BGM_SONGS[currentSongIndex];
+  if (!song) {
+    bgmTimer = null;
+    isBgmPlaying = false;
+    currentBgmKey = null;
+    return;
+  }
   if (song.useTone) { bgmTimer = 'tone'; return; }
   const freq = song.melody[noteIndex % song.melody.length];
   const now = audioCtx.currentTime;
@@ -112,6 +163,21 @@ function scheduleNextNote() {
   bgmTimer = setTimeout(scheduleNextNote, song.tempo * 1000);
 }
 
+function getBgmKey(song, index) {
+  return song.useTone ? `tone:${song.toneBuilder}` : `web:${index}`;
+}
+
+function disconnectAudioNodes(nodes) {
+  nodes.forEach((node) => {
+    if (!node || typeof node.disconnect !== 'function') return;
+    try {
+      node.disconnect();
+    } catch (error) {
+      // 既に切断済みの場合は何もしない
+    }
+  });
+}
+
 function playBgmTone(freq, waveType, level, duration, startTime, detune = 0) {
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
@@ -124,6 +190,10 @@ function playBgmTone(freq, waveType, level, duration, startTime, detune = 0) {
   gain.connect(audioCtx.destination);
   osc.start(startTime);
   osc.stop(startTime + duration);
+  osc.onended = () => {
+    disconnectAudioNodes([osc, gain]);
+    osc.onended = null;
+  };
 }
 
 function playBgmBeat(index, now, tempo) {
@@ -137,6 +207,10 @@ function playBgmBeat(index, now, tempo) {
   hatGain.connect(audioCtx.destination);
   hat.start(now);
   hat.stop(now + Math.min(0.06, tempo * 0.6));
+  hat.onended = () => {
+    disconnectAudioNodes([hat, hatGain]);
+    hat.onended = null;
+  };
 
   if (index % 4 === 0) {
     const kick = audioCtx.createOscillator();
@@ -150,5 +224,9 @@ function playBgmBeat(index, now, tempo) {
     kickGain.connect(audioCtx.destination);
     kick.start(now);
     kick.stop(now + 0.13);
+    kick.onended = () => {
+      disconnectAudioNodes([kick, kickGain]);
+      kick.onended = null;
+    };
   }
 }

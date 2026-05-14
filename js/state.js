@@ -1,7 +1,7 @@
 // 九九データ (読み仮名付き)
 // q_read / a_read: 画面表示用（ひらがな）
 // q_speak / a_speak: 読み上げ用（省略時は q_read / a_read を使用）
-//   語末の「は」は iPhone 等で助詞「わ」と解釈されるため、カタカナ「ハ」で指定して回避する
+//   語末の「は」は一部環境で助詞「わ」と解釈されるため、カタカナ「ハ」で指定して回避する
 const kukuData = [
   // 1の段
   { a: 1, b: 1, q_read: "いんいちが", a_read: "いち" },
@@ -105,6 +105,38 @@ let isProcessing = false;
 let currentQuestionType = "answer"; // "answer"（通常）or "equation"（逆問題: Q5, Q10）
 let equationInputB = "";
 let totalQuestions = parseInt(localStorage.getItem('kuku_question_count') || '10');
+let gameSessionId = 0;
+const gameProgressTimers = new Set();
+
+function clearGameProgressTimers() {
+  gameProgressTimers.forEach((timerId) => clearTimeout(timerId));
+  gameProgressTimers.clear();
+}
+
+function invalidateGameSession() {
+  clearGameProgressTimers();
+  gameSessionId++;
+  return gameSessionId;
+}
+
+function getCurrentGameSessionId() {
+  return gameSessionId;
+}
+
+function isCurrentGameSession(sessionId) {
+  return sessionId === gameSessionId;
+}
+
+function scheduleGameProgressTimer(callback, delay, sessionId) {
+  const targetSessionId = sessionId == null ? getCurrentGameSessionId() : sessionId;
+  const timerId = setTimeout(() => {
+    gameProgressTimers.delete(timerId);
+    if (!isCurrentGameSession(targetSessionId)) return;
+    callback();
+  }, delay);
+  gameProgressTimers.add(timerId);
+  return timerId;
+}
 
 // くみあわせモード
 let isCombinationMode = false;
@@ -117,8 +149,8 @@ let selectedFreeProblems = new Set(); // "a,b" 形式
 // 音声合成
 const synth = window.speechSynthesis;
 let voice = null;
-// パーティクル同時生存数の上限。iPhone Safari のメモリ不足対策。
-const PARTICLE_CAP = 200;
+// パーティクル同時生存数の上限。全端末共通で演出負荷を抑える。
+const PARTICLE_CAP = 100;
 // 九九の表モード
 let isPlayingTable = false;
 let tablePlaybackData = [];
