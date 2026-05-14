@@ -130,8 +130,10 @@ function showFeedback(isCorrect) {
 
   launchBurst(isCorrect, isFever);
   if (isCorrect) {
-    launchLasers(isFever);
-    if (isFever) launchConfetti(12);
+    if (isFever) {
+      launchLasers(true);
+      launchConfetti(4);
+    }
   }
 
   setFeedbackTimer(() => {
@@ -155,7 +157,7 @@ function launchLasers(isBig) {
   if (prefersReducedMotion() || isLegacyFx()) return;
   const layer = document.getElementById('burst-layer');
   if (!layer) return;
-  const requested = isBig ? 8 : 5;
+  const requested = isBig ? 3 : 0;
   const count = getParticleBudget(layer, requested);
   if (count === 0) return;
   const colors = ['#FFD700', '#FF69B4', '#4ECDC4', '#65D6FF', '#A8F04F'];
@@ -166,7 +168,7 @@ function launchLasers(isBig) {
     laser.style.setProperty('--laser-color', colors[i % colors.length]);
     layer.appendChild(laser);
     trackFeedbackElement(laser);
-    setFeedbackTimer(() => removeFeedbackElement(laser), 650);
+    setFeedbackTimer(() => removeFeedbackElement(laser), 520);
   }
 }
 
@@ -181,14 +183,14 @@ function launchConfetti(count) {
     const c = document.createElement('div');
     c.className = 'confetti';
     c.style.setProperty('--cx', `${Math.random() * 100}%`);
-    c.style.setProperty('--csize', `${6 + Math.random() * 8}px`);
+    c.style.setProperty('--csize', `${5 + Math.random() * 5}px`);
     c.style.setProperty('--ccolor', colors[i % colors.length]);
     c.style.setProperty('--crot', `${Math.random() * 360}deg`);
-    c.style.setProperty('--cdx', `${(Math.random() - 0.5) * 220}px`);
-    c.style.setProperty('--clife', `${1200 + Math.random() * 700}ms`);
+    c.style.setProperty('--cdx', `${(Math.random() - 0.5) * 140}px`);
+    c.style.setProperty('--clife', `${850 + Math.random() * 350}ms`);
     layer.appendChild(c);
     trackFeedbackElement(c);
-    setFeedbackTimer(() => removeFeedbackElement(c), 2100);
+    setFeedbackTimer(() => removeFeedbackElement(c), 1400);
   }
 }
 
@@ -204,12 +206,12 @@ function launchShootingStar() {
   const startY = Math.random() * 30;
   star.style.setProperty('--ssx', `${startX}%`);
   star.style.setProperty('--ssy', `${startY}%`);
-  star.style.setProperty('--ssdx', `${200 + Math.random() * 200}px`);
-  star.style.setProperty('--ssdy', `${150 + Math.random() * 150}px`);
+  star.style.setProperty('--ssdx', `${150 + Math.random() * 120}px`);
+  star.style.setProperty('--ssdy', `${110 + Math.random() * 90}px`);
   star.style.setProperty('--ssc', colors[Math.floor(Math.random() * colors.length)]);
   layer.appendChild(star);
   trackFeedbackElement(star);
-  setFeedbackTimer(() => removeFeedbackElement(star), 1100);
+  setFeedbackTimer(() => removeFeedbackElement(star), 900);
 }
 
 function launchBurst(isCorrect, isBig) {
@@ -225,9 +227,7 @@ function launchBurst(isCorrect, isBig) {
   const questionRect = target.getBoundingClientRect();
   const centerX = questionRect.left - appRect.left + questionRect.width / 2;
   const centerY = questionRect.top - appRect.top + questionRect.height / 2;
-  const requested = legacy
-    ? (isBig ? 30 : (isCorrect ? 22 : 14))
-    : (isBig ? 58 : (isCorrect ? 38 : 24));
+  const requested = isBig ? 18 : (isCorrect ? 12 : 8);
   const count = getParticleBudget(layer, requested);
   const symbols = isCorrect
     ? (legacy ? ['★', '×', '+', '♪'] : ['★', '✦', '♥', '♪', '✿', '◆', '✺'])
@@ -240,12 +240,12 @@ function launchBurst(isCorrect, isBig) {
 
   for (let i = 0; i < count; i++) {
     const spark = document.createElement('span');
-    const angle = (Math.PI * 2 * i / count) + Math.random() * (legacy ? 0.45 : 0.6);
+    const angle = (Math.PI * 2 * i / count) + Math.random() * (legacy ? 0.3 : 0.4);
     const distance = legacy
-      ? (isBig ? 180 : 120) + Math.random() * (isBig ? 120 : 70)
-      : (isBig ? 240 : 160) + Math.random() * (isBig ? 180 : 110);
+      ? (isBig ? 120 : 90) + Math.random() * (isBig ? 70 : 45)
+      : (isBig ? 150 : 105) + Math.random() * (isBig ? 80 : 55);
     const x = Math.cos(angle) * distance;
-    const y = Math.sin(angle) * distance - Math.random() * (legacy ? 45 : 70);
+    const y = Math.sin(angle) * distance - Math.random() * (legacy ? 28 : 40);
     spark.className = 'spark';
     spark.textContent = symbols[Math.floor(Math.random() * symbols.length)];
     spark.style.setProperty('--left', `${centerX}px`);
@@ -255,45 +255,14 @@ function launchBurst(isCorrect, isBig) {
     spark.style.setProperty('--spin', `${(Math.random() * (legacy ? 720 : 1080) - (legacy ? 360 : 540)).toFixed(0)}deg`);
     spark.style.setProperty('--spark-color', colors[i % colors.length]);
     spark.style.setProperty('--spark-size', legacy
-      ? `${14 + Math.random() * (isBig ? 18 : 12)}px`
-      : `${18 + Math.random() * (isBig ? 28 : 18)}px`);
+      ? `${13 + Math.random() * (isBig ? 10 : 8)}px`
+      : `${15 + Math.random() * (isBig ? 14 : 10)}px`);
     spark.style.setProperty('--spark-life', legacy
-      ? `${650 + Math.random() * 300}ms`
-      : `${720 + Math.random() * 420}ms`);
+      ? `${560 + Math.random() * 220}ms`
+      : `${620 + Math.random() * 260}ms`);
     layer.appendChild(spark);
     trackFeedbackElement(spark);
-    setFeedbackTimer(() => removeFeedbackElement(spark), legacy ? 1050 : 1300);
-  }
-
-  if (legacy) return;
-
-  // 二次バースト（少し遅れて 別方向に）
-  if (isCorrect) {
-    setFeedbackTimer(() => {
-      const secondRequested = isBig ? 26 : 18;
-      const secondCount = getParticleBudget(layer, secondRequested);
-      if (secondCount === 0) return;
-      for (let i = 0; i < secondCount; i++) {
-        const spark = document.createElement('span');
-        const angle = (Math.PI * 2 * i / secondCount) + Math.PI / secondCount;
-        const distance = (isBig ? 200 : 140) + Math.random() * 100;
-        const x = Math.cos(angle) * distance;
-        const y = Math.sin(angle) * distance - Math.random() * 50;
-        spark.className = 'spark';
-        spark.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-        spark.style.setProperty('--left', `${centerX}px`);
-        spark.style.setProperty('--top', `${centerY}px`);
-        spark.style.setProperty('--x', `${x}px`);
-        spark.style.setProperty('--y', `${y}px`);
-        spark.style.setProperty('--spin', `${(Math.random() * 720 - 360).toFixed(0)}deg`);
-        spark.style.setProperty('--spark-color', colors[i % colors.length]);
-        spark.style.setProperty('--spark-size', `${16 + Math.random() * 14}px`);
-        spark.style.setProperty('--spark-life', `${650 + Math.random() * 340}ms`);
-        layer.appendChild(spark);
-        trackFeedbackElement(spark);
-        setFeedbackTimer(() => removeFeedbackElement(spark), 1100);
-      }
-    }, 150);
+    setFeedbackTimer(() => removeFeedbackElement(spark), legacy ? 900 : 1050);
   }
 }
 
@@ -324,7 +293,7 @@ function endGame() {
       if (displayed >= score) return;
       displayed++;
       finalScoreEl.textContent = `${displayed} / ${totalQuestions}`;
-      playSe('btn');
+      if (displayed === score || displayed % 2 === 0) playSe('btn');
       if (displayed < score) setFeedbackTimer(tickScore, stepDuration);
     };
     setFeedbackTimer(tickScore, 400);
@@ -334,25 +303,15 @@ function endGame() {
       if (score > 0) launchBurst(true, isPerfect);
     }, 180);
 
-    // 紙吹雪 連発
+    // 紙吹雪は1回だけにしてリザルト遷移時のピーク負荷を抑える
     if (score > 0) {
-      const burstCount = isPerfect ? 3 : Math.min(3, Math.ceil(score / 3));
-      for (let i = 0; i < burstCount; i++) {
-        setFeedbackTimer(() => launchConfetti(isPerfect ? 18 : 12), 260 + i * 240);
-      }
+      setFeedbackTimer(() => launchConfetti(4), 260);
     }
 
-    // パーフェクト時 花火連発＋流れ星
+    // パーフェクト時も小規模な追加演出1回に抑える
     if (isPerfect) {
-      for (let i = 0; i < 2; i++) {
-        setFeedbackTimer(() => {
-          launchBurst(true, true);
-          launchLasers(true);
-        }, 600 + i * 360);
-      }
-      for (let i = 0; i < 2; i++) {
-        setFeedbackTimer(launchShootingStar, 540 + i * 240);
-      }
+      setFeedbackTimer(() => launchLasers(true), 560);
+      setFeedbackTimer(launchShootingStar, 620);
     }
   }
 
