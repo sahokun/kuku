@@ -1,227 +1,181 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="screen-orientation" content="portrait">
-  <title>九九がくしゅうアプリ</title>
-  
-  <!--
-  ゲーム要件:
-  ・九九の問題がランダムで出る（例: 2×2=?）
-  ・問題表示と同時に読み上げ音声が流れる（例: 「ににんが」）
-  ・1-9（および0）のボタンで答えを入力して答える
-  ・合ってたら⚪︎で1点、間違ってたら✖️で0点
-  ・合ってても間違えても正解の読み上げ音声が流れる（例: 「し」）
-  ・モード: 1-9の段の個別モード、1-3、3-5、6-9、1-4、5-9、1-9の段モード
-  ・タイトル画面、スコア画面がある
-  ・デザイン: KAWAIIカルチャー、ゆめかわいい、パステルカラー、丸ゴシック
-  ・5問目と10問目は逆問題: 答えが表示され、式（かけ算の数）を穴埋めで入力する
-  ・全問題で九九の読みがなを表示し、回答後に完全な読みが表示される
-    - 通常問題: 式と共に「ににんが」を表示、回答後に「し」を公開
-    - 逆問題: 答えと共に「し」を表示、回答後に「ににんが」を公開
-  -->
-
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ffd900">
+  <title>九九ぱれーど</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap" rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/layout.css">
-  <link rel="stylesheet" href="css/title.css">
+  <link rel="stylesheet" href="css/home.css">
   <link rel="stylesheet" href="css/game.css">
-  <link rel="stylesheet" href="css/feedback.css">
-  <link rel="stylesheet" href="css/table.css">
-  <link rel="stylesheet" href="css/result.css">
+  <link rel="stylesheet" href="css/screens.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/rewards.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/theme.css">
 </head>
 <body>
-
-  <div id="app">
-    <div class="scene-backdrop" aria-hidden="true">
-      <div class="sky-ribbon"></div>
-      <div class="warp-grid"></div>
-      <div class="floating-kuku">
-        <span>2×3</span>
-        <span>7×8</span>
-        <span>4×6</span>
-        <span>9×9</span>
-        <span>5×5</span>
+  <canvas id="background" aria-hidden="true"></canvas>
+  <canvas id="particles" aria-hidden="true"></canvas>
+  <canvas id="foreground" aria-hidden="true"></canvas>
+  <main id="app">
+    <header class="topbar"><a href="#" id="brand" aria-label="はじめの がめん">九九<span>ぱれーど</span></a><button id="sound" class="icon-button" aria-label="おとを だす" aria-pressed="false">♪<span>おと</span></button></header>
+    <p id="storage-warning" class="notice" hidden>きろくを のこせないよ。このがめんでは あそべるよ。</p>
+    <section id="home" class="screen">
+      <div class="home-status"><span id="home-date"></span><span>まい日 10ぷん</span></div>
+      <div class="home-tv">
+        <div class="tv-caption"><span class="live-dot"></span> きょうも いっしょに！</div>
+        <h1>できた！を<br><span>ふやそう。</span></h1>
+        <button id="mascot-home" class="mascot-host home-mascot" aria-label="こえを きく"></button>
+        <span class="tv-channel" aria-hidden="true">九九</span>
+        <span class="tv-hint">とりを おすと はなすよ ♪</span>
       </div>
-    </div>
-    <div id="burst-layer" aria-hidden="true"></div>
-    <div id="screen-flash" class="screen-flash" aria-hidden="true"></div>
-    <div id="mute-btn" class="mute-btn" onclick="toggleMute()">🔇</div>
-    <!-- タイトル画面 -->
-    <div id="title-screen" class="screen active">
-      <h1>九九がくしゅうアプリ</h1>
+      <div class="daily-card"><div class="row"><strong>きょうの がんばり</strong><span id="daily-time">0 / 10ふん</span></div><progress id="daily-progress" max="600000" value="0" aria-label="きょう あそんだ じかん"></progress><p id="daily-note">1かいは だいたい 1ぷん。</p></div>
+      <div class="next-play">
+        <div class="row"><span class="recommend-tag">つぎは これ！</span><span id="round-estimate"></span></div>
+        <h2 id="recommendation-title"></h2><p id="auto-description" class="help"></p>
+        <button id="auto-start" class="primary big">はじめる <span>▶</span></button>
+        <button id="choose-course" data-open="route" class="choose-course">ほかの だんを えらぶ →</button>
+      </div>
+      <button data-open="missions" class="mission-shortcut"><span class="shortcut-icon" aria-hidden="true">✿</span><span><strong>きょうの めあて</strong><small id="home-mission-note">あそんで はなを さかせよう</small></span><b id="home-mission-count">0 / 3</b><span aria-hidden="true">›</span></button>
+    </section>
+    <section id="menu" class="screen" hidden>
+      <div class="section-top"><button class="back">← もどる</button><h1>メニュー</h1></div>
+      <p class="help">きいたり、じぶんで えらんだり。</p>
+      <nav class="utility-menu" aria-label="メニュー">
+        <button data-open="table"><span class="menu-symbol" aria-hidden="true">♪</span><span><strong>九九を きく</strong><small>よみかたを たしかめよう</small></span><b aria-hidden="true">›</b></button>
+        <button data-open="manual"><span class="menu-symbol" aria-hidden="true">＋</span><span><strong>じぶんで えらぶ</strong><small>だん・はんい・もんだいを えらぶ</small></span><b aria-hidden="true">›</b></button>
+        <button data-open="settings"><span class="menu-symbol" aria-hidden="true">⚙</span><span><strong>せってい</strong><small>おと・こえ・うごき</small></span><b aria-hidden="true">›</b></button>
+      </nav>
+    </section>
+    <section id="missions" class="screen" hidden>
+      <div class="section-top"><button class="back">← もどる</button><h1>きょうの めあて</h1></div>
+      <div class="mission-card"><div class="row"><h2>きょうの めあて</h2><span id="mission-count"></span></div><div id="home-missions"></div><p id="mission-reward" class="help"></p></div>
+      <button data-open="calendar" class="secondary wide">あそんだ カレンダー →</button>
+    </section>
+    <section id="records" class="screen" hidden>
+      <div class="section-top"><button class="back">← もどる</button><h1>きろくを 見る</h1></div>
+      <div class="milestone"><span class="star">✦</span><div><strong id="mastered-count">しっかり おぼえた 0 / 72</strong><p>日を あけて できたら、ほしが つくよ。</p></div></div>
+      <nav class="record-menu utility-menu"><button data-open="map"><span class="menu-symbol" aria-hidden="true">★</span><span><strong>九九マップ</strong><small>しっかり おぼえた ほしを 見る</small></span><b aria-hidden="true">›</b></button><button data-open="calendar"><span class="menu-symbol" aria-hidden="true">▦</span><span><strong>カレンダー</strong><small>あそんだ日の はなを 見る</small></span><b aria-hidden="true">›</b></button><button data-open="challenge"><span class="menu-symbol" aria-hidden="true">♛</span><span><strong>ベストに ちょうせん</strong><small>はやく せいかいして スコアアップ！</small></span><b aria-hidden="true">›</b></button></nav>
+      <div id="dan-progress-card" class="dan-progress-card" hidden>
+        <div class="row"><strong id="dan-progress-title"></strong><span id="dan-progress-count"></span><button id="next-dan" class="next-dan">あそぶ →</button></div>
+        <div id="dan-progress-dots" class="dan-progress-dots" aria-label="だんの すすみぐあい"></div>
+      </div>
+    </section>
+    <section id="game" class="screen" hidden>
+      <div class="row game-bar"><button id="pause" class="quiet">ひとやすみ</button><strong id="round-name"></strong><span id="counter"></span></div>
+      <progress id="round-progress" max="10" value="0" aria-label="もんだいの すすみぐあい"></progress>
+      <div id="score-strip" class="score-strip"><span>スコア <strong id="game-score">0</strong></span><span id="game-best"></span><span id="score-gain" aria-live="polite"></span></div>
+      <div class="parade-meter"><span id="parade-label">ぱれーど はじまるよ</span><div id="parade-lights" aria-hidden="true"></div><span id="parade-count">0 / 10</span></div>
+      <div class="stage"><div class="stage-floor" aria-hidden="true"></div><div class="stage-lights" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><div class="stage-backdrop" aria-hidden="true"></div><div class="audience" aria-hidden="true"></div><div id="stage-cheer" aria-hidden="true"></div><div id="mascot-game" class="mascot-host" aria-hidden="true"></div><span id="combo" aria-live="polite"></span></div>
+      <div class="question-card"><div id="answer-seal" aria-hidden="true">できた！</div><p id="mode-note" class="eyebrow"></p><div id="equation" class="equation"></div><p id="reading" class="reading"></p><div id="answer" class="answer" aria-label="こたえ" aria-live="polite">?</div><p id="feedback" role="status"></p></div>
+      <div id="input-controls"><div class="numpad" aria-label="すうじの ボタン">
+        <button data-digit="1">1</button><button data-digit="2">2</button><button data-digit="3">3</button>
+        <button data-digit="4">4</button><button data-digit="5">5</button><button data-digit="6">6</button>
+        <button data-digit="7">7</button><button data-digit="8">8</button><button data-digit="9">9</button>
+        <button id="erase" class="key-small">けす</button><button data-digit="0">0</button><button id="enter" class="key-small key-enter">こたえる</button>
+      </div><button id="reveal" class="reveal">わからない → こたえを きく</button></div>
+      <div id="intro-guide" class="recitation-guide" hidden aria-hidden="true"><span data-step="listen">きく</span><span>→</span><span data-step="cue">せーのっ</span><span>→</span><span data-step="repeat">いっしょに</span></div>
+      <div id="voice-loading" hidden role="status"><p id="voice-load-status">こえを じゅんびちゅう…</p><div id="voice-load-actions" hidden><button id="voice-retry" class="primary wide">もういちど</button><button id="voice-skip" class="quiet wide">こえ なしで あそぶ</button></div></div>
+    </section>
+    <section id="result" class="screen" hidden>
+      <div class="result-hero"><div><p class="eyebrow">よく がんばったね！</p><h1 id="result-title">はなまる！</h1></div><div id="mascot-result" class="mascot-host result-mascot" aria-hidden="true"></div></div>
+      <div id="result-score-card" class="result-score-card" hidden><p id="result-score-label"></p><strong id="result-score"></strong></div>
+      <div class="result-card"><h2 id="result-main"></h2><p id="result-detail"></p></div>
+      <div id="result-missions" class="result-missions"></div><p id="result-time" class="help"></p>
+      <div class="result-actions"><button id="continue" class="primary big">つづける →</button><button data-open="result-answers" class="secondary wide">もんだいと こたえ →</button><button id="finish" class="quiet wide">きょうは おしまい</button></div>
+    </section>
+    <section id="result-answers" class="screen" hidden>
+      <div class="section-top"><button data-open="result" class="back">← けっか</button><h1>もんだいと こたえ</h1></div>
+      <p class="help">○ せいかい　× もういちど　♪ きいたよ</p>
+      <ol id="answer-list" class="answer-list" aria-label="このかいの もんだい"></ol>
+      <nav class="answer-pages" aria-label="もんだいの ページ"><button id="answers-prev" aria-label="まえの 5もん">← まえ</button><strong id="answers-page" aria-live="polite"></strong><button id="answers-next" aria-label="つぎの 5もん">つぎ →</button></nav>
+      <button data-open="result-details" class="secondary wide">スコア・きろくを 見る →</button>
+    </section>
+    <section id="result-details" class="screen" hidden>
+      <div class="section-top"><button data-open="result" class="back">← もどる</button><h1>このかいの きろく</h1></div>
+      <div class="detail-card"><p id="result-score-detail"></p><p id="result-comparison"></p><div id="result-changes"></div></div>
+      <div id="result-dan-progress" class="result-dan-progress"></div>
+      <button id="challenge-again" class="secondary wide" hidden>おなじ コースで もういちど →</button>
+      <button id="result-next-dan" class="secondary wide" hidden>だんを えらぶ →</button>
+      <button data-open="result" class="quiet wide">けっかに もどる</button>
+    </section>
+    <section id="route" class="screen" hidden>
+      <div class="section-top"><button class="back">← もどる</button><h1>あそぶ</h1></div>
+      <nav class="screen-tabs" aria-label="あそびかた"><button data-route-page="rows" aria-pressed="true">① だんを えらぶ</button><button data-route-page="mix" aria-pressed="false">② まぜる →</button><button data-route-page="final" aria-pressed="false">③ テスト →</button></nav>
+      <div id="route-rows" class="route-panel">
 
-      <div class="mode-section bgm-selector">
-        <h2>おんがく</h2>
-        <div class="bgm-grid">
-          <button class="btn bgm-option bgm-active" onclick="selectSong(0)">ゆったり</button>
-          <button class="btn bgm-option" onclick="selectSong(1)">わくわく</button>
-          <button class="btn bgm-option" onclick="selectSong(2)">たのしい</button>
-          <button class="btn bgm-option" onclick="selectSong(3)">キラキラ</button>
-          <button class="btn bgm-option" onclick="selectSong(4)">ノリノリ</button>
+      <div class="route-heading"><h2>① すきな だんから</h2><strong id="route-cleared"></strong></div>
+      <p class="help">だんを おして スタート！ クリアしたら まぜよう。</p>
+      <div id="route-list" class="route-list"></div>
+      <button id="route-tutorial" class="quiet wide"></button></div>
+      <section id="route-mix" class="mix-station route-panel" hidden><h2>② クリアした だんを まぜよう</h2>
+        <p id="mix-help" class="help"></p><div id="mix-choices" class="mix-choices"></div>
+        <button id="mix-all" class="quiet wide">クリアした だんを ぜんぶ えらぶ</button>
+        <p id="mix-count"></p><progress id="mix-progress" max="72" value="0"></progress>
+        <div id="mix-stamps" class="mix-stamps" aria-hidden="true"></div><p id="mix-rounds" class="help"></p>
+        <button id="mix-start" class="primary wide">まぜて 10もん →</button>
+        <p class="help">1かい 1〜2ふん。日を あけて、なんども！</p>
+      </section>
+      <section id="route-final" class="test-hub route-panel" hidden>
+        <div class="test-heading"><span aria-hidden="true">★</span><div><h2>テストに ちょうせん</h2><p id="final-status"></p></div></div>
+        <div class="test-options">
+          <button id="final-start" class="test-ticket"><span class="test-number">50<small>もん</small></span><span class="test-copy"><strong>チャレンジ</strong><span>2〜9のだんから</span><span>45もん せいかいで クリア</span></span><small id="final-record" class="test-record"></small></button>
+          <button id="all-start" class="test-ticket test-perfect"><span class="test-number">81<small>もん</small></span><span class="test-copy"><strong>ぜんぶに ちょうせん</strong><span>1〜9のだん、ぜんぶ！</span><span>81もん ぜんぶ せいかいで クリア</span></span><small id="all-record" class="test-record"></small></button>
         </div>
-      </div>
-
-      <div style="width: 100%; margin: 4px 0;">
-        <button class="btn btn-primary" style="width: 100%; font-size: 0.85rem; padding: 10px;" onclick="showTable()">📖 九九のひょう</button>
-      </div>
-
-      <div class="mode-section">
-        <div class="dan-header">
-          <h2>だんをえらんでね</h2>
-          <button id="combination-toggle" class="btn combination-btn" onclick="toggleCombinationMode()">くみあわせ</button>
-        </div>
-        <div class="mode-grid">
-          <button class="btn" data-dan="1" onclick="handleDanClick(1)">1のだん</button>
-          <button class="btn" data-dan="2" onclick="handleDanClick(2)">2のだん</button>
-          <button class="btn" data-dan="3" onclick="handleDanClick(3)">3のだん</button>
-          <button class="btn" data-dan="4" onclick="handleDanClick(4)">4のだん</button>
-          <button class="btn" data-dan="5" onclick="handleDanClick(5)">5のだん</button>
-          <button class="btn" data-dan="6" onclick="handleDanClick(6)">6のだん</button>
-          <button class="btn" data-dan="7" onclick="handleDanClick(7)">7のだん</button>
-          <button class="btn" data-dan="8" onclick="handleDanClick(8)">8のだん</button>
-          <button class="btn" data-dan="9" onclick="handleDanClick(9)">9のだん</button>
-        </div>
-        <button id="combination-start" class="btn btn-primary combination-start" onclick="startCombinationGame()" style="display: none;" disabled>スタート</button>
-      </div>
-
-      <div class="mode-section">
-        <h2>まとめて</h2>
-        <div class="range-grid">
-          <button class="btn btn-secondary" onclick="startGame('2-3')">2〜3のだん</button>
-          <button class="btn btn-secondary" onclick="startGame('4-6')">4〜6のだん</button>
-          <button class="btn btn-secondary" onclick="startGame('7-9')">7〜9のだん</button>
-          <button class="btn btn-secondary" onclick="startGame('2-5')">2〜5のだん</button>
-          <button class="btn btn-secondary" onclick="startGame('6-9')">6〜9のだん</button>
-          <button class="btn btn-primary" style="grid-column: span 2;" onclick="startGame('1-9')">ぜんぶ (1〜9)</button>
-          <button class="btn btn-secondary" style="grid-column: span 2;" onclick="showFreeSelect()">✏️ じゆうにえらぶ</button>
-        </div>
-      </div>
-
-      <div class="settings-row">
-        <span class="settings-label">もんだいすう</span>
-        <div class="stepper">
-          <button class="btn stepper-btn" onclick="changeQuestionCount(-1)">－</button>
-          <span id="question-count-display">10</span>
-          <button class="btn stepper-btn" onclick="changeQuestionCount(1)">＋</button>
-        </div>
-        <span class="settings-unit">もん</span>
-      </div>
-
-      <div class="mode-section bgm-selector">
-        <h2>えんしゅつ</h2>
-        <div class="fx-grid">
-          <button id="fx-btn-new" class="btn fx-option fx-active" onclick="selectFx('new')">ごうか</button>
-          <button id="fx-btn-legacy" class="btn fx-option" onclick="selectFx('legacy')">ふつう</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ゲーム画面 -->
-    <div id="game-screen" class="screen">
-      <div class="status-bar">
-        <button class="btn" style="font-size: 0.65rem; padding: 4px 10px; margin: 0;" onclick="showTitle()">やめる</button>
-        <span id="question-counter" class="status-bar-center">もんだい 1/10</span>
-        <span class="status-right">
-          <span id="score-display">スコア: 0</span>
-          <span id="combo-display" class="combo-display">れんぞく: 0</span>
-        </span>
-      </div>
-
-      <div class="power-stage" aria-hidden="true">
-        <div class="stage-ring back"></div>
-        <div class="stage-ring"></div>
-        <div class="stage-comet"></div>
-        <div class="stage-mini one" id="stage-left">?</div>
-        <div class="stage-mini two" id="stage-right">?</div>
-        <div class="stage-core" id="stage-number">GO</div>
-      </div>
-
-      <div class="question-area">
-        <div id="question-text" class="question-text"></div>
-        <div id="kuku-reading" class="kuku-reading"></div>
-        <div id="answer-display" class="answer-display">&nbsp;</div>
-      </div>
-
-      <div class="numpad">
-        <button class="num-btn" onclick="inputNum(7)">7</button>
-        <button class="num-btn" onclick="inputNum(8)">8</button>
-        <button class="num-btn" onclick="inputNum(9)">9</button>
-        <button class="num-btn" onclick="inputNum(4)">4</button>
-        <button class="num-btn" onclick="inputNum(5)">5</button>
-        <button class="num-btn" onclick="inputNum(6)">6</button>
-        <button class="num-btn" onclick="inputNum(1)">1</button>
-        <button class="num-btn" onclick="inputNum(2)">2</button>
-        <button class="num-btn" onclick="inputNum(3)">3</button>
-        <button class="num-btn action-btn btn-clear" onclick="clearInput()">けす</button>
-        <button class="num-btn" onclick="inputNum(0)">0</button>
-        <button class="num-btn action-btn btn-enter" onclick="submitAnswer()">OK</button>
-      </div>
-
-    </div>
-
-    <!-- フィードバック -->
-    <div id="feedback-overlay">
-      <div id="feedback-ring" class="feedback-ring"></div>
-      <div id="feedback-ring-2" class="feedback-ring" style="transition-delay: 0.15s;"></div>
-      <div id="feedback-icon" class="feedback-icon"></div>
-    </div>
-
-    <!-- リザルト画面 -->
-    <div id="result-screen" class="screen">
-      <h1>けっか</h1>
-      <div class="score-board">
-        <div class="score-text">あなたのスコア</div>
-        <div id="final-score" class="final-score">10</div>
-        <div id="perfect-msg" class="perfect-msg"></div>
-      </div>
-      <button class="btn btn-primary" onclick="showTitle()">もういっかい</button>
-    </div>
-
-    <!-- 自由選択画面 -->
-    <div id="free-select-screen" class="screen">
-      <h1>もんだいをえらぼう</h1>
-      <div class="free-select-controls">
-        <button class="btn btn-secondary" style="font-size: 0.7rem; padding: 5px 10px; min-width: auto;" onclick="selectAllFree()">すべてえらぶ</button>
-        <button class="btn" style="font-size: 0.7rem; padding: 5px 10px; min-width: auto;" onclick="clearAllFree()">クリア</button>
-        <span id="free-select-count">0もんえらびちゅう</span>
-      </div>
-      <div id="free-select-table" class="compact-kuku-table">
-        <!-- JS で生成 -->
-      </div>
-      <div class="free-select-footer">
-        <button class="btn btn-secondary" onclick="showTitle()">もどる</button>
-        <button class="btn btn-primary" id="free-start-btn" onclick="startFreeGame()" disabled>スタート</button>
-      </div>
-    </div>
-
-    <!-- 九九の表画面 -->
-    <div id="table-screen" class="screen">
-      <div class="table-header">
-        <button class="btn" style="font-size: 0.65rem; padding: 4px 10px;" onclick="showTitle()">もどる</button>
-        <h1 style="margin: 0; font-size: 1.1rem;">九九のひょう</h1>
-        <div style="width: 50px;"></div>
-      </div>
-
-      <div id="table-content" class="table-content">
-        <!-- 動的に生成 -->
-      </div>
-    </div>
-  </div>
-
-  <script src="js/state.js"></script>
-  <script src="js/speech.js"></script>
-  <script src="js/game.js"></script>
-  <script src="js/feedback.js"></script>
-  <script src="js/title.js"></script>
-  <script src="js/free-select.js"></script>
-  <script src="js/table.js"></script>
-  <script src="js/audio.js"></script>
-  <script src="js/se.js"></script>
-  <script src="js/init.js"></script>
+        <p id="test-unlock" class="help">8つの だんを クリアして、まぜて<br>72しゅるい できたら あそべるよ。</p>
+        <p class="help test-duration">50もん：4〜8ふん　81もん：7〜12ふん<br>とちゅうで ひとやすみ できるよ。</p>
+      </section>
+    </section>
+    <section id="challenge" class="screen" hidden>
+      <div class="section-top"><button class="back">← もどる</button><h1>きろくに ちょうせん</h1></div>
+      <p class="help">せいかい ＋ はやさ ＋ れんぞくで ベストを めざそう！</p>
+      <nav class="screen-tabs" aria-label="コース"><button data-course-page="rows" aria-pressed="true">だんごと</button><button data-course-page="mixed" aria-pressed="false">まぜる・テスト</button></nav><div id="challenge-list" class="challenge-list"></div>
+      <p class="help">いつも おなじ もんだいを、じゅんばんを かえて だすよ。<br>じゅんばんの れんしゅうが おわった だんで あそべるよ。</p>
+    </section>
+    <section id="calendar" class="screen" hidden>
+      <div class="section-top"><button class="back">← もどる</button><h1>あそんだ カレンダー</h1></div>
+      <div class="calendar-nav"><button id="calendar-prev" aria-label="まえの つき">←</button><h2 id="calendar-month"></h2><button id="calendar-next" aria-label="つぎの つき">→</button></div>
+      <div class="calendar-week" aria-hidden="true"><span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span></div>
+      <div id="calendar-grid" class="calendar-grid"></div><p class="help">● あそんだ日　✿ めあて ぜんぶ できた日<br>やすんでも、あつめた しるしは のこるよ。</p><p id="calendar-detail" class="detail-card" role="status"></p>
+    </section>
+    <section id="manual" class="screen" hidden>
+      <div class="section-top"><button class="back">← もどる</button><h1>じぶんで えらぶ</h1></div><nav class="screen-tabs" aria-label="えらびかた"><button data-manual-page="rows" aria-pressed="true">だんを おす</button><button data-manual-page="range" aria-pressed="false">はんいで えらぶ</button></nav>
+      <div id="dan-buttons" class="dan-grid"></div>
+      <div id="manual-range" class="range-picker" hidden><label>ここから<select id="range-from" aria-label="はじめの だん"></select></label><span>〜</span><label>ここまで<select id="range-to" aria-label="おわりの だん"></select></label><button id="range-apply">えらぶ</button></div>
+      <p id="manual-summary" class="help"></p><button id="manual-start" class="primary wide">10もん はじめる →</button><button id="manual-focus" class="secondary wide" hidden>この だんから すすめる →</button>
+      <button data-open="custom" class="quiet wide">もんだいを ひとつずつ えらぶ →</button>
+    </section>
+    <section id="custom" class="screen" hidden>
+      <div class="section-top"><button data-open="manual" class="back">← もどる</button><h1>もんだいを えらぶ</h1></div>
+      <p class="help">れんしゅうしたい マスを おしてね。</p><div id="problem-picker" class="kuku-grid"></div><button id="custom-start" class="primary wide" disabled>えらんだ もんだいで あそぶ</button>
+    </section>
+    <section id="map" class="screen" hidden>
+      <div class="section-top"><button class="back">← もどる</button><h1>九九マップ</h1></div><p id="map-count"></p><div class="map-growth" aria-label="ほしが ふえるほど おぼえたよ"><span>ほしを あつめよう</span><strong>☆ → ★ → ★★ → ★★★</strong></div>
+      <div id="map-grid" class="kuku-grid"></div><button id="map-tutorial" class="quiet map-tutorial">1のだん · はじめの れんしゅう →</button><p class="help">ほしが 3こで、しっかり おぼえた！<br>オレンジの しるしは、おさらいしよう。</p><div id="map-detail" class="detail-card" aria-live="polite">マスを おすと、きろくが 見られるよ。</div>
+    </section>
+    <section id="table" class="screen" hidden>
+      <div class="section-top"><button class="back">← もどる</button><h1>九九を きく</h1></div><label class="table-select">だんを えらぶ <select id="table-dan" aria-label="きく だん"></select></label><p class="help">おすと よみかたを きけるよ。</p><div id="table-list"></div>
+    </section>
+    <section id="settings" class="screen" hidden>
+      <div class="section-top"><button class="back">← もどる</button><h1>せってい</h1></div>
+      <div class="settings-card"><label class="pace-setting"><span>こたえる<br>じかん</span><select id="setting-pace" aria-label="こたえる じかん"><option value="auto">おまかせ</option><option value="first">はじめて（なし）</option><option value="easy">やさしい（10びょう）</option><option value="normal">ふつう（5びょう）</option><option value="hard">むずかしい（3びょう）</option><option value="robot">ろぼっと（1.5びょう）</option></select></label><label>おんがくと おと<input id="setting-sound" type="checkbox"></label><label>こえで よむ<input id="setting-voice" type="checkbox"></label><label>おとの おおきさ<input id="setting-volume" type="range" min="0" max="100"></label><label>うごきの おおきさ<input id="setting-motion" type="range" min="0" max="100"></label></div>
+      <p class="help voice-credit">こえ：<a href="https://voicevox.hiroshiba.jp/product/kasukabe_tsumugi/" target="_blank" rel="noopener">VOICEVOX:春日部つむぎ</a></p>
+      <p class="help">きろくは このブラウザに のこるよ。</p><button id="tutorial-replay" class="secondary wide">1のだんで れんしゅう</button>
+    </section>
+    <nav id="main-nav" class="main-nav" aria-label="メインメニュー">
+      <button data-open="home" data-nav="home" aria-current="page"><span aria-hidden="true">⌂</span><strong>ホーム</strong></button>
+      <button data-open="route" data-nav="route"><span class="nav-play" aria-hidden="true"></span><strong>あそぶ</strong></button>
+      <button data-open="records" data-nav="records"><span aria-hidden="true">★</span><strong>きろく</strong></button>
+      <button data-open="menu" data-nav="menu"><span aria-hidden="true">☰</span><strong>メニュー</strong></button>
+    </nav>
+    <dialog id="round-setup" aria-labelledby="round-setup-title"><p class="eyebrow">あそぶ じゅんび</p><h2 id="round-setup-title" tabindex="-1" autofocus></h2><label for="round-pace">こたえる じかん</label><select id="round-pace"><option value="auto">おまかせ</option><option value="first">はじめて（じかん なし）</option><option value="easy">やさしい（10びょう）</option><option value="normal">ふつう（5びょう）</option><option value="hard">むずかしい（3びょう）</option><option value="robot">ろぼっと（1.5びょう）</option></select><strong id="round-pace-preview"></strong><p id="round-pace-note" class="help"></p><p class="help">あそんでいる あいだは、じかんは かわらないよ。</p><button id="round-go" class="primary wide">はじめる ▶</button><button id="round-cancel" class="quiet wide">もどる</button></dialog>
+    <dialog id="pause-dialog"><h2>ひとやすみ</h2><p>じかんは とまっているよ。</p><button id="resume" class="primary wide">つづける</button><button id="quit" class="quiet wide">はじめに もどる</button></dialog>
+  </main>
+  <div id="reward-toast" role="status" hidden></div>
+  <script src="js/viewport.js"></script><script src="js/data.js"></script><script src="js/learning.js"></script><script src="js/rewards.js"></script><script src="js/results.js"></script><script src="js/store.js"></script><script src="js/voice-manifest.js"></script><script src="js/voice-files.js"></script><script src="js/sound.js"></script><script src="js/visuals.js"></script><script src="js/recitation.js"></script><script src="js/journey.js"></script><script src="js/diagnostics.js"></script><script src="js/app.js"></script>
 </body>
 </html>

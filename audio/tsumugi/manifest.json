@@ -1,0 +1,1215 @@
+{
+  "credit": "VOICEVOX:春日部つむぎ",
+  "core": "0.17.0",
+  "style": 8,
+  "clips": {
+    "いってみよう。せーのっ！": {
+      "bank": "cue",
+      "offset": 0.0,
+      "duration": 1.952,
+      "id": "cue"
+    },
+    "いんいちが": {
+      "bank": "dan-1",
+      "offset": 0.0,
+      "duration": 0.8426666666666667,
+      "id": "1-1-question"
+    },
+    "いんいちがいち": {
+      "bank": "dan-1",
+      "offset": 0.9626666666666667,
+      "duration": 1.1413333333333333,
+      "id": "1-1-full"
+    },
+    "いんにが": {
+      "bank": "dan-1",
+      "offset": 2.224,
+      "duration": 0.704,
+      "id": "1-2-question"
+    },
+    "いんにがに": {
+      "bank": "dan-1",
+      "offset": 3.048,
+      "duration": 0.8426666666666667,
+      "id": "1-2-full"
+    },
+    "いんさんが": {
+      "bank": "dan-1",
+      "offset": 4.010666666666666,
+      "duration": 0.7786666666666666,
+      "id": "1-3-question"
+    },
+    "いんさんがさん": {
+      "bank": "dan-1",
+      "offset": 4.9093333333333335,
+      "duration": 1.0026666666666666,
+      "id": "1-3-full"
+    },
+    "いんしが": {
+      "bank": "dan-1",
+      "offset": 6.032,
+      "duration": 0.6613333333333333,
+      "id": "1-4-question"
+    },
+    "いんしがし": {
+      "bank": "dan-1",
+      "offset": 6.8133333333333335,
+      "duration": 0.832,
+      "id": "1-4-full"
+    },
+    "いんごが": {
+      "bank": "dan-1",
+      "offset": 7.765333333333333,
+      "duration": 0.7253333333333334,
+      "id": "1-5-question"
+    },
+    "いんごがご": {
+      "bank": "dan-1",
+      "offset": 8.610666666666667,
+      "duration": 0.8426666666666667,
+      "id": "1-5-full"
+    },
+    "いんろくが": {
+      "bank": "dan-1",
+      "offset": 9.573333333333334,
+      "duration": 0.8426666666666667,
+      "id": "1-6-question"
+    },
+    "いんろくがろく": {
+      "bank": "dan-1",
+      "offset": 10.536,
+      "duration": 1.056,
+      "id": "1-6-full"
+    },
+    "いんしちが": {
+      "bank": "dan-1",
+      "offset": 11.712,
+      "duration": 0.832,
+      "id": "1-7-question"
+    },
+    "いんしちがしち": {
+      "bank": "dan-1",
+      "offset": 12.664,
+      "duration": 1.1733333333333333,
+      "id": "1-7-full"
+    },
+    "いんはちが": {
+      "bank": "dan-1",
+      "offset": 13.957333333333333,
+      "duration": 0.8213333333333334,
+      "id": "1-8-question"
+    },
+    "いんはちがはち": {
+      "bank": "dan-1",
+      "offset": 14.898666666666667,
+      "duration": 1.152,
+      "id": "1-8-full"
+    },
+    "いんくが": {
+      "bank": "dan-1",
+      "offset": 16.170666666666666,
+      "duration": 0.704,
+      "id": "1-9-question"
+    },
+    "いんくがく": {
+      "bank": "dan-1",
+      "offset": 16.994666666666667,
+      "duration": 0.8213333333333334,
+      "id": "1-9-full"
+    },
+    "にいちが": {
+      "bank": "dan-2",
+      "offset": 0.0,
+      "duration": 0.736,
+      "id": "2-1-question"
+    },
+    "にいちがに": {
+      "bank": "dan-2",
+      "offset": 0.856,
+      "duration": 0.8853333333333333,
+      "id": "2-1-full"
+    },
+    "ににんが": {
+      "bank": "dan-2",
+      "offset": 1.8613333333333333,
+      "duration": 0.7146666666666667,
+      "id": "2-2-question"
+    },
+    "ににんがし": {
+      "bank": "dan-2",
+      "offset": 2.696,
+      "duration": 0.8746666666666667,
+      "id": "2-2-full"
+    },
+    "にさんが": {
+      "bank": "dan-2",
+      "offset": 3.6906666666666665,
+      "duration": 0.7466666666666667,
+      "id": "2-3-question"
+    },
+    "にさんがろく": {
+      "bank": "dan-2",
+      "offset": 4.557333333333333,
+      "duration": 0.9813333333333333,
+      "id": "2-3-full"
+    },
+    "にしが": {
+      "bank": "dan-2",
+      "offset": 5.658666666666667,
+      "duration": 0.608,
+      "id": "2-4-question"
+    },
+    "にしがはち": {
+      "bank": "dan-2",
+      "offset": 6.386666666666667,
+      "duration": 0.9493333333333334,
+      "id": "2-4-full"
+    },
+    "にご": {
+      "bank": "dan-2",
+      "offset": 7.456,
+      "duration": 0.512,
+      "id": "2-5-question"
+    },
+    "にごじゅう": {
+      "bank": "dan-2",
+      "offset": 8.088,
+      "duration": 0.736,
+      "id": "2-5-full"
+    },
+    "にろく": {
+      "bank": "dan-2",
+      "offset": 8.944,
+      "duration": 0.6293333333333333,
+      "id": "2-6-question"
+    },
+    "にろくじゅうに": {
+      "bank": "dan-2",
+      "offset": 9.693333333333333,
+      "duration": 1.0133333333333334,
+      "id": "2-6-full"
+    },
+    "にしち": {
+      "bank": "dan-2",
+      "offset": 10.826666666666666,
+      "duration": 0.7253333333333334,
+      "id": "2-7-question"
+    },
+    "にしちじゅうし": {
+      "bank": "dan-2",
+      "offset": 11.672,
+      "duration": 1.088,
+      "id": "2-7-full"
+    },
+    "にはち": {
+      "bank": "dan-2",
+      "offset": 12.88,
+      "duration": 0.7146666666666667,
+      "id": "2-8-question"
+    },
+    "にはちじゅうろく": {
+      "bank": "dan-2",
+      "offset": 13.714666666666666,
+      "duration": 1.12,
+      "id": "2-8-full"
+    },
+    "にく": {
+      "bank": "dan-2",
+      "offset": 14.954666666666666,
+      "duration": 0.5226666666666666,
+      "id": "2-9-question"
+    },
+    "にくじゅうはち": {
+      "bank": "dan-2",
+      "offset": 15.597333333333333,
+      "duration": 1.0453333333333332,
+      "id": "2-9-full"
+    },
+    "さんいちが": {
+      "bank": "dan-3",
+      "offset": 0.0,
+      "duration": 0.9386666666666666,
+      "id": "3-1-question"
+    },
+    "さんいちがさん": {
+      "bank": "dan-3",
+      "offset": 1.0586666666666666,
+      "duration": 1.1626666666666667,
+      "id": "3-1-full"
+    },
+    "さんにが": {
+      "bank": "dan-3",
+      "offset": 2.3413333333333335,
+      "duration": 0.7893333333333333,
+      "id": "3-2-question"
+    },
+    "さんにがろく": {
+      "bank": "dan-3",
+      "offset": 3.2506666666666666,
+      "duration": 1.024,
+      "id": "3-2-full"
+    },
+    "さざんが": {
+      "bank": "dan-3",
+      "offset": 4.394666666666667,
+      "duration": 0.768,
+      "id": "3-3-question"
+    },
+    "さざんがく": {
+      "bank": "dan-3",
+      "offset": 5.282666666666667,
+      "duration": 0.8853333333333333,
+      "id": "3-3-full"
+    },
+    "さんし": {
+      "bank": "dan-3",
+      "offset": 6.288,
+      "duration": 0.7466666666666667,
+      "id": "3-4-question"
+    },
+    "さんしじゅうに": {
+      "bank": "dan-3",
+      "offset": 7.1546666666666665,
+      "duration": 1.056,
+      "id": "3-4-full"
+    },
+    "さんご": {
+      "bank": "dan-3",
+      "offset": 8.330666666666668,
+      "duration": 0.6826666666666666,
+      "id": "3-5-question"
+    },
+    "さんごじゅうご": {
+      "bank": "dan-3",
+      "offset": 9.133333333333333,
+      "duration": 1.0453333333333332,
+      "id": "3-5-full"
+    },
+    "さぶろく": {
+      "bank": "dan-3",
+      "offset": 10.298666666666668,
+      "duration": 0.7893333333333333,
+      "id": "3-6-question"
+    },
+    "さぶろくじゅうはち": {
+      "bank": "dan-3",
+      "offset": 11.208,
+      "duration": 1.312,
+      "id": "3-6-full"
+    },
+    "さんしち": {
+      "bank": "dan-3",
+      "offset": 12.64,
+      "duration": 0.8746666666666667,
+      "id": "3-7-question"
+    },
+    "さんしちにじゅういち": {
+      "bank": "dan-3",
+      "offset": 13.634666666666666,
+      "duration": 1.4613333333333334,
+      "id": "3-7-full"
+    },
+    "さんぱ": {
+      "bank": "dan-3",
+      "offset": 15.216,
+      "duration": 0.7146666666666667,
+      "id": "3-8-question"
+    },
+    "さんぱにじゅうし": {
+      "bank": "dan-3",
+      "offset": 16.050666666666668,
+      "duration": 1.2373333333333334,
+      "id": "3-8-full"
+    },
+    "さんく": {
+      "bank": "dan-3",
+      "offset": 17.408,
+      "duration": 0.7146666666666667,
+      "id": "3-9-question"
+    },
+    "さんくにじゅうしち": {
+      "bank": "dan-3",
+      "offset": 18.24266666666667,
+      "duration": 1.344,
+      "id": "3-9-full"
+    },
+    "しいちが": {
+      "bank": "dan-4",
+      "offset": 0.0,
+      "duration": 0.8106666666666666,
+      "id": "4-1-question"
+    },
+    "しいちがし": {
+      "bank": "dan-4",
+      "offset": 0.9306666666666666,
+      "duration": 0.96,
+      "id": "4-1-full"
+    },
+    "しにが": {
+      "bank": "dan-4",
+      "offset": 2.010666666666667,
+      "duration": 0.6826666666666666,
+      "id": "4-2-question"
+    },
+    "しにがはち": {
+      "bank": "dan-4",
+      "offset": 2.8133333333333335,
+      "duration": 1.024,
+      "id": "4-2-full"
+    },
+    "しさん": {
+      "bank": "dan-4",
+      "offset": 3.957333333333333,
+      "duration": 0.672,
+      "id": "4-3-question"
+    },
+    "しさんじゅうに": {
+      "bank": "dan-4",
+      "offset": 4.749333333333333,
+      "duration": 1.0453333333333332,
+      "id": "4-3-full"
+    },
+    "しし": {
+      "bank": "dan-4",
+      "offset": 5.914666666666666,
+      "duration": 0.6613333333333333,
+      "id": "4-4-question"
+    },
+    "ししじゅうろく": {
+      "bank": "dan-4",
+      "offset": 6.696,
+      "duration": 1.056,
+      "id": "4-4-full"
+    },
+    "しご": {
+      "bank": "dan-4",
+      "offset": 7.872,
+      "duration": 0.5546666666666666,
+      "id": "4-5-question"
+    },
+    "しごにじゅう": {
+      "bank": "dan-4",
+      "offset": 8.546666666666667,
+      "duration": 0.8853333333333333,
+      "id": "4-5-full"
+    },
+    "しろく": {
+      "bank": "dan-4",
+      "offset": 9.552,
+      "duration": 0.672,
+      "id": "4-6-question"
+    },
+    "しろくにじゅうし": {
+      "bank": "dan-4",
+      "offset": 10.344,
+      "duration": 1.216,
+      "id": "4-6-full"
+    },
+    "ししち": {
+      "bank": "dan-4",
+      "offset": 11.68,
+      "duration": 0.7893333333333333,
+      "id": "4-7-question"
+    },
+    "ししちにじゅうはち": {
+      "bank": "dan-4",
+      "offset": 12.589333333333334,
+      "duration": 1.376,
+      "id": "4-7-full"
+    },
+    "しハ": {
+      "bank": "dan-4",
+      "offset": 14.085333333333333,
+      "duration": 0.576,
+      "id": "4-8-question"
+    },
+    "しハさんじゅうに": {
+      "bank": "dan-4",
+      "offset": 14.781333333333333,
+      "duration": 1.1733333333333333,
+      "id": "4-8-full"
+    },
+    "しく": {
+      "bank": "dan-4",
+      "offset": 16.074666666666666,
+      "duration": 0.544,
+      "id": "4-9-question"
+    },
+    "しくさんじゅうろく": {
+      "bank": "dan-4",
+      "offset": 16.738666666666667,
+      "duration": 1.2053333333333334,
+      "id": "4-9-full"
+    },
+    "ごいちが": {
+      "bank": "dan-5",
+      "offset": 0.0,
+      "duration": 0.7253333333333334,
+      "id": "5-1-question"
+    },
+    "ごいちがご": {
+      "bank": "dan-5",
+      "offset": 0.8453333333333334,
+      "duration": 0.864,
+      "id": "5-1-full"
+    },
+    "ごに": {
+      "bank": "dan-5",
+      "offset": 1.8293333333333333,
+      "duration": 0.512,
+      "id": "5-2-question"
+    },
+    "ごにじゅう": {
+      "bank": "dan-5",
+      "offset": 2.461333333333333,
+      "duration": 0.7146666666666667,
+      "id": "5-2-full"
+    },
+    "ごさん": {
+      "bank": "dan-5",
+      "offset": 3.296,
+      "duration": 0.64,
+      "id": "5-3-question"
+    },
+    "ごさんじゅうご": {
+      "bank": "dan-5",
+      "offset": 4.056,
+      "duration": 0.9813333333333333,
+      "id": "5-3-full"
+    },
+    "ごし": {
+      "bank": "dan-5",
+      "offset": 5.157333333333334,
+      "duration": 0.5546666666666666,
+      "id": "5-4-question"
+    },
+    "ごしにじゅう": {
+      "bank": "dan-5",
+      "offset": 5.832,
+      "duration": 0.8426666666666667,
+      "id": "5-4-full"
+    },
+    "ごご": {
+      "bank": "dan-5",
+      "offset": 6.794666666666667,
+      "duration": 0.512,
+      "id": "5-5-question"
+    },
+    "ごごにじゅうご": {
+      "bank": "dan-5",
+      "offset": 7.426666666666667,
+      "duration": 0.9706666666666667,
+      "id": "5-5-full"
+    },
+    "ごろく": {
+      "bank": "dan-5",
+      "offset": 8.517333333333333,
+      "duration": 0.608,
+      "id": "5-6-question"
+    },
+    "ごろくさんじゅう": {
+      "bank": "dan-5",
+      "offset": 9.245333333333333,
+      "duration": 0.992,
+      "id": "5-6-full"
+    },
+    "ごしち": {
+      "bank": "dan-5",
+      "offset": 10.357333333333333,
+      "duration": 0.7146666666666667,
+      "id": "5-7-question"
+    },
+    "ごしちさんじゅうご": {
+      "bank": "dan-5",
+      "offset": 11.192,
+      "duration": 1.1946666666666668,
+      "id": "5-7-full"
+    },
+    "ごハ": {
+      "bank": "dan-5",
+      "offset": 12.506666666666666,
+      "duration": 0.5226666666666666,
+      "id": "5-8-question"
+    },
+    "ごハしじゅう": {
+      "bank": "dan-5",
+      "offset": 13.149333333333333,
+      "duration": 0.8533333333333334,
+      "id": "5-8-full"
+    },
+    "ごく": {
+      "bank": "dan-5",
+      "offset": 14.122666666666667,
+      "duration": 0.544,
+      "id": "5-9-question"
+    },
+    "ごくしじゅうご": {
+      "bank": "dan-5",
+      "offset": 14.786666666666667,
+      "duration": 1.0026666666666666,
+      "id": "5-9-full"
+    },
+    "ろくいちが": {
+      "bank": "dan-6",
+      "offset": 0.0,
+      "duration": 0.8853333333333333,
+      "id": "6-1-question"
+    },
+    "ろくいちがろく": {
+      "bank": "dan-6",
+      "offset": 1.0053333333333334,
+      "duration": 1.1306666666666667,
+      "id": "6-1-full"
+    },
+    "ろくに": {
+      "bank": "dan-6",
+      "offset": 2.256,
+      "duration": 0.672,
+      "id": "6-2-question"
+    },
+    "ろくにじゅうに": {
+      "bank": "dan-6",
+      "offset": 3.048,
+      "duration": 1.0346666666666666,
+      "id": "6-2-full"
+    },
+    "ろくさん": {
+      "bank": "dan-6",
+      "offset": 4.2026666666666666,
+      "duration": 0.7146666666666667,
+      "id": "6-3-question"
+    },
+    "ろくさんじゅうはち": {
+      "bank": "dan-6",
+      "offset": 5.037333333333334,
+      "duration": 1.2693333333333334,
+      "id": "6-3-full"
+    },
+    "ろくし": {
+      "bank": "dan-6",
+      "offset": 6.426666666666667,
+      "duration": 0.704,
+      "id": "6-4-question"
+    },
+    "ろくしにじゅうし": {
+      "bank": "dan-6",
+      "offset": 7.250666666666667,
+      "duration": 1.184,
+      "id": "6-4-full"
+    },
+    "ろくご": {
+      "bank": "dan-6",
+      "offset": 8.554666666666666,
+      "duration": 0.6506666666666666,
+      "id": "6-5-question"
+    },
+    "ろくごさんじゅう": {
+      "bank": "dan-6",
+      "offset": 9.325333333333333,
+      "duration": 1.0453333333333332,
+      "id": "6-5-full"
+    },
+    "ろくろく": {
+      "bank": "dan-6",
+      "offset": 10.490666666666666,
+      "duration": 0.768,
+      "id": "6-6-question"
+    },
+    "ろくろくさんじゅうろく": {
+      "bank": "dan-6",
+      "offset": 11.378666666666666,
+      "duration": 1.4186666666666667,
+      "id": "6-6-full"
+    },
+    "ろくしち": {
+      "bank": "dan-6",
+      "offset": 12.917333333333334,
+      "duration": 0.8426666666666667,
+      "id": "6-7-question"
+    },
+    "ろくしちしじゅうに": {
+      "bank": "dan-6",
+      "offset": 13.88,
+      "duration": 1.3013333333333332,
+      "id": "6-7-full"
+    },
+    "ろくハ": {
+      "bank": "dan-6",
+      "offset": 15.301333333333334,
+      "duration": 0.6613333333333333,
+      "id": "6-8-question"
+    },
+    "ろくハしじゅうはち": {
+      "bank": "dan-6",
+      "offset": 16.082666666666668,
+      "duration": 1.312,
+      "id": "6-8-full"
+    },
+    "ろっく": {
+      "bank": "dan-6",
+      "offset": 17.514666666666667,
+      "duration": 0.64,
+      "id": "6-9-question"
+    },
+    "ろっくごじゅうし": {
+      "bank": "dan-6",
+      "offset": 18.27466666666667,
+      "duration": 1.1306666666666667,
+      "id": "6-9-full"
+    },
+    "しちいちが": {
+      "bank": "dan-7",
+      "offset": 0.0,
+      "duration": 0.9493333333333334,
+      "id": "7-1-question"
+    },
+    "しちいちがしち": {
+      "bank": "dan-7",
+      "offset": 1.0693333333333332,
+      "duration": 1.2906666666666666,
+      "id": "7-1-full"
+    },
+    "しちに": {
+      "bank": "dan-7",
+      "offset": 2.48,
+      "duration": 0.736,
+      "id": "7-2-question"
+    },
+    "しちにじゅうし": {
+      "bank": "dan-7",
+      "offset": 3.336,
+      "duration": 1.1093333333333333,
+      "id": "7-2-full"
+    },
+    "しちさん": {
+      "bank": "dan-7",
+      "offset": 4.565333333333333,
+      "duration": 0.8106666666666666,
+      "id": "7-3-question"
+    },
+    "しちさんにじゅういち": {
+      "bank": "dan-7",
+      "offset": 5.496,
+      "duration": 1.472,
+      "id": "7-3-full"
+    },
+    "しちし": {
+      "bank": "dan-7",
+      "offset": 7.088,
+      "duration": 0.768,
+      "id": "7-4-question"
+    },
+    "しちしにじゅうはち": {
+      "bank": "dan-7",
+      "offset": 7.976,
+      "duration": 1.3546666666666667,
+      "id": "7-4-full"
+    },
+    "しちご": {
+      "bank": "dan-7",
+      "offset": 9.450666666666667,
+      "duration": 0.6933333333333334,
+      "id": "7-5-question"
+    },
+    "しちごさんじゅうご": {
+      "bank": "dan-7",
+      "offset": 10.264,
+      "duration": 1.28,
+      "id": "7-5-full"
+    },
+    "しちろく": {
+      "bank": "dan-7",
+      "offset": 11.664,
+      "duration": 0.832,
+      "id": "7-6-question"
+    },
+    "しちろくしじゅうに": {
+      "bank": "dan-7",
+      "offset": 12.616,
+      "duration": 1.3333333333333333,
+      "id": "7-6-full"
+    },
+    "しちしち": {
+      "bank": "dan-7",
+      "offset": 14.069333333333333,
+      "duration": 0.9173333333333333,
+      "id": "7-7-question"
+    },
+    "しちしちしじゅうく": {
+      "bank": "dan-7",
+      "offset": 15.106666666666667,
+      "duration": 1.3226666666666667,
+      "id": "7-7-full"
+    },
+    "しちハ": {
+      "bank": "dan-7",
+      "offset": 16.549333333333333,
+      "duration": 0.704,
+      "id": "7-8-question"
+    },
+    "しちハごじゅうろく": {
+      "bank": "dan-7",
+      "offset": 17.373333333333335,
+      "duration": 1.28,
+      "id": "7-8-full"
+    },
+    "しちく": {
+      "bank": "dan-7",
+      "offset": 18.773333333333333,
+      "duration": 0.6933333333333334,
+      "id": "7-9-question"
+    },
+    "しちくろくじゅうさん": {
+      "bank": "dan-7",
+      "offset": 19.586666666666666,
+      "duration": 1.312,
+      "id": "7-9-full"
+    },
+    "はちいちが": {
+      "bank": "dan-8",
+      "offset": 0.0,
+      "duration": 0.9173333333333333,
+      "id": "8-1-question"
+    },
+    "はちいちがはち": {
+      "bank": "dan-8",
+      "offset": 1.0373333333333334,
+      "duration": 1.2586666666666666,
+      "id": "8-1-full"
+    },
+    "はちに": {
+      "bank": "dan-8",
+      "offset": 2.416,
+      "duration": 0.6933333333333334,
+      "id": "8-2-question"
+    },
+    "はちにじゅうろく": {
+      "bank": "dan-8",
+      "offset": 3.2293333333333334,
+      "duration": 1.12,
+      "id": "8-2-full"
+    },
+    "はちさん": {
+      "bank": "dan-8",
+      "offset": 4.469333333333333,
+      "duration": 0.7466666666666667,
+      "id": "8-3-question"
+    },
+    "はちさんにじゅうし": {
+      "bank": "dan-8",
+      "offset": 5.336,
+      "duration": 1.3013333333333332,
+      "id": "8-3-full"
+    },
+    "はちし": {
+      "bank": "dan-8",
+      "offset": 6.757333333333333,
+      "duration": 0.7253333333333334,
+      "id": "8-4-question"
+    },
+    "はちしさんじゅうに": {
+      "bank": "dan-8",
+      "offset": 7.602666666666667,
+      "duration": 1.2586666666666666,
+      "id": "8-4-full"
+    },
+    "はちご": {
+      "bank": "dan-8",
+      "offset": 8.981333333333334,
+      "duration": 0.6506666666666666,
+      "id": "8-5-question"
+    },
+    "はちごしじゅう": {
+      "bank": "dan-8",
+      "offset": 9.752,
+      "duration": 1.0133333333333334,
+      "id": "8-5-full"
+    },
+    "はちろく": {
+      "bank": "dan-8",
+      "offset": 10.885333333333334,
+      "duration": 0.7786666666666666,
+      "id": "8-6-question"
+    },
+    "はちろくしじゅうはち": {
+      "bank": "dan-8",
+      "offset": 11.784,
+      "duration": 1.44,
+      "id": "8-6-full"
+    },
+    "はちしち": {
+      "bank": "dan-8",
+      "offset": 13.344,
+      "duration": 0.864,
+      "id": "8-7-question"
+    },
+    "はちしちごじゅうろく": {
+      "bank": "dan-8",
+      "offset": 14.328,
+      "duration": 1.376,
+      "id": "8-7-full"
+    },
+    "はっぱ": {
+      "bank": "dan-8",
+      "offset": 15.824,
+      "duration": 0.6506666666666666,
+      "id": "8-8-question"
+    },
+    "はっぱろくじゅうし": {
+      "bank": "dan-8",
+      "offset": 16.594666666666665,
+      "duration": 1.248,
+      "id": "8-8-full"
+    },
+    "はっく": {
+      "bank": "dan-8",
+      "offset": 17.962666666666667,
+      "duration": 0.6613333333333333,
+      "id": "8-9-question"
+    },
+    "はっくしちじゅうに": {
+      "bank": "dan-8",
+      "offset": 18.744,
+      "duration": 1.2586666666666666,
+      "id": "8-9-full"
+    },
+    "くいちが": {
+      "bank": "dan-9",
+      "offset": 0.0,
+      "duration": 0.7466666666666667,
+      "id": "9-1-question"
+    },
+    "くいちがく": {
+      "bank": "dan-9",
+      "offset": 0.8666666666666667,
+      "duration": 0.864,
+      "id": "9-1-full"
+    },
+    "くに": {
+      "bank": "dan-9",
+      "offset": 1.8506666666666667,
+      "duration": 0.5653333333333334,
+      "id": "9-2-question"
+    },
+    "くにじゅうはち": {
+      "bank": "dan-9",
+      "offset": 2.536,
+      "duration": 1.056,
+      "id": "9-2-full"
+    },
+    "くさん": {
+      "bank": "dan-9",
+      "offset": 3.712,
+      "duration": 0.6186666666666667,
+      "id": "9-3-question"
+    },
+    "くさんにじゅうしち": {
+      "bank": "dan-9",
+      "offset": 4.450666666666667,
+      "duration": 1.2906666666666666,
+      "id": "9-3-full"
+    },
+    "くし": {
+      "bank": "dan-9",
+      "offset": 5.8613333333333335,
+      "duration": 0.576,
+      "id": "9-4-question"
+    },
+    "くしさんじゅうろく": {
+      "bank": "dan-9",
+      "offset": 6.557333333333333,
+      "duration": 1.1733333333333333,
+      "id": "9-4-full"
+    },
+    "くご": {
+      "bank": "dan-9",
+      "offset": 7.850666666666666,
+      "duration": 0.5226666666666666,
+      "id": "9-5-question"
+    },
+    "くごしじゅうご": {
+      "bank": "dan-9",
+      "offset": 8.493333333333334,
+      "duration": 0.992,
+      "id": "9-5-full"
+    },
+    "くろく": {
+      "bank": "dan-9",
+      "offset": 9.605333333333334,
+      "duration": 0.6186666666666667,
+      "id": "9-6-question"
+    },
+    "くろくごじゅうし": {
+      "bank": "dan-9",
+      "offset": 10.344,
+      "duration": 1.1413333333333333,
+      "id": "9-6-full"
+    },
+    "くしち": {
+      "bank": "dan-9",
+      "offset": 11.605333333333334,
+      "duration": 0.7146666666666667,
+      "id": "9-7-question"
+    },
+    "くしちろくじゅうさん": {
+      "bank": "dan-9",
+      "offset": 12.44,
+      "duration": 1.2906666666666666,
+      "id": "9-7-full"
+    },
+    "くハ": {
+      "bank": "dan-9",
+      "offset": 13.850666666666667,
+      "duration": 0.5333333333333333,
+      "id": "9-8-question"
+    },
+    "くハしちじゅうに": {
+      "bank": "dan-9",
+      "offset": 14.504,
+      "duration": 1.1626666666666667,
+      "id": "9-8-full"
+    },
+    "くく": {
+      "bank": "dan-9",
+      "offset": 15.786666666666667,
+      "duration": 0.5333333333333333,
+      "id": "9-9-question"
+    },
+    "くくはちじゅういち": {
+      "bank": "dan-9",
+      "offset": 16.44,
+      "duration": 1.312,
+      "id": "9-9-full"
+    },
+    "くくぱれーど！いっしょに、あそぼう！": {
+      "bank": "messages",
+      "offset": 0.0,
+      "duration": 2.848,
+      "id": "welcome"
+    },
+    "おかえり！きょうも、たのしくいこう！": {
+      "bank": "messages",
+      "offset": 2.968,
+      "duration": 2.8586666666666667,
+      "id": "welcome-back"
+    },
+    "すきなだんから、はじめよう！": {
+      "bank": "messages",
+      "offset": 5.946666666666666,
+      "duration": 2.048,
+      "id": "home-help"
+    },
+    "すきなだんを、えらんでね！": {
+      "bank": "messages",
+      "offset": 8.114666666666666,
+      "duration": 2.026666666666667,
+      "id": "route"
+    },
+    "できた、だんをまぜて、ちょうせん！": {
+      "bank": "messages",
+      "offset": 10.261333333333333,
+      "duration": 2.8266666666666667,
+      "id": "mix"
+    },
+    "おぼえたくくが、ふえていくよ！": {
+      "bank": "messages",
+      "offset": 13.208,
+      "duration": 2.2613333333333334,
+      "id": "map"
+    },
+    "ききたいくくを、おしてね！": {
+      "bank": "messages",
+      "offset": 15.589333333333334,
+      "duration": 1.952,
+      "id": "table"
+    },
+    "きょうのめあてに、ちょうせんしよう！": {
+      "bank": "messages",
+      "offset": 17.661333333333335,
+      "duration": 2.272,
+      "id": "missions"
+    },
+    "がんばりを、カレンダーでみてみよう！": {
+      "bank": "messages",
+      "offset": 20.053333333333335,
+      "duration": 2.485333333333333,
+      "id": "calendar"
+    },
+    "れんしゅうしたい、だんをえらんでね！": {
+      "bank": "messages",
+      "offset": 22.658666666666665,
+      "duration": 2.3146666666666667,
+      "id": "manual"
+    },
+    "このこえで、いっしょにれんしゅうしよう！": {
+      "bank": "messages",
+      "offset": 25.093333333333334,
+      "duration": 2.6453333333333333,
+      "id": "voice-on"
+    },
+    "やったね！": {
+      "bank": "messages",
+      "offset": 27.858666666666668,
+      "duration": 0.704,
+      "id": "praise-first"
+    },
+    "そのちょうし！": {
+      "bank": "messages",
+      "offset": 28.682666666666666,
+      "duration": 0.9493333333333334,
+      "id": "praise-three"
+    },
+    "すごい！": {
+      "bank": "messages",
+      "offset": 29.752,
+      "duration": 0.64,
+      "id": "praise-five"
+    },
+    "ばっちり！": {
+      "bank": "messages",
+      "offset": 30.512,
+      "duration": 0.7466666666666667,
+      "id": "praise-eight"
+    },
+    "しっかり、おぼえたね！": {
+      "bank": "messages",
+      "offset": 31.378666666666668,
+      "duration": 1.856,
+      "id": "praise-mastered"
+    },
+    "じぶんのベストを、こえたよ！": {
+      "bank": "messages",
+      "offset": 33.35466666666667,
+      "duration": 2.1226666666666665,
+      "id": "praise-best"
+    },
+    "だいじょうぶ！": {
+      "bank": "messages",
+      "offset": 35.59733333333333,
+      "duration": 0.8213333333333334,
+      "id": "encourage"
+    },
+    "すこしずつ、いこう！": {
+      "bank": "messages",
+      "offset": 36.538666666666664,
+      "duration": 1.7493333333333334,
+      "id": "encourage-again"
+    },
+    "よくがんばったね！はなまる！": {
+      "bank": "messages",
+      "offset": 38.408,
+      "duration": 2.048,
+      "id": "finish"
+    },
+    "ぜんぶ、せいかい！すごーい！": {
+      "bank": "messages",
+      "offset": 40.576,
+      "duration": 2.6666666666666665,
+      "id": "perfect"
+    },
+    "やったー！クリア、おめでとう！": {
+      "bank": "messages",
+      "offset": 43.36266666666667,
+      "duration": 2.9226666666666667,
+      "id": "clear"
+    },
+    "くくマスター！おめでとう！": {
+      "bank": "messages",
+      "offset": 46.40533333333333,
+      "duration": 2.08,
+      "id": "final-clear"
+    },
+    "ここまで、よくきけたね！つぎは、おもいだしてみよう！": {
+      "bank": "messages",
+      "offset": 48.605333333333334,
+      "duration": 4.362666666666667,
+      "id": "intro-finish"
+    },
+    "きょうも、よくがんばったね！また、あそぼう！": {
+      "bank": "messages",
+      "offset": 53.088,
+      "duration": 3.68,
+      "id": "daily-finish"
+    },
+    "また、いっしょにあそぼうね！": {
+      "bank": "messages",
+      "offset": 56.888,
+      "duration": 2.1546666666666665,
+      "id": "goodbye"
+    }
+  },
+  "banks": {
+    "cue": {
+      "file": "audio/tsumugi/cue.mp3",
+      "bytes": 17324
+    },
+    "dan-1": {
+      "file": "audio/tsumugi/dan-1.mp3",
+      "bytes": 144236
+    },
+    "dan-2": {
+      "file": "audio/tsumugi/dan-2.mp3",
+      "bytes": 134828
+    },
+    "dan-3": {
+      "file": "audio/tsumugi/dan-3.mp3",
+      "bytes": 158444
+    },
+    "dan-4": {
+      "file": "audio/tsumugi/dan-4.mp3",
+      "bytes": 145196
+    },
+    "dan-5": {
+      "file": "audio/tsumugi/dan-5.mp3",
+      "bytes": 127916
+    },
+    "dan-6": {
+      "file": "audio/tsumugi/dan-6.mp3",
+      "bytes": 156908
+    },
+    "dan-7": {
+      "file": "audio/tsumugi/dan-7.mp3",
+      "bytes": 168812
+    },
+    "dan-8": {
+      "file": "audio/tsumugi/dan-8.mp3",
+      "bytes": 161708
+    },
+    "dan-9": {
+      "file": "audio/tsumugi/dan-9.mp3",
+      "bytes": 143660
+    },
+    "messages": {
+      "file": "audio/tsumugi/messages.mp3",
+      "bytes": 474092
+    }
+  },
+  "phrases": {
+    "welcome": "くくぱれーど！いっしょに、あそぼう！",
+    "welcome-back": "おかえり！きょうも、たのしくいこう！",
+    "home-help": "すきなだんから、はじめよう！",
+    "route": "すきなだんを、えらんでね！",
+    "mix": "できた、だんをまぜて、ちょうせん！",
+    "map": "おぼえたくくが、ふえていくよ！",
+    "table": "ききたいくくを、おしてね！",
+    "missions": "きょうのめあてに、ちょうせんしよう！",
+    "calendar": "がんばりを、カレンダーでみてみよう！",
+    "manual": "れんしゅうしたい、だんをえらんでね！",
+    "voice-on": "このこえで、いっしょにれんしゅうしよう！",
+    "praise-first": "やったね！",
+    "praise-three": "そのちょうし！",
+    "praise-five": "すごい！",
+    "praise-eight": "ばっちり！",
+    "praise-mastered": "しっかり、おぼえたね！",
+    "praise-best": "じぶんのベストを、こえたよ！",
+    "encourage": "だいじょうぶ！",
+    "encourage-again": "すこしずつ、いこう！",
+    "finish": "よくがんばったね！はなまる！",
+    "perfect": "ぜんぶ、せいかい！すごーい！",
+    "clear": "やったー！クリア、おめでとう！",
+    "final-clear": "くくマスター！おめでとう！",
+    "intro-finish": "ここまで、よくきけたね！つぎは、おもいだしてみよう！",
+    "daily-finish": "きょうも、よくがんばったね！また、あそぼう！",
+    "goodbye": "また、いっしょにあそぼうね！"
+  }
+}
