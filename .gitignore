@@ -4,6 +4,9 @@
 # local env files
 .env*.local
 
+# Generated private preview bundle
+/dist/
+
 # editor
 .vscode/
 
@@ -14,6 +17,6 @@
 .claude/*
 !.claude/commands/
 
-.github/
+.github/*
 !.github/copilot-instructions.md
 !.github/workflows/

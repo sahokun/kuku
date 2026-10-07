@@ -1,0 +1,46 @@
+@media(max-width:360px) {
+  #app {
+    padding-inline:14px
+  }
+  h1 {
+    font-size:36px
+  }
+  .home-mascot {
+    width:145px!important;
+    right:-8px
+  }
+  .home-links button {
+    padding:10px;
+    font-size:12px
+  }
+  .kuku-grid {
+    gap:2px
+  }
+}
+
+@media(max-height:740px) {
+  .topbar,body[data-scene=game] .topbar {height:50px}
+  .game-bar {height:40px}
+  .game-bar button {min-height:40px}
+  .parade-meter {margin-top:3px;font-size:9px;gap:5px}
+  #parade-label {min-width:100px}
+  #game .stage {height:96px}
+  #game .stage .mascot-host {height:94px;width:106px;margin-bottom:0}
+  .stage-floor {height:21px}
+  .question-card {padding:6.5px;margin-top:6px}
+  .equation {font-size:32px}
+  .answer {font-size:32px;min-height:36px}
+  .question-card .reading {font-size:13px;min-height:20px;margin:2px 0}
+  .question-card #feedback {min-height:17px;font-size:11px;margin-top:2px}
+  .question-card .eyebrow {margin-bottom:2px;line-height:1.3;font-size:10px}
+  .numpad {margin-top:12px;gap:6px}
+  .numpad button {height:48px;min-height:48px;line-height:1.1}
+  .reveal {margin-top:3px;min-height:38px;padding:8px}
+  .parade-guest {width:52px;height:50px}
+  .parade-guest:nth-child(3),.parade-guest:nth-child(4) {width:38px;height:38px;bottom:38px}
+  .parade-guest:nth-child(5),.parade-guest:nth-child(6) {width:42px;height:42px;bottom:4px}
+  #stage-cheer {font-size:16px;top:0;padding:2px 12px}
+  #combo {font-size:9px;padding:2px 6px}
+  #answer-seal {font-size:15px;top:-40px;padding:2px 9px}
+}
+@media(prefers-reduced-motion:reduce) {button{transition:none}}

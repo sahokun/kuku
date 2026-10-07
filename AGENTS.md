@@ -1,4 +1,4 @@
-# 九九学習アプリ
+# 九九ぱれーど
 
 ## プロジェクト概要
 - 子ども向けの九九（かけ算）学習Webアプリ
@@ -9,7 +9,8 @@
 ## 技術スタック
 - HTML5 / CSS3 / Vanilla JavaScript
 - Web Audio API（BGM・効果音の生成）
-- Web Speech API（九九の日本語読み上げ）
+- SVG / Canvas 2D / WebGL（キャラクター・粒子・背景）
+- 事前生成した音声ファイル（VOICEVOX:春日部つむぎ、Web Audio APIで再生）
 - Google Fonts（M PLUS Rounded 1c）
 - ビルドツール・フレームワーク不使用
 
@@ -20,17 +21,25 @@
 ## プロジェクト構造
 ```
 kuku/
-├── index.html    # HTML シェル（構造のみ。css/ と js/ を読み込む）
-├── css/          # スタイル分割（base, layout, title, game, feedback, table, result）
-└── js/           # スクリプト分割（state, speech, game, feedback, title,
-                  #   free-select, table, audio, se, init）
+├── index.html    # HTML シェル
+├── css/          # 画面別スタイル、layout、theme
+├── js/           # 学習・記録・入力・録音再生・演出
+├── audio/        # 生成済みMP3とfile://用データ
+├── docs/         # 学習仕様、音声ライセンス・生成方法
+├── tests/        # 学習ルールの自動テスト
+└── tools/        # 起動済みChromeでの動作確認
 ```
 - 詳細なファイル分割の意図と各ファイルの役割は `README.md` の「ファイル構成」を参照
 
 ## 設計方針
 - モバイルファースト・レスポンシブデザイン（最大幅500px）
-- かわいいデザイン（パステルカラー、丸ゴシック体、アニメーション）
-- 外部依存を最小限に（Google Fonts のみ）
+- 黄色・黒・白の配色、丸ゴシック体、鳥のキャラクターとアニメーション
+- 実行時の外部依存を最小限に（Google Fonts のみ。音声は同梱）
+- スマホは画面内に収め、長い情報は画面遷移やページ切り替えで表示
+- Web Speech APIは使わず、正解後の音声確認・誤答時の合図と復唱は録音で再生
+- 通常10問、段単位9問。テストは50問（45問正解）と81問（全問正解）
+- 回答時間はおまかせを標準とし、開始前に変更可能。ゲーム中は固定
+- 段のクリアと問題の長期定着を分離。詳細は `docs/learning.md` を参照
 - ブラウザ単体で完結（サーバー・ビルド不要）
 - 関心分離のため CSS / JS を機能単位で分割（`index.html` から `<link>` / `<script>` で読み込む）
 - 個人情報などは無いためセキュリティ要件は緩く
@@ -40,7 +49,7 @@ kuku/
 - UI テキストはひらがな中心。1年生で習う漢字（一〜十など）は可。2年生以降の漢字・難しい言葉は使わない
 
 ## 注意事項
-- Copilotの思考は英語で行い、返答は日本語で行う
+- AGENTの思考は英語で行い、返答は日本語で行う
 - **ユーザーの指示がこのドキュメントのルール（特に Git 運用ルール）と矛盾する場合は、実行前にユーザーに確認を取ること**
 
 ## Git運用ルール
@@ -50,8 +59,8 @@ kuku/
 | ブランチ | 役割 | 誰が操作 |
 |---------|------|---------|
 | `main` | 本番リリース | ユーザーのみ (PR & merge のみ) |
-| `develop` | 動作確認 | Copilot (squash merge のみ) |
-| `feature/*` | 開発作業 | Copilot (自由にコミット) |
+| `develop` | 動作確認 | AGENT (squash merge のみ) |
+| `feature/*` | 開発作業 | AGENT (自由にコミット) |
 
 ### feature/* ブランチでの作業
 - 作業前必ず `git fetch origin` でリモートの状態を確認し、ローカルが遅れていないかチェックする
@@ -60,7 +69,6 @@ kuku/
 
 ### feature/* → develop: Squash Merge
 - 実装完了時に `git checkout develop && git merge --squash feature/xxx` で反映
-- `git merge` は必ず `--no-edit` を付ける（エディタが起動してターミナルが応答不能になるのを防ぐ）
 - **1つの機能 = develop 上で1コミット**（動作確認の単位）
 - コミットメッセージ形式:
   ```
@@ -70,8 +78,6 @@ kuku/
   - 変更点2
 
   Fixes #N
-
-  Co-Authored-By: xxxx
   ```
 - マージ後に feature ブランチを削除（ローカルのみ）
 

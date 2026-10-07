@@ -1,0 +1,153 @@
+#home {
+  padding-top:12px
+}
+.home-mascot {
+  position:absolute!important;
+  width:175px!important;
+  height:175px!important;
+  right:-8px;
+  top:38px;
+  transform:rotate(8deg)
+}
+.mascot-host {
+  position:relative;
+  width:180px;
+  height:155px;
+  margin:auto
+}
+.mascot-host svg {
+  width:100%;
+  height:100%;
+  overflow:visible
+}
+.daily-card,.result-card,.detail-card,.settings-card {
+  background:#fffdf8;
+  border:1.5px solid var(--line);
+  border-radius:22px;
+  padding:20px;
+  box-shadow:var(--shadow)
+}
+.daily-card {
+  margin:28px 0 18px
+}
+.row {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px
+}
+.daily-card strong {
+  font-size:14px
+}
+.daily-card span {
+  font-size:12px;
+  color:var(--muted)
+}
+progress {
+  width:100%;
+  height:9px;
+  border:none;
+  border-radius:20px;
+  overflow:hidden;
+  background:#e9eadf;
+  accent-color:#56a58c
+}
+progress::-webkit-progress-bar {
+  background:#e9eadf
+}
+progress::-webkit-progress-value {
+  background:#56a58c;
+  border-radius:20px
+}
+progress::-moz-progress-bar {
+  background:#56a58c
+}
+.daily-card progress {
+  margin-top:14px
+}
+.daily-card p {
+  font-size:11px;
+  color:var(--muted);
+  margin:10px 0 0
+}
+.primary {
+  background:var(--coral);
+  border-color:var(--coral);
+  color:#fff;
+  box-shadow:0 4px 0 #cf5c48;
+  font-weight:900
+}
+.big {
+  width:100%;
+  font-size:19px;
+  min-height:64px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between
+}
+.big span {
+  font-size:26px
+}
+.secondary {
+  background:var(--mint);
+  border-color:var(--mint)
+}
+.quiet,.back {
+  border:0;
+  background:transparent;
+  font-size:13px
+}
+.wide {
+  width:100%;
+  margin-top:12px
+}
+.help {
+  font-size:12px;
+  line-height:1.8;
+  color:var(--muted);
+  text-align:center
+}
+.home-links {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin:24px 0
+}
+.home-links button {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:13px;
+  text-align:left;
+  background:#fff9
+}
+.home-links button span {
+  font-size:23px;
+  color:#488773
+}
+.milestone {
+  display:flex;
+  gap:14px;
+  align-items:center;
+  border-top:1px dashed #c6cabe;
+  padding:18px 0
+}
+.milestone .star {
+  font-size:36px;
+  color:#d49d27
+}
+.milestone strong {
+  font-size:13px
+}
+.milestone p {
+  font-size:10px;
+  color:var(--muted);
+  margin:5px 0
+}
+.dan-progress-card {padding:16px;background:#fffdf7;border:1px solid var(--line);border-radius:18px;margin-top:16px}
+.dan-progress-card .row {font-size:12px}
+.dan-progress-dots {display:flex;gap:5px;justify-content:space-between;margin-top:12px}
+.dan-progress-dots span {display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#eeeade;color:#898b80;font-size:12px}
+.dan-progress-dots .done {background:#67b797;color:white;box-shadow:0 2px 0 #34816a}
+.dan-progress-card p {font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:4px}
+.next-dan {background:none;border:0;padding:8px 0;text-align:left;min-height:40px;color:#387b69;font-size:12px}
