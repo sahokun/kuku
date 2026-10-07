@@ -1,77 +1,161 @@
-/* 共通スタイル */
-.screen {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 12px;
-  padding-bottom: max(12px, env(safe-area-inset-bottom));
-  transition: opacity 0.3s ease;
-  opacity: 0;
-  pointer-events: none;
-  z-index: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
+/* Each feature owns one viewport; more detail is reached through navigation. */
+html {height:var(--app-height,100svh);overflow:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body {height:var(--app-height,100svh);min-height:0;overflow:hidden;overscroll-behavior:none}
+#app {height:var(--app-height,100svh);min-height:0;max-width:500px;width:100%;padding:env(safe-area-inset-top) 16px max(10px,env(safe-area-inset-bottom));display:flex;flex-direction:column;overflow:hidden}
+#app>* {min-width:0}
+.topbar,body[data-scene=game] .topbar {height:48px;flex:0 0 48px;gap:8px}
+.topbar a {font-size:21px}.topbar a span {font-size:15px}.icon-button {min-height:40px}
+.screen {flex:1;min-height:0;min-width:0;display:flex;flex-direction:column;gap:8px;padding:0}
+.screen>*,.route-panel>* {flex-shrink:0;min-width:0}
+.screen h1 {font-size:25px;line-height:1.25;margin:4px 0}
+.screen h2 {font-size:17px;margin:6px 0}
+.screen p {margin:5px 0}
+.section-top {margin:0;min-height:44px;gap:12px}
+.section-top h1 {font-size:22px;letter-spacing:-.5px}
+.section-top .back {min-height:40px;flex-shrink:0}
+.help {font-size:11px;line-height:1.55}
+.wide {margin-top:0;min-height:44px;padding:9px 12px}
+.big {min-height:52px;font-size:17px;padding:10px 14px}
+select,input {font-size:16px}
+.notice {margin:0;padding:4px 8px;font-size:10px;flex:none}
+#home {padding-top:4px;gap:10px}
+#home>.eyebrow {margin:0;font-size:10px}
+#home>h1 {font-size:34px;min-height:84px;margin:0}
+.home-mascot {top:6px;right:4px;width:135px!important;height:120px!important}
+.daily-card {margin:0;padding:12px 14px;border-radius:18px}
+.daily-card progress {margin-top:6px}.daily-card p {margin:3px 0 0;font-size:10px}
+#auto-description {min-height:30px;margin:0;line-height:1.5}
+.home-menu {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;flex:1;min-height:150px;max-height:240px}
+.home-menu button {display:flex;align-items:center;gap:7px;padding:8px;font-size:12px;background:#fff9;min-height:44px}
+.home-menu button span {font-size:22px;color:#8052a1}
+.mission-card {margin:0;padding:14px}.mission {min-height:52px}
+.record-menu {display:grid;gap:10px}.record-menu button {text-align:left;font-size:15px}
+.milestone {padding:8px 0;border:0}.dan-progress-card {padding:12px;margin:0}
+.dan-progress-card .row {font-size:11px}.dan-progress-card .row strong {max-width:75%}
+.dan-progress-dots {margin-top:8px}.dan-progress-card p {font-size:10px}.next-dan {min-height:36px;padding:4px 0}
+.screen-tabs {display:flex;gap:8px;flex:none}.screen-tabs button {flex:1;min-height:42px;font-size:13px;padding:8px 4px;background:#eee4f3}
+.screen-tabs button[aria-pressed=true] {background:#73508f;border-color:#73508f;color:white;box-shadow:0 3px 0 #513769}
+.route-panel {display:flex;flex-direction:column;gap:8px;min-height:0;flex:1}
+.route-heading {margin:0;min-height:28px}.route-heading h2 {font-size:16px}.route-heading strong {font-size:11px}
+.route-list {margin:0;flex:1;min-height:0;max-height:432px;grid-template-rows:repeat(4,minmax(0,1fr));gap:8px}
+.route-node {position:relative;display:grid;grid-template-columns:auto 1fr;align-content:center;column-gap:6px;border-radius:16px;padding:9px;box-shadow:0 3px 0 #a58ab722}
+.route-node h3 {font-size:19px;margin:0;grid-row:span 2;align-self:center}
+.route-badge {font-size:10px}.route-node p {font-size:10px;line-height:1.3;margin:2px 0}
+.route-node button {position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;border-radius:16px}
+.route-node:focus-within {outline:3px solid #2a8275;outline-offset:1px}
+#route-tutorial {margin:0;min-height:36px;padding:6px;font-size:11px}
+.mix-station,.final-station {padding:14px;margin:0;flex:0 1 auto;gap:9px}
+.mix-station h2,.final-station h2 {font-size:17px}.mix-choices {margin:4px 0;gap:8px}.mix-choices button {min-height:48px}
+.mix-stamps {margin-top:0;font-size:22px}.final-station {padding:24px 16px;gap:20px}
+.challenge-list {margin:0;gap:8px;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:minmax(76px,1fr);min-height:0;flex:1;max-height:428px}
+.challenge-course {display:flex;flex-direction:column;justify-content:center;padding:8px;gap:4px;min-width:0;min-height:0}
+.challenge-course strong {font-size:18px}.challenge-course span {align-self:auto;font-size:10px}.challenge-course small {font-size:10px}
+.calendar-nav {height:44px}.calendar-nav h2 {font-size:19px}.calendar-nav button {min-height:40px;padding:6px 16px}
+.calendar-week {padding:2px 0;font-size:11px}.calendar-grid {flex:1;min-height:0;max-height:354px;grid-auto-rows:minmax(0,1fr)}
+.calendar-grid button {min-height:0;font-size:11px;padding:3px 0}.calendar-grid strong {font-size:18px}
+.detail-card {padding:12px;font-size:12px;line-height:1.55}
+#calendar-detail {min-height:62px}
+.dan-grid {gap:8px}.dan-grid button {padding:8px 6px;min-height:46px}
+.range-picker {margin-top:0;gap:6px}.range-picker select {margin-top:3px;padding:7px;min-height:42px}.range-picker button {padding:8px 10px}
+.kuku-grid {margin:4px 0;gap:3px;flex:1;min-height:0;max-height:380px;grid-template-rows:22px repeat(9,minmax(0,1fr))}
+.kuku-grid button {min-height:0;font-size:11px;touch-action:manipulation}.legend {gap:4px 10px;font-size:10px}
+#map-detail {min-height:64px}#table-list {flex:1;min-height:0;max-height:510px;grid-template-rows:repeat(9,minmax(0,1fr));gap:6px}
+#table-list button {padding:6px 12px;min-height:0;font-size:16px}#table-list small {font-size:12px}
+.table-select select {min-height:42px;padding:6px 10px}.settings-card {padding:10px 16px}.settings-card label {padding:14px 0}
+#result {padding:0;gap:8px}.result-hero {display:flex;justify-content:center;align-items:center;gap:4px;height:90px}
+.result-hero>div:first-child {flex:1}.result-hero .eyebrow {font-size:10px}
+#result #result-title {font-size:27px;margin:4px 0}
+body[data-scene=result] #result .result-mascot {height:84px;width:105px;margin:0;flex:none;filter:none}
+#result #result-score-card {margin:0;padding:10px;border-radius:20px}#result-score-label {font-size:14px;margin:0 0 2px}#result-score {font-size:36px;line-height:1.2}
+#result .result-card {padding:9px;box-shadow:0 3px 0 #bf934133;border-width:2px}
+#result .result-card h2 {font-size:17px;margin:2px 0}#result .result-card p {font-size:12px;margin:2px 0}
+.result-missions {margin:0;padding:7px;font-size:11px}.result-actions {display:grid;gap:8px;margin-top:auto}.result-actions .big {justify-content:center}
+#result-score-detail,#result-comparison {font-size:13px;margin:8px 0;line-height:1.7}.result-dan-progress {font-size:13px;margin-top:4px}
+#result-changes {font-size:12px;line-height:1.6}
+/* All game regions share the available height, including browser chrome changes. */
+#game {display:grid;grid-template-rows:36px 5px 25px 20px minmax(58px,1fr) auto minmax(208px,1.35fr);gap:5px;align-content:stretch}
+#game .game-bar {height:auto;font-size:11px;padding-inline:5px}.game-bar strong {font-size:10px;flex:1;text-align:center;overflow-wrap:anywhere}.game-bar button {min-height:34px;font-size:11px;white-space:nowrap}#counter {white-space:nowrap}
+#game>progress {height:5px}.score-strip {margin:0;min-height:0;padding:1px 6px}#game-score {font-size:17px}#game-best {font-size:9px}#score-gain {font-size:11px}
+.parade-meter {margin:0;gap:5px;font-size:9px}#parade-label {min-width:98px}#parade-lights i {height:8px}
+#game .stage {height:auto;min-height:0;align-self:stretch}
+#game .stage .mascot-host {height:100%;max-height:130px;width:145px;margin-bottom:0;filter:none}
+#game .question-card {margin:0;padding:7px}.equation {font-size:34px;line-height:1.1}.answer {font-size:34px;min-height:36px}
+.question-card .reading {min-height:19px;margin:2px 0;font-size:13px}.question-card #feedback {min-height:17px;line-height:1.4;font-size:11px;margin:2px 0 0}
+#input-controls {display:flex;flex-direction:column;min-height:0;gap:4px}.numpad {flex:1;min-height:0;grid-template-rows:repeat(4,minmax(0,1fr));margin:0;gap:6px}
+#game .numpad button {height:auto;min-height:0;padding:2px;font-size:25px}.numpad .key-small {font-size:12px!important}
+#game .reveal {margin:0;min-height:32px;padding:5px;font-size:12px;flex:none}
+#intro-guide {margin:0;align-self:center;flex-wrap:wrap}#game:has(#input-controls[hidden]) {grid-template-rows:36px 5px 0px 20px minmax(90px,1fr) auto minmax(80px,.7fr)}
+#stage-cheer {font-size:16px;padding:2px 10px;max-width:100%}#answer-seal {font-size:15px;top:-38px;padding:2px 9px}
+.parade-guest {filter:none;width:58px;height:56px;will-change:transform}.parade-guest img {width:100%;height:100%;object-fit:contain}
+.parade-guest:nth-child(3),.parade-guest:nth-child(4) {width:44px;height:44px;bottom:32px}.parade-guest:nth-child(5),.parade-guest:nth-child(6) {width:42px;height:42px;bottom:3px}
+.stage-lights i {will-change:transform}.stage-floor {height:22px}#combo {font-size:9px;padding:2px 6px}
+#reward-toast {top:max(6px,env(safe-area-inset-top));padding:8px 12px;font-size:11px}
+@media(max-height:659px){
+ #app {padding-inline:12px;padding-bottom:max(8px,env(safe-area-inset-bottom))}.topbar,body[data-scene=game] .topbar {height:42px;flex-basis:42px}
+ .screen {gap:6px}.screen h1,.section-top h1 {font-size:21px}.section-top {min-height:40px}
+ #home {gap:7px}#home>h1 {font-size:29px;min-height:72px}.home-mascot {height:103px!important;width:116px!important;top:0}
+ .daily-card {padding:9px 12px}.home-menu {gap:7px;min-height:140px}.home-menu button {font-size:11px}.big {min-height:46px;font-size:16px}
+ .route-panel {gap:5px}.route-node {padding:6px}.route-node h3 {font-size:17px}.route-node p {font-size:9px}.route-badge {font-size:9px}
+ .mix-station,.final-station {gap:7px;padding:12px}.mix-station h2,.final-station h2 {font-size:15px}.mix-choices button {min-height:42px}.mix-station .help {font-size:10px}
+ .result-hero {height:70px}body[data-scene=result] #result .result-mascot {height:66px;width:82px}#result #result-title {font-size:24px}#result-score {font-size:31px}
+ #result #result-score-card {padding:7px}.result-actions {gap:6px}.result-actions button {min-height:40px}.result-actions .big {min-height:46px}
+ .challenge-list {grid-auto-rows:minmax(65px,1fr)}.challenge-course strong {font-size:16px}.challenge-course span {font-size:9px}
+ #game {grid-template-rows:32px 4px 22px 17px minmax(44px,1fr) auto minmax(194px,1.6fr);gap:4px}
+ #game .question-card {padding:5px}.equation {font-size:30px}.answer {font-size:30px;min-height:32px}.question-card .reading {font-size:12px;min-height:17px}#game .stage .mascot-host {max-height:90px;width:105px}
+ .settings-card label {padding:12px 0}.dan-grid button {min-height:42px}.help {font-size:10px}
 }
-
-.screen.active {
-  opacity: 1;
-  pointer-events: auto;
-  z-index: 3;
+@media(min-width:600px) and (max-height:500px){
+ #app {max-width:900px}.topbar,body[data-scene=game] .topbar {flex-basis:36px;height:36px}.screen {gap:5px}
+ #home {display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto auto 1fr;column-gap:24px}#home>.eyebrow {grid-column:1}#home>h1 {grid-column:1;min-height:60px}.home-mascot {left:180px;top:5px}#home .daily-card {grid-column:1}#home .home-menu {grid-column:2;grid-row:1/5;max-height:none}#home #auto-start {grid-column:1}#auto-description {display:none}
+ #game {grid-template-columns:1fr 1fr;grid-template-rows:30px 4px 22px 18px minmax(40px,1fr) auto;column-gap:20px}
+ #game .game-bar {grid-column:1/-1}#game>progress,#score-strip,.parade-meter,#game .stage,#game .question-card {grid-column:1}
+ #input-controls,#intro-guide {grid-column:2;grid-row:2/7}#game .equation {font-size:26px}#game .answer {font-size:27px;min-height:29px}
+ #game:has(#input-controls[hidden]) {grid-template-rows:30px 4px 0px 18px minmax(50px,1fr) auto}
+ .route-list {grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr))}.route-node {padding:8px}.route-heading {display:none}#route-rows>.help {margin:0}
+ .mix-station {display:grid;grid-template-columns:1fr 1fr}.mix-station h2,.mix-station>#mix-help {grid-column:1/-1}.mix-choices {grid-row:3/6}.mix-stamps,#mix-rounds,.mix-station>.help:last-child {display:none}
+ .final-station {gap:8px}.final-station .help {line-height:1.5}
+ .challenge-list {grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:minmax(70px,1fr)}
+ #result {display:grid;grid-template-columns:1fr 1fr;column-gap:24px;grid-template-rows:70px auto auto 1fr}.result-hero {grid-column:1}#result-score-card {grid-column:1;grid-row:2}#result .result-card {grid-column:1;grid-row:3}#result-missions {grid-column:2;grid-row:1;align-self:center}#result-time {grid-column:1;grid-row:4}.result-actions {grid-column:2;grid-row:2/5}
+ #manual {display:grid;grid-template-columns:1fr 1fr;column-gap:20px}#manual .section-top {grid-column:1/-1}#dan-buttons {grid-row:2/6}#manual>p:first-of-type {display:none}.range-picker {grid-column:2}#manual .wide {grid-column:2}
+ #table-list {grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,minmax(0,1fr))}#table-list button {flex-direction:column;justify-content:center}
+ #calendar,#map,#custom,#records {display:grid;grid-template-columns:1fr 1fr;column-gap:20px}#calendar .section-top,#map .section-top,#custom .section-top,#records .section-top {grid-column:1/-1}
+ #calendar .calendar-week {grid-column:1;grid-row:2;align-self:start}#calendar-grid {grid-column:1;grid-row:3/7;height:215px}#calendar .calendar-nav {grid-column:2}#calendar-detail {grid-column:2}
+ #map-grid,#problem-picker {grid-column:1;grid-row:2/7;height:230px}#map .legend,#map .help,#map-detail,#custom .help,#custom-start {grid-column:2}#map-count {grid-column:2}
+ #records .milestone {grid-column:1}#records .record-menu {grid-column:1}#dan-progress-card {grid-column:2;grid-row:2/4}
+ #settings .settings-card {display:grid;grid-template-columns:1fr 1fr;gap:4px 20px}#settings .settings-card label {padding:10px 0}
 }
-
-h1 {
-  font-size: 1.4rem;
-  color: var(--main-pink);
-  text-shadow: 3px 3px 0 #fff, 6px 6px 0 rgba(0,0,0,0.1);
-  margin: 6px 0;
-  text-align: center;
+.mix-station h2 {display:none}
+.mix-station p {margin:0}
+.mix-station #mix-all {min-height:32px;padding:5px;font-size:11px}
+.mix-station .mix-stamps {font-size:19px;line-height:1.2}
+.mix-station .help:last-child {font-size:10px;line-height:1.4}
+@media(min-width:600px) and (max-height:500px){
+ #home-missions {display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.mission {margin-top:8px;min-height:76px}.mission-card {padding:12px}
+ #missions>.wide {align-self:center;max-width:360px}
 }
-
-h2 {
-  color: var(--pastel-purple);
-  margin: 3px 0;
-  font-size: 0.85rem;
+/* Small phones with the address bar expanded still retain every action. */
+@media(max-width:599px) and (max-height:559px){
+ .screen {gap:4px}.topbar,body[data-scene=game] .topbar {height:38px;flex-basis:38px}.section-top {min-height:36px}.section-top h1 {font-size:19px}
+ #home {gap:5px}#home>h1 {font-size:25px;min-height:62px}.home-mascot {height:92px!important;width:100px!important}.home-menu {min-height:126px;gap:6px}.home-menu button {padding:6px;font-size:10px}.home-menu button span {font-size:19px}
+ .daily-card {padding:7px 10px}.daily-card strong {font-size:12px}.daily-card p {font-size:9px}#auto-description {min-height:25px;font-size:9px}.big {min-height:42px;font-size:15px}
+ .route-panel {gap:3px}.route-list {gap:6px}.route-heading h2 {font-size:14px}.route-node h3 {font-size:16px}.screen-tabs button {min-height:36px;padding:6px}.route-panel>.help {margin:2px 0}#route-tutorial {min-height:30px}
+ .mix-station {gap:5px;padding:9px}.mix-choices {gap:5px;margin:0}.mix-choices button {min-height:36px}.mix-station .mix-stamps {font-size:16px}.mix-station .help {font-size:9px}.mix-station #mix-start {min-height:40px}
+ .record-menu {gap:7px}.record-menu button {min-height:42px;padding:8px;font-size:13px}.dan-progress-card {padding:8px}.dan-progress-dots span {width:24px;height:24px}.milestone {padding:4px 0}.milestone .star {font-size:26px}
+ .challenge-list {grid-auto-rows:minmax(56px,1fr);gap:6px}.challenge-course {gap:2px;padding:5px}.challenge-course strong {font-size:14px}.challenge-course small {font-size:9px}
+ .calendar-grid {gap:3px}.calendar-grid button {padding:2px 0}.calendar-grid strong {font-size:16px}.detail-card {padding:8px;font-size:11px}#calendar-detail,#map-detail {min-height:54px}
+ .dan-grid {gap:5px}.dan-grid button {min-height:38px;font-size:13px}.range-picker select {min-height:36px;padding:4px}.range-picker button {min-height:36px;font-size:13px}#manual .wide {min-height:36px;padding:6px;font-size:12px}
+ .result-hero {height:62px}#result #result-title {font-size:22px}#result-score {font-size:29px}#result #result-score-card {padding:6px}.result-missions {padding:5px}.result-actions button {min-height:36px}.result-actions .big {min-height:42px}
+ #game {grid-template-rows:30px 4px 21px 16px minmax(32px,1fr) auto minmax(176px,1.5fr);gap:3px}
+ #game .question-card {padding:4px}.equation {font-size:27px}.answer {font-size:28px;min-height:29px}.question-card .reading {font-size:11px;min-height:15px}.question-card #feedback {font-size:10px;min-height:15px}
+ #game .reveal {min-height:28px;padding:3px}.numpad {gap:5px}#game .numpad button {font-size:23px}#game .stage .mascot-host {max-height:70px;width:86px}#stage-cheer {font-size:12px}#answer-seal {font-size:12px;top:-31px}#combo {font-size:8px}
+ .settings-card label {padding:10px 0}.mission {min-height:44px}.mission-card {padding:10px}
 }
+#game .game-bar {grid-row:1}#game>progress {grid-row:2}#score-strip {grid-row:3}.parade-meter {grid-row:4}#game .stage {grid-row:5}#game .question-card {grid-row:6}
+#input-controls,#intro-guide {grid-row:7}
+#voice-loading {grid-row:7;align-self:center;text-align:center;font-weight:800}
+.voice-credit {text-align:center}.voice-credit a {color:inherit}
+@media(min-width:600px) and (max-height:500px){#input-controls,#intro-guide {grid-row:2/7}}
+@media(max-width:599px) and (max-height:559px){#result {gap:4px}.result-actions {gap:5px}}
 
-.btn {
-  background-color: var(--white);
-  border: 2px solid var(--main-pink);
-  border-radius: 50px;
-  padding: 6px 12px;
-  font-size: 0.75rem;
-  font-family: inherit;
-  font-weight: 700;
-  color: var(--main-pink);
-  cursor: pointer;
-  box-shadow: var(--btn-shadow);
-  transition: transform 0.1s, box-shadow 0.1s;
-  margin: 2px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 65px;
-  transform: translateZ(0);
-}
-
-.btn:active {
-  transform: translateY(4px);
-  box-shadow: var(--btn-active-shadow);
-}
-
-.btn-primary {
-  background-color: var(--main-pink);
-  color: var(--white);
-  border-color: var(--white);
-}
-
-.btn-secondary {
-  background-color: var(--mint);
-  color: var(--white);
-  border-color: var(--white);
-}
-
+#mascot-home {padding:0;border:0;background:none;box-shadow:none;cursor:pointer}
+#mascot-home:focus-visible {outline:3px solid #9876c3;outline-offset:3px;border-radius:30px}

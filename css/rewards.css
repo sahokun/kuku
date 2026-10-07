@@ -1,0 +1,93 @@
+.mission-card {margin-top:22px;background:#fffcf1;border:2px solid #d8c1e6;border-radius:22px;padding:16px;box-shadow:0 4px 0 #9e7fbe22}
+.mission-card h2 {font-size:17px;margin:0}
+#mission-count {font-size:13px;color:#77558e}
+.mission {width:100%;display:flex;align-items:center;gap:9px;margin-top:9px;padding:10px;font-size:12px;text-align:left;border-radius:12px}
+.mission span:nth-child(2) {flex:1}
+.mission strong {font-size:11px;white-space:nowrap}
+.mission.done {background:#e7f2d9;color:#46856b;opacity:1}
+.mission-card .help {margin:12px 0 0;font-size:11px}
+.adventure-links {display:grid;gap:8px;margin-top:18px}
+.adventure-links button {display:flex;align-items:center;gap:12px;text-align:left;background:#f0e4fc;border-color:#c6a8dd;font-size:15px}
+.adventure-links span {width:30px;font-size:24px;color:#8e5ea7;text-align:center}
+.score-strip {display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:24px;font-size:10px;color:#604676;background:#fff9;border-radius:8px;padding:1px 8px;margin-top:4px;font-variant-numeric:tabular-nums}
+#game-score {font-size:18px;color:#52326f;display:inline-block}
+#score-gain {color:#bb397a;font-size:12px;font-weight:900;min-width:38px;text-align:right}
+#game-best {font-size:10px}
+body[data-scene=game] .topbar {height:50px}
+#game .stage {height:134px}
+#result-score-card {margin-top:24px;background:#fff2ad;border:3px solid white;border-radius:22px;padding:16px;box-shadow:0 5px 0 #d5a54744}
+#result-score-label {font-weight:900;color:#9e4b72;font-size:17px;margin:0 0 6px}
+#result-score {font-size:42px;font-weight:900;color:#a53172}
+#result-score-detail,#result-comparison {font-size:12px;line-height:1.7;margin:8px 0 0}
+.result-missions {font-size:13px;color:#437a60;background:#fff9;border-radius:12px;padding:12px;margin-top:16px}
+.route-list {position:relative;display:grid;gap:24px;margin-top:28px}
+.route-list::before {content:"";position:absolute;left:27px;top:10px;bottom:10px;width:6px;background:repeating-linear-gradient(#bfa5d5 0 9px,#eee2f6 9px 18px);z-index:-1}
+.route-node {background:#fffcf5;border:2px solid #ddd2e5;border-radius:22px;padding:15px 16px;margin-left:9px;box-shadow:0 4px 0 #a58ab722}
+.route-node.current {border-color:#da73a9;box-shadow:0 0 0 4px #f6d8e9}
+.route-node.mastered {border-color:#dab855;background:#fff7d6}
+.route-node h2 {font-size:19px;margin:0 0 12px}
+.route-node p {font-size:12px;line-height:1.7}
+.route-steps {display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.route-steps span {position:relative;font-size:10px;background:#eee9f0;color:#7a7682;border-radius:9px;padding:9px 1px;text-align:center}
+.route-steps .done {background:#cee9d6;color:#397458}
+.route-node button {min-height:40px;padding:8px;margin-top:12px;font-size:12px;background:#f4e8fa}
+.route-node .route-challenge {margin-left:6px;background:#fff0b1}
+.challenge-list {display:grid;gap:12px;margin-top:20px}
+.challenge-course {display:grid;grid-template-columns:1fr auto;text-align:left;gap:6px 10px;background:#fff9e4;border:2px solid #dbbd65;padding:16px}
+.challenge-course strong {font-size:18px}
+.challenge-course span {font-size:12px;align-self:center;color:#8e506d}
+.challenge-course small {grid-column:1/-1;color:#6f7374;font-size:11px}
+.challenge-course:disabled {background:#eeeaf0;border-color:#d7cfdf;opacity:.75}
+.calendar-nav {display:flex;align-items:center;justify-content:space-between}
+.calendar-nav h2 {font-size:20px}
+.calendar-week,.calendar-grid {display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.calendar-week {text-align:center;font-size:12px;padding:14px 0 8px;color:#667674}
+.calendar-grid button {padding:5px 0;min-height:57px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;border-radius:12px;gap:2px}
+.calendar-grid strong {font-size:20px;line-height:1;color:#aaa3a8}
+.calendar-grid .played {background:#ddefe5;border-color:#8fc7ad}
+.calendar-grid .played strong {color:#5c9c82}
+.calendar-grid .sealed {background:#ffe1eb;border-color:#dc8bac}
+.calendar-grid .sealed strong {color:#cc477c}
+.calendar-grid .today {outline:2px solid #9671b0;outline-offset:1px}
+#reward-toast {position:fixed;z-index:5;top:10px;left:50%;transform:translateX(-50%);max-width:92%;width:max-content;background:#fff0aa;border:3px solid white;border-radius:18px;box-shadow:0 4px 0 #ad7c4544;padding:12px 16px;font-size:13px;pointer-events:none;color:#76517e}
+@media(max-height:740px){
+  body[data-scene=game] .topbar {height:44px}
+  #game .stage {height:78px}
+  .score-strip {min-height:21px;margin-top:2px}
+  #game-score {font-size:16px}
+}
+@media(max-width:360px){.challenge-course{grid-template-columns:1fr}.challenge-course span{font-size:12px}.route-node .route-challenge{margin-left:0;display:block;width:100%}}
+
+#result.has-score #result-title {font-size:27px;margin:8px 0}
+#result.has-score .result-mascot {height:112px;width:135px}
+#result.has-score .result-card {padding:12px}
+#result.has-score .stamp {display:none}
+#result.has-score .result-score-card {margin-top:14px}
+#result-score-card.new-best {border-color:#fff;box-shadow:0 0 0 5px #fbc843,0 7px 0 #bb882d55;background:linear-gradient(130deg,#fff7ac,#ffdf8e,#ffe4ee)}
+
+@media(max-width:360px){.section-top h1{font-size:20px;min-width:0}.calendar-nav h2{font-size:18px}.route-steps span{font-size:9px}}
+/* Independent rows converge into a shared practice station. */
+.route-heading {display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:20px}
+.route-heading h2,.mix-station h2,.final-station h2 {font-size:18px;margin:8px 0}
+.route-heading strong {font-size:12px;white-space:nowrap;color:#47765a}
+.route-list {grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.route-list::before {display:none}
+.route-node {margin:0;padding:14px 10px;min-width:0;text-align:center;border-radius:20px}
+.route-node h3 {font-size:23px;margin:0 0 8px;color:#785596}
+.route-node.cleared {background:#effbef;border-color:#8bcaa0}
+.route-node.mastered {background:#fff7d6;border-color:#dab855}
+.route-badge {font-size:12px;color:#52705d}
+.route-node p {font-size:10px;margin:8px 0;line-height:1.6}
+.route-node button {width:100%;font-size:11px;margin-top:4px;padding:8px 4px}
+.route-join {text-align:center;color:#ad8dc1;font-size:30px;letter-spacing:12px;padding:10px 0}
+.mix-station,.final-station {border:2px solid #c3a6dc;background:#faf1ff;border-radius:24px;padding:18px 14px;text-align:center}
+.final-station {border-color:#e6c273;background:#fff6d9;margin-bottom:24px}
+.mix-choices {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px 0}
+.mix-choices button {font-size:12px;min-height:44px;padding:8px 2px;background:#fff;border:2px solid #d9c8e4}
+.mix-choices button[aria-pressed="true"] {background:#d7efdd;border-color:#6da983;color:#2e6740;box-shadow:0 3px 0 #78a484}
+.mix-choices button:disabled {opacity:.4}
+.mix-station progress {width:100%;accent-color:#80b88e;height:14px}
+.mix-stamps {display:flex;justify-content:space-between;color:#d46b9f;font-size:22px;margin-top:12px}
+#mix-count,#final-status {font-size:13px;font-weight:800}
+#route-tutorial {margin-top:8px;font-size:12px;background:#f0edf5}
+@media(max-width:360px){.route-heading h2,.mix-station h2,.final-station h2{font-size:15px}.route-node{padding:12px 7px}.route-node p{font-size:9px}.route-heading strong{font-size:10px}}
