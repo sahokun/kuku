@@ -1,0 +1,14 @@
+音声クレジット: VOICEVOX:春日部つむぎ
+
+このディレクトリの生成音声（MP3および同内容を含むJS）は、アプリ本体のMITライセンスの対象外です。
+音声の利用・再配布時は「VOICEVOX:春日部つむぎ」のクレジットを表示し、以下の規約を守ってください。
+第三者への利用許諾にも音声ライブラリ規約の遵守と、その義務の引き継ぎを求めてください。
+
+VOICEVOX ソフトウェア利用規約:
+https://voicevox.hiroshiba.jp/term/
+VOICEVOX 音声モデル・音声ライブラリ利用規約:
+https://github.com/VOICEVOX/voicevox_vvm/blob/main/TERMS.txt
+春日部つむぎ公式利用規約:
+https://tsumugi-official.studio.site/rule
+
+詳しい生成条件・再生方式は docs/VOICE.md を参照してください。
