@@ -174,3 +174,13 @@ test('the map explains what earns the next star',()=>{
  Object.assign(r,{stage:3,due:'2026-11-16'});assert.equal(L.nextStep(r,now),'きょう できたら ★3！');
  Object.assign(r,{stage:4,mastered:true,repair:false,due:'2026-11-30'});assert.match(L.nextStep(r,now),/ときどき/);
 });
+test('a hinted correct answer is practice: no self-correct count, no restart, no stage credit, no pace timing',()=>{
+ const s=L.fresh(),now=new Date('2026-11-16T12:00:00').getTime(),q={a:3,b:7};
+ L.submit(s,q,true,now,2000);
+ const before={...s.problems['3x7']};
+ assert.equal(L.submit(s,q,true,now+60000,30000,'hint'),'practice');
+ const r=s.problems['3x7'];
+ assert.equal(r.correct,before.correct);assert.equal(r.stage,before.stage);assert.equal(r.hits,before.hits);
+ assert.equal(r.history.at(-1).kind,'hint');
+ assert.equal(L.hint(3,7),'3×6＝18。それに 3を たすと？');assert.equal(L.hint(4,1),'4が 1つ。');
+});

@@ -189,8 +189,12 @@
         $('equation').textContent = `${q.a} × ${q.b} =`;
         $('reading').textContent = intro ? session.q.q_read + session.q.a_read : session.q.q_read;
         $('answer').textContent = intro ? String(q.a * q.b) : '?';
-        $('feedback').textContent = '';
+        $('feedback').textContent = intro ? '' : GUIDE;
         $('score-gain').textContent = '';
+        session.hinted = false;
+        delete $('game').dataset.wait;
+        $('reveal').textContent = 'わからない → ヒント';
+        if (intro) showDots(session.q, true); else hideDots();
         $('input-controls').hidden = intro;
         $('intro-guide').hidden = !intro;
         delete $('game').dataset.recitation;
@@ -209,6 +213,58 @@
         fx.setEnergy(e);
         sound.setEnergy(e);
         fx.progress(done, session.plan.count);
+    }
+    const GUIDE = 'おしたら すぐ こたえあわせ（2けたは 2つ）';
+    // "a × b" read as "a pieces, b times": b groups of a dots (rows of five), laid out to fit the stage.
+    function showDots(q, total) {
+        const board = $('dot-board');
+        board.hidden = false;
+        const area = board.getBoundingClientRect();
+        const width = area.width - 20, height = area.height - 30, cols = Math.min(q.a, 5), rows = Math.ceil(q.a / 5);
+        let best = { size: 0, per: q.b };
+        for (let lines = 1; lines <= q.b; lines++) {
+            const per = Math.ceil(q.b / lines), size = Math.min(width / (per * cols * 1.25 + (per - 1)), height / (lines * rows * 1.25 + (lines - 1)));
+            if (size > best.size) best = { size, per };
+        }
+        board.style.setProperty('--dot', Math.max(3, Math.min(16, Math.floor(best.size))) + 'px');
+        board.style.setProperty('--cols', cols);
+        const groups = Array.from({ length: q.b }, () => {
+            const g = document.createElement('span');g.className = 'dot-group';
+            g.append(...Array.from({ length: q.a }, () => document.createElement('i')));
+            return g;
+        });
+        $('dot-rows').replaceChildren(...Array.from({ length: Math.ceil(q.b / best.per) }, (_, i) => {
+            const line = document.createElement('div');line.className = 'dot-line';
+            line.append(...groups.slice(i * best.per, i * best.per + best.per));
+            return line;
+        }));
+        $('dot-caption').textContent = total ? `${q.a}こが ${q.b}つで ${q.a * q.b}こ` : `${q.a}こが ${q.b}つ`;
+    }
+    function hideDots() { $('dot-board').hidden = true; }
+    function help() {
+        if (!session || session.paused || screen !== 'game') return;
+        if (session.phase === 'wait') { proceed(); return; }
+        if (session.phase !== 'question' || session.lockMs > 0) return;
+        if (session.hinted) { answer(true); return; }
+        session.hinted = true;
+        showDots(session.q, false);
+        $('feedback').textContent = L.hint(session.q.a, session.q.b);
+        $('reveal').textContent = 'こたえを きく';
+        // A hint restarts a limited clock so the child can use it.
+        if (Number.isFinite(L.answerTime(session.pace))) { session.questionMs = 0; session.extended = false; }
+    }
+    function waitForNext() {
+        session.phase = 'wait';
+        $('game').dataset.wait = 'true';
+        $('feedback').textContent = 'いえたら つぎへ';
+        $('reveal').textContent = session.index + 1 < session.plan.count ? 'つぎの もんだいへ ▶' : 'けっかを 見る ▶';
+        $('reveal').disabled = false;
+    }
+    function proceed() {
+        if (!session || session.phase !== 'wait' || session.paused) return;
+        delete $('game').dataset.wait;
+        session.index++;
+        next();
     }
     function fullRead(q) { return (q.q_speak || q.q_read) + (q.a_speak || q.a_read); }
     function setKeys(enabled) {
@@ -229,15 +285,18 @@
         }
         if (session.input.length >= String(session.q.a * session.q.b).length)
             answer(false);
+        else if (!session.hinted)
+            $('feedback').textContent = 'あと 1つ おすか「こたえる」';
     }
     function answer(reveal, reason = 'shown') {
         if (!session || session.phase !== 'question' || session.paused || session.lockMs > 0)
             return;
         if (!reveal && session.input === '')
             return;
-        const ok = !reveal && Number(session.input) === session.q.a * session.q.b;
+        const right = !reveal && Number(session.input) === session.q.a * session.q.b;
+        const helped = right && session.hinted, ok = right && !helped;
         session.review = R.ensureDay(s).reviewKeys.includes(L.key(session.q.a, session.q.b));
-        const change = L.submit(s, session.q, ok, Date.now(), session.questionMs, session.plan.kind === 'ordered' ? 'ordered' : 'random');
+        const change = L.submit(s, session.q, right, Date.now(), session.questionMs, helped ? 'hint' : session.plan.kind === 'ordered' ? 'ordered' : 'random');
         session.justMastered = change === 'mastered';
         session.newBest = false;
         session.recent.push(L.key(session.q.a, session.q.b));
@@ -249,32 +308,33 @@
             session.combo = 0;
         $('combo').textContent = session.combo >= 2 ? `${session.combo}もん れんぞく！` : '';
         const award = R.points(ok, session.questionMs, session.combo, session.plan.count);
-        const response = { a: session.q.a, b: session.q.b, ok, ms: session.questionMs, given: session.input || null, reason: reveal ? reason : ok ? 'correct' : 'wrong' };
+        const response = { a: session.q.a, b: session.q.b, ok, ms: session.questionMs, given: session.input || null, reason: reveal ? reason : ok ? 'correct' : helped ? 'hint' : 'wrong' };
         session.answers.push(response);
         session.responses.push(response);
         journey.event({ type: 'answer', ok, roundCorrect: session.correct });
         if (session.plan.kind !== 'intro') {
             session.score += award.total;session.speedPoints += award.speed;session.chainPoints += award.chain;
             $('game-score').textContent = session.score.toLocaleString();
-            $('score-gain').textContent = ok ? `+${award.total}` : reveal ? (reason === 'timeout' ? 'じかんぎれ' : '') : `きみの こたえ：${session.input}`;
+            $('score-gain').textContent = ok ? `+${award.total}` : helped ? 'ヒントで できた' : reveal ? (reason === 'timeout' ? 'じかんぎれ' : '') : `きみの こたえ：${session.input}`;
         }
         if (Object.hasOwn(session.changes, change))
             session.changes[change]++;
         session.phase = 'recitation';
         session.phaseMs = 0;
-        $('game').classList.add(ok ? 'correct' : 'revealed');
+        $('game').classList.add(right ? 'correct' : 'revealed');
+        if (right) hideDots(); else showDots(session.q, true);
         $('answer').textContent = String(session.q.a * session.q.b);
         $('reading').textContent = session.q.q_read + session.q.a_read;
         $('round-progress').value = session.index + 1;
-        $('feedback').textContent = ok ? (change === 'ready' ? 'きょうは OK！' : change === 'mastered' ? 'しっかり おぼえた！' : 'できた！') : 'まずは きいてね';
+        $('feedback').textContent = helped ? 'ヒントで できた！' : ok ? (change === 'ready' ? 'きょうは OK！' : change === 'mastered' ? 'しっかり おぼえた！' : 'できた！') : 'まずは きいてね';
         setKeys(false);
         sound.cancelSpeech();
         // A wrong answer still counts as answered, but without the star flight or a stage change.
-        if (ok) updateParade(session.index + 1); else fx.progress(session.index + 1, session.plan.count, false);
-        sound.effect(ok ? 'correct' : 'reveal', session.combo);
-        if (ok) {
+        if (right) updateParade(session.index + 1); else fx.progress(session.index + 1, session.plan.count, false);
+        sound.effect(right ? 'correct' : 'reveal', session.combo);
+        if (right) {
             fx.burst(false, session.combo);
-            if (session.plan.kind !== 'intro') {
+            if (ok && session.plan.kind !== 'intro') {
                 const best = s.rewards.bests[session.plan.courseId];
                 const crossed = !!best && session.score > best.score && !session.bestCrossed;
                 session.newBest = crossed;
@@ -319,6 +379,8 @@
                 active.recitation = null;
                 journey.event({ type: 'recite', review: !intro && active.review });
                 if (intro) advanceIntro();
+                // After a miss, let the child say it and move on with a tap instead of racing to the next question.
+                else if (!repeatOnly) waitForNext();
                 else { active.index++; next(); }
             }
         });
@@ -398,7 +460,7 @@
             const content = document.createElement('div'), equation = document.createElement('strong'), note = document.createElement('small');
             equation.textContent = item.equation;note.textContent = item.note;content.append(equation, note);
             const mark = document.createElement('span');mark.className = 'answer-mark';mark.textContent = item.mark;
-            mark.setAttribute('aria-label', item.state === 'correct' ? 'せいかい' : item.state === 'listen' ? 'きいたよ' : 'もういちど');
+            mark.setAttribute('aria-label', item.state === 'correct' ? 'せいかい' : item.state === 'listen' ? 'きいたよ' : item.state === 'hint' ? 'ヒントで できた' : 'もういちど');
             row.append(number, content, mark);$('answer-list').append(row);
         }
         $('answers-page').textContent = view.total ? `${view.start + 1}〜${view.end} / ${view.total}もん` : 'もんだいは ないよ';
@@ -603,7 +665,7 @@
         }
     };
     $('enter').onclick = () => answer(false);
-    $('reveal').onclick = () => answer(true);
+    $('reveal').onclick = help;
 
     $('pause').onclick = pause;
     $('resume').onclick = resume;
@@ -675,7 +737,7 @@
         }
         if (e.key === 'Enter' && !['BUTTON', 'INPUT', 'SELECT'].includes(document.activeElement.tagName)) {
             e.preventDefault();
-            answer(false);
+            if (session?.phase === 'wait') proceed(); else answer(false);
         }
     });
     document.addEventListener('visibilitychange', () => {

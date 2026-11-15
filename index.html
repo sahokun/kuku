@@ -77,14 +77,14 @@
       <progress id="round-progress" max="10" value="0" aria-label="もんだいの すすみぐあい"></progress>
       <div id="score-strip" class="score-strip"><span>スコア <strong id="game-score">0</strong></span><span id="game-best"></span><span id="score-gain" aria-live="polite"></span></div>
       <div class="parade-meter"><span id="parade-label">ぱれーど はじまるよ</span><div id="parade-lights" aria-hidden="true"></div><span id="parade-count">0 / 10</span></div>
-      <div class="stage"><div class="stage-floor" aria-hidden="true"></div><div class="stage-lights" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><div class="stage-backdrop" aria-hidden="true"></div><div class="audience" aria-hidden="true"></div><div id="stage-cheer" aria-hidden="true"></div><div id="mascot-game" class="mascot-host" aria-hidden="true"></div><span id="combo" aria-live="polite"></span></div>
+      <div class="stage"><div id="dot-board" class="dot-board" hidden><div id="dot-rows" class="dot-rows" aria-hidden="true"></div><p id="dot-caption" class="dot-caption"></p></div><div class="stage-floor" aria-hidden="true"></div><div class="stage-lights" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><div class="stage-backdrop" aria-hidden="true"></div><div class="audience" aria-hidden="true"></div><div id="stage-cheer" aria-hidden="true"></div><div id="mascot-game" class="mascot-host" aria-hidden="true"></div><span id="combo" aria-live="polite"></span></div>
       <div class="question-card"><div id="answer-seal" aria-hidden="true">できた！</div><p id="mode-note" class="eyebrow"></p><div id="equation" class="equation"></div><p id="reading" class="reading"></p><div id="answer" class="answer" aria-label="こたえ" aria-live="polite">?</div><p id="feedback" role="status"></p></div>
       <div id="input-controls"><div class="numpad" aria-label="すうじの ボタン">
         <button data-digit="1">1</button><button data-digit="2">2</button><button data-digit="3">3</button>
         <button data-digit="4">4</button><button data-digit="5">5</button><button data-digit="6">6</button>
         <button data-digit="7">7</button><button data-digit="8">8</button><button data-digit="9">9</button>
         <button id="erase" class="key-small">けす</button><button data-digit="0">0</button><button id="enter" class="key-small key-enter">こたえる</button>
-      </div><button id="reveal" class="reveal">わからない → こたえを きく</button></div>
+      </div><button id="reveal" class="reveal">わからない → ヒント</button></div>
       <div id="intro-guide" class="recitation-guide" hidden aria-hidden="true"><span data-step="listen">きく</span><span>→</span><span data-step="cue">せーのっ</span><span>→</span><span data-step="repeat">いっしょに</span></div>
       <div id="voice-loading" hidden role="status"><p id="voice-load-status">こえを じゅんびちゅう…</p><div id="voice-load-actions" hidden><button id="voice-retry" class="primary wide">もういちど</button><button id="voice-skip" class="quiet wide">こえ なしで あそぶ</button></div></div>
     </section>

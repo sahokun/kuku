@@ -16,3 +16,7 @@ test('results distinguish correct, wrong, revealed, timed out and listening resp
  assert.equal(rows[4].state,'listen');
  const empty=R.page([],5);assert.equal(empty.index,0);assert.equal(empty.pages,1);assert.deepEqual(empty.rows,[]);
 });
+test('hinted answers are marked separately from correct and wrong ones',()=>{
+ const row=R.page([{a:3,b:7,ok:false,reason:'hint',given:'21'}]).rows[0];
+ assert.deepEqual([row.state,row.mark,row.note],['hint','△','ヒントで できた']);
+});

@@ -79,7 +79,7 @@
         const defs = {
             play: { text: '1かい さいごまで あそぼう', goal: 1, value: d.finished },
             'play-three': { text: '3かい さいごまで あそぼう', goal: 3, value: d.finished },
-            'round-correct': { text: '1かいで 3もん せいかいしよう', goal: 3, value: d.bestRoundCorrect },
+            'round-correct': { text: '1かいで 5もん せいかいしよう', goal: 5, value: d.bestRoundCorrect },
             review: { text: 'まえの 九九を おさらいしよう', goal: 1, value: d.reviewed }
         };
         return d.missions.map(id => ({ id, ...defs[id], done: defs[id].value >= defs[id].goal }));

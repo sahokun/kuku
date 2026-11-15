@@ -72,7 +72,7 @@ try {
         if(pending&&!window.__holdSpeech){pending.left-=50;if(pending.left<=0){window.__pendingSpeech=null;pending.u.onend?.();}}
         for(const t of window.__timers){if(window.__clock-t.last>=t.ms){t.last=window.__clock;t.fn();}}
       }};
-      window.__finishFeedback=()=>{let left=300;const game=document.getElementById('game');while(left-->0&&!game.hidden&&(game.classList.contains('correct')||game.classList.contains('revealed')))window.__advance(50);if(left<0)throw Error('Feedback did not complete');};
+      window.__finishFeedback=()=>{let left=300;const game=document.getElementById('game');while(left-->0&&!game.hidden&&(game.classList.contains('correct')||game.classList.contains('revealed'))){if(game.dataset.wait==='true')document.getElementById('reveal').click();else window.__advance(50);}if(left<0)throw Error('Feedback did not complete');};
     ` });
     await send('Page.reload');
     await sleep(900);
@@ -102,16 +102,16 @@ try {
         await evaluate(`document.querySelector('[data-open="settings"]').click();document.getElementById('setting-pace').value='${pace}';document.getElementById('setting-pace').dispatchEvent(new Event('change'));document.getElementById('custom-start').click()`);
         await check(`JSON.parse(localStorage.getItem('kuku:learning:v1')).settings.pace==='${pace}'`, pace+' setting is saved');
         const cues=await evaluate('__readyCount');
-        await evaluate(`__advance(${Number.isFinite(limit)?limit-50:60000})`);
+        await evaluate(`__advance(${600+(Number.isFinite(limit)?limit-50:60000)})`);
         await check(`!document.getElementById('game').classList.contains('revealed') && document.getElementById('counter').textContent==='1もんめ / 10'`, pace+' waits for its deadline');
         await click('pause');await evaluate('__advance(10000)');await click('resume');
         await check(`__readyCount===${cues}`, pace+' resume does not repeat ready sound');
-        if (pace==='first') await click('reveal'); else await evaluate('__advance(50)');
+        if (pace==='first') { await click('reveal');await click('reveal'); } else await evaluate('__advance(50)');
         await check(`document.getElementById('game').classList.contains('revealed')`, pace+' shows answer at the expected time');
         await evaluate('__finishFeedback()');
         await check(`__readyCount===${cues+1} && document.getElementById('counter').textContent==='2もんめ / 10'`, pace+' next question has one ready sound');
         if (Number.isFinite(limit)) {
-            await evaluate(`__advance(${limit-50});document.querySelector('[data-digit="1"]').click();__advance(50)`);
+            await evaluate(`__advance(${600+limit-50});document.querySelector('[data-digit="1"]').click();__advance(50)`);
             await check(`!document.getElementById('game').classList.contains('revealed')`, pace+' late first digit has time for the second');
             await evaluate(`document.querySelector('[data-digit="2"]').click()`);
             await check(`document.getElementById('game').classList.contains('correct')`, pace+' second digit can complete the answer');
@@ -167,6 +167,8 @@ try {
     await check(`KukuLearning.daily(KukuStore.state,KukuLearning.day()).ms===${before}`, 'pause excludes elapsed time');
     await click('resume');
     await evaluate('__spoken=[]');
+    await click('reveal');
+    await check(`!document.getElementById('dot-board').hidden && document.getElementById('reveal').textContent==='こたえを きく'`, 'first help shows a hint');
     await click('reveal');
     await check(`document.getElementById('game').classList.contains('revealed')`, 'show answer');
     const wrongCounter=await evaluate(`document.getElementById('counter').textContent`);
@@ -301,7 +303,7 @@ try {
     const finalRows=new Set();
     for(let i=0;i<50;i++) {
       finalRows.add(await evaluate(`document.getElementById('equation').textContent[0]`));
-      if(i<5) { await click('reveal');await evaluate('__finishFeedback()'); }
+      if(i<5) { await evaluate('__advance(650)');await click('reveal');await click('reveal');await evaluate('__finishFeedback()'); }
       else await evaluate(`__advance(650);(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());__finishFeedback();})()`);
     }
     if(finalRows.size!==8)throw Error('Final must include all eight rows');
@@ -315,7 +317,7 @@ try {
       await evaluate(`document.querySelector('[data-open="result"]').click();document.getElementById('result-next-dan').click();document.getElementById('all-start').click()`);
       await check(`document.getElementById('counter').textContent==='1もんめ / 81'`, 'all-facts test starts 81 questions');
       for(let i=0;i<81;i++) {
-        if(i<mistakes) { await click('reveal');await evaluate('__finishFeedback()'); }
+        if(i<mistakes) { await evaluate('__advance(650)');await click('reveal');await click('reveal');await evaluate('__finishFeedback()'); }
         else await evaluate(`__advance(650);(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());__finishFeedback();})()`);
       }
       await check(`KukuStore.state.rewards.trail.passedAll===${mistakes===0} && KukuStore.state.rewards.bests['all-81'].correct===${81-mistakes} && KukuStore.state.rewards.bests.final.correct===45`, '81 test needs a perfect run and preserves 50-question record');

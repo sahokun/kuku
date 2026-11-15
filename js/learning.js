@@ -123,7 +123,7 @@
             const r = s.problems[key(q.a,q.b)], answered = (r?.history || []).filter(x => x.kind !== 'intro'), recent = answered.slice(-2);
             if (!recent.length || recent.length === 2 && recent.every(x => !x.ok)) return 'first';
             if (!r?.everReady || !r.stage || r.repair || !recent[recent.length-1].ok) pace = 'easy';
-            for (const x of answered.filter(x => x.ok && Number.isFinite(x.ms)).slice(-3)) times.push(x.ms);
+            for (const x of answered.filter(x => x.ok && x.kind !== 'hint' && Number.isFinite(x.ms)).slice(-3)) times.push(x.ms);
         }
         if (!pool.length) return 'first';
         // Leave room for how long this child actually takes: a child who counts up needs no limit, not a shorter one.
@@ -134,6 +134,10 @@
             if (need > answerTimes.normal) pace = 'easy';
         }
         return pace;
+    }
+    function hint(a, b) {
+        // Build the answer from the previous step instead of showing it.
+        return b === 1 ? `${a}が 1つ。` : `${a}×${b - 1}＝${a * (b - 1)}。それに ${a}を たすと？`;
     }
     function nextStep(r, now = Date.now()) {
         const today = day(now);
@@ -166,7 +170,8 @@
         s.serial++;
         r.attempts++;
         daily(s, today).answers++;
-        if (ok && kind !== 'intro')
+        // A hinted answer is practice: it neither counts as answering alone nor restarts the checks.
+        if (ok && kind !== 'intro' && kind !== 'hint')
             r.correct++;
         r.history.push({ at: now, ok, ms: Math.max(0, Math.round(elapsed)), kind });
         r.history = r.history.slice(-24);
@@ -292,5 +297,5 @@
                     n++;
         return n;
     }
-    return { VERSION, mapStars, roundPace, nextStep, paceLabel, answerTime, answerDeadline, key, day, plusDays, fresh, restore, record, daily, eligible, isDue, activeDan, danProgress, chooseDan, plan, submit, finishIntro, pick, status, countMastered };
+    return { VERSION, mapStars, roundPace, nextStep, hint, paceLabel, answerTime, answerDeadline, key, day, plusDays, fresh, restore, record, daily, eligible, isDue, activeDan, danProgress, chooseDan, plan, submit, finishIntro, pick, status, countMastered };
 });

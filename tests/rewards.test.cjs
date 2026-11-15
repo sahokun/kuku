@@ -51,7 +51,7 @@ test('daily mission selection stays fixed across learning changes and reloads',(
 });
 test('daily flower is awarded once and survives the following day and reload',()=>{
  const s=state(),date='2026-09-29';R.ensureDay(s,date);
- for(let i=0;i<3;i++)R.event(s,date,{type:'answer',ok:true,roundCorrect:i+1});
+ for(let i=0;i<5;i++)R.event(s,date,{type:'answer',ok:true,roundCorrect:i+1});
  for(let i=0;i<2;i++)R.event(s,date,{type:'finish'});
  assert.equal(s.rewards.days[date].seal,false);
  const result=R.event(s,date,{type:'finish'});assert.equal(result.sealed,true);assert.equal(result.earned[0].id,'play-three');
@@ -156,6 +156,8 @@ test('three correct answers must come from one round, without requiring a streak
  assert.equal(R.missions(s,date).find(m=>m.id==='round-correct').done,false);
  R.event(s,date,{type:'answer',ok:false,roundCorrect:2});
  R.event(s,date,{type:'answer',ok:true,roundCorrect:3});
+ assert.equal(R.missions(s,date).find(m=>m.id==='round-correct').done,false,'accuracy goal needs five in one round');
+ R.event(s,date,{type:'answer',ok:true,roundCorrect:4});R.event(s,date,{type:'answer',ok:true,roundCorrect:5});
  assert.equal(R.missions(s,date).find(m=>m.id==='round-correct').done,true);
  s.rewards=R.restore(JSON.parse(JSON.stringify(s.rewards)),s);
  assert.equal(R.missions(s,date).find(m=>m.id==='round-correct').done,true);
@@ -173,7 +175,7 @@ test('review is an additional fourth mission and is required for the daily flowe
  const s=state(),date='2026-10-06';s.problems['2x3']={lastAt:at('2026-10-05'),due:date};
  assert.equal(R.missions(s,date).length,4);
  for(let i=0;i<3;i++) R.event(s,date,{type:'finish'});
- R.event(s,date,{type:'answer',ok:true,roundCorrect:3});
+ R.event(s,date,{type:'answer',ok:true,roundCorrect:5});
  assert.equal(s.rewards.days[date].seal,false);
  const result=R.event(s,date,{type:'recite',review:true});assert.equal(result.sealed,true);
 });
