@@ -149,3 +149,28 @@ test('old default normal pace migrates once; deliberate choices remain available
  old.settings.pace='robot';assert.equal(L.restore(old).settings.pace,'robot');
  assert.equal(L.mapStars({stars:100,stage:100}),0);
 });
+
+test('automatic pace follows how long correct answers actually take',()=>{
+ const make=ms=>{const s=L.fresh(),now=Date.now();
+  for(const b of [1,2,3]){const r=L.record(s,{a:3,b});r.attempts=3;r.everReady=true;r.stage=1;r.history=[{at:now,ok:true,ms,kind:'random'},{at:now,ok:true,ms,kind:'random'}];}
+  return s;};
+ const p={kind:'manual',keys:['3x1','3x2','3x3']};
+ assert.equal(L.roundPace(make(1500),p),'normal');
+ assert.equal(L.roundPace(make(4000),p),'easy');
+ assert.equal(L.roundPace(make(8000),p),'first');
+ const s=make(1500);s.problems['3x3'].history.push({at:Date.now(),ok:true,ms:9000,kind:'random'},{at:Date.now(),ok:true,ms:9000,kind:'random'});
+ assert.equal(L.roundPace(s,p),'first','a slow minority above the 80th percentile still needs room');
+ assert.equal(L.roundPace(make(8000),p,'normal'),'normal','a hand-picked pace is kept');
+});
+test('the map explains what earns the next star',()=>{
+ const now=new Date('2026-11-16T12:00:00').getTime(),today='2026-11-16';
+ assert.match(L.nextStep(undefined,now),/こたえて/);
+ const r={attempts:3,correct:2,today,hits:1,stage:0,history:[{at:now,ok:true,ms:3000,kind:'random'}]};
+ assert.match(L.nextStep(r,now),/あと 1かい/);
+ r.history.push({at:now,ok:false,ms:3000,kind:'random'});r.hits=0;
+ assert.match(L.nextStep(r,now),/まちがえた/);assert.match(L.nextStep(r,now),/2かい/);
+ Object.assign(r,{stage:1,due:'2026-11-17',stars:1});assert.equal(L.nextStep(r,now),'11月17日から また できたら ★2！');
+ r.stars=2;assert.match(L.nextStep(r,now),/つぎの だんかい/);
+ Object.assign(r,{stage:3,due:'2026-11-16'});assert.equal(L.nextStep(r,now),'きょう できたら ★3！');
+ Object.assign(r,{stage:4,mastered:true,repair:false,due:'2026-11-30'});assert.match(L.nextStep(r,now),/ときどき/);
+});
