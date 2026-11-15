@@ -50,6 +50,13 @@
         <button data-open="manual"><span class="menu-symbol" aria-hidden="true">＋</span><span><strong>じぶんで えらぶ</strong><small>だん・はんい・もんだいを えらぶ</small></span><b aria-hidden="true">›</b></button>
         <button data-open="settings"><span class="menu-symbol" aria-hidden="true">⚙</span><span><strong>せってい</strong><small>おと・こえ・うごき</small></span><b aria-hidden="true">›</b></button>
       </nav>
+      <button data-open="updates" class="quiet version-link"><span id="app-version">バージョン</span> ・ こうしん きろく →</button>
+    </section>
+    <section id="updates" class="screen" hidden>
+      <div class="section-top"><button class="back">← もどる</button><h1>こうしん きろく</h1></div>
+      <p class="help">あたらしく なった ところだよ。</p>
+      <article class="updates-card"><h2 id="updates-version"></h2><p id="updates-date" class="help"></p><ul id="updates-list"></ul></article>
+      <nav class="answer-pages" aria-label="こうしんの ページ"><button id="updates-newer">← あたらしい</button><strong id="updates-page" aria-live="polite"></strong><button id="updates-older">まえの →</button></nav>
     </section>
     <section id="missions" class="screen" hidden>
       <div class="section-top"><button class="back">← もどる</button><h1>きょうの めあて</h1></div>
@@ -176,6 +183,6 @@
     <dialog id="pause-dialog"><h2>ひとやすみ</h2><p>じかんは とまっているよ。</p><button id="resume" class="primary wide">つづける</button><button id="quit" class="quiet wide">はじめに もどる</button></dialog>
   </main>
   <div id="reward-toast" role="status" hidden></div>
-  <script src="js/viewport.js"></script><script src="js/data.js"></script><script src="js/learning.js"></script><script src="js/rewards.js"></script><script src="js/results.js"></script><script src="js/store.js"></script><script src="js/voice-manifest.js"></script><script src="js/voice-files.js"></script><script src="js/sound.js"></script><script src="js/visuals.js"></script><script src="js/recitation.js"></script><script src="js/journey.js"></script><script src="js/diagnostics.js"></script><script src="js/app.js"></script>
+  <script src="js/version.js"></script><script src="js/viewport.js"></script><script src="js/data.js"></script><script src="js/learning.js"></script><script src="js/rewards.js"></script><script src="js/results.js"></script><script src="js/store.js"></script><script src="js/voice-manifest.js"></script><script src="js/voice-files.js"></script><script src="js/sound.js"></script><script src="js/visuals.js"></script><script src="js/recitation.js"></script><script src="js/journey.js"></script><script src="js/diagnostics.js"></script><script src="js/app.js"></script>
 </body>
 </html>
