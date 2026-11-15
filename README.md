@@ -86,7 +86,7 @@ GitHub Actionsは学習ルールを検証し、本番の配信は `main` へのp
 
 ## プレイテスト
 
-AIテスター（muse）が毎日プレイし、非公開リポジトリ `sahokun/kuku-playtest` のIssueに報告します。テスト版は Cloudflare Pages が `develop` ブランチから自動で配信します（本番のGitHub Pagesとは別）。
+AIテスター（muse）が毎日プレイし、非公開リポジトリ `sahokun/kuku-playtest` のIssueに報告します。テスト版は Cloudflare Pages が `develop` ブランチから自動で配信します（https://kuku-develop.pages.dev/ 、本番のGitHub Pagesとは別）。
 報告の取り込み・判定・修正・反映は `/playtest-review`（`.claude/skills/playtest-review/SKILL.md`）の手順で行い、変更点は `js/version.js` の「こうしん きろく」でテスターへ伝えます。
 
 ## ライセンス

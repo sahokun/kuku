@@ -108,6 +108,6 @@ gh api -X PATCH repos/sahokun/kuku-playtest/issues/comments/<ID> -F body=@body.m
 
 ## 環境メモ
 
-- テスト版URL: （Cloudflare Pages の設定後に記入）
+- テスト版URL: https://kuku-develop.pages.dev/ （Cloudflare Pages プロジェクト `kuku-develop`、本番ブランチ develop。版の確認は `curl -s https://kuku-develop.pages.dev/js/version.js | grep version:`）
 - 本番: https://sahokun.github.io/kuku/
 - 旧テスト版（ChatGPT Sites、もう更新できない）: https://kuku-developer-check.aaoutaa.chatgpt.site/
