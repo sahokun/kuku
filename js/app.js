@@ -16,7 +16,7 @@
     function show(id, returning = false) {
         if (!returning && id !== screen && !roots.includes(id) && !['game', 'result', 'result-details', 'result-answers'].includes(id) && !['game', 'result', 'result-details', 'result-answers'].includes(screen)) backTargets[id] = screen;
         screen = id;
-        const section = ['game', 'result', 'result-details', 'result-answers'].includes(id) ? null : id === 'calendar' && backTargets.calendar === 'missions' ? 'home' : ['map', 'calendar', 'challenge', 'records'].includes(id) ? 'records' : ['manual', 'custom', 'table', 'settings', 'menu'].includes(id) ? 'menu' : id === 'route' ? 'route' : 'home';
+        const section = ['game', 'result', 'result-details', 'result-answers'].includes(id) ? null : id === 'calendar' && backTargets.calendar === 'missions' ? 'home' : ['map', 'calendar', 'challenge', 'records'].includes(id) ? 'records' : ['manual', 'custom', 'table', 'settings', 'menu', 'updates'].includes(id) ? 'menu' : id === 'route' ? 'route' : 'home';
         $('main-nav').hidden = !section;
         document.querySelectorAll('[data-nav]').forEach(b => { if (b.dataset.nav === section) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
         fx.setScene(id);
@@ -36,6 +36,7 @@
             renderTable();
         if (id === 'settings')
             renderSettings();
+        if (id === 'updates') { updatesPage = 0; renderUpdates(); }
         if (id === 'route') journey.route();
         if (id === 'challenge') journey.challenges();
         if (id === 'calendar') journey.calendar();
@@ -514,6 +515,21 @@
             $('table-list').append(button);
         }
     }
+    let updatesPage = 0;
+    function renderUpdates() {
+        const notes = KukuVersion.notes;
+        updatesPage = Math.max(0, Math.min(notes.length - 1, updatesPage));
+        const note = notes[updatesPage];
+        $('updates-version').textContent = `バージョン ${note.version}`;
+        $('updates-date').textContent = note.date.replace(/^(\d+)-0?(\d+)-0?(\d+)$/, '$1年$2月$3日');
+        $('updates-list').replaceChildren(...note.items.map(text => { const li = document.createElement('li'); li.textContent = text; return li; }));
+        $('updates-page').textContent = `${updatesPage + 1} / ${notes.length}`;
+        $('updates-newer').disabled = updatesPage === 0;
+        $('updates-older').disabled = updatesPage + 1 >= notes.length;
+    }
+    $('updates-newer').onclick = () => { updatesPage--; renderUpdates(); };
+    $('updates-older').onclick = () => { updatesPage++; renderUpdates(); };
+    $('app-version').textContent = `バージョン ${KukuVersion.version}`;
     function renderSettings() {
         $('setting-pace').value = s.settings.pace;
         $('setting-sound').checked = s.settings.sound;

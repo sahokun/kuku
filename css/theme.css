@@ -217,3 +217,6 @@ dialog {border:3px solid var(--ink);border-radius:12px;box-shadow:5px 5px 0 #ed7
 #reveal {font-weight:900;color:var(--ink);background:#fff2b4;border:2px solid var(--ink);border-radius:6px;font-size:12px}
 @media(max-height:559px){#round-setup {padding:12px}#round-setup h2 {font-size:19px;margin:3px 0 8px}#round-pace {padding:6px;margin-bottom:8px}#round-setup .wide {min-height:36px;padding:6px;margin-top:7px}#round-pace-preview {font-size:16px}.map-growth strong {font-size:12px;letter-spacing:0}}
 @media(min-width:600px) and (max-height:500px){#map-grid {height:210px;grid-row:2/7}#map .map-growth,#map .map-tutorial {grid-column:2}#map .map-growth {flex-wrap:wrap}#map .map-tutorial {margin:0}}
+.version-link {align-self:center;font-size:12px;min-height:36px;margin-top:auto}
+.updates-card {flex:1;min-height:0;overflow:auto;background:#fffef4;border:2px solid var(--ink);border-radius:9px;padding:10px 14px}
+.updates-card h2 {margin:0}.updates-card ul {margin:6px 0 0;padding-left:1.2em;display:grid;gap:6px;font-size:13px;line-height:1.5}

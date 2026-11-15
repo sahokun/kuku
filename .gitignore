@@ -13,9 +13,10 @@
 # AI metadata
 .ai/
 
-# Claude Code (commands only committed)
+# Claude Code (commands and skills committed)
 .claude/*
 !.claude/commands/
+!.claude/skills/
 
 .github/*
 !.github/copilot-instructions.md

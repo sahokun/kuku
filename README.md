@@ -49,6 +49,7 @@ Google Fonts以外の実行時外部依存はありません。フォントを�
 | --- | --- |
 | `index.html` | 画面構造とスクリプトの読み込み |
 | `css/` | 画面・数字キー・レスポンシブ表示。`theme.css` は配色・ボタンの優先順位・共通ナビゲーション |
+| `js/version.js` | バージョンと「こうしん きろく」の内容。変更をテスト版へ出すたびに先頭へ追加 |
 | `js/data.js` | 九九81問と日本語の読み |
 | `js/learning.js` | 学習判定・出題計画・保存データの検証。DOMに依存しない |
 | `js/results.js` | 回答履歴の表示と5問ごとのページ分け |
@@ -81,6 +82,11 @@ node --test --experimental-test-isolation=none tests/*.test.cjs
 
 ローカルの `develop` が動作確認用、`main` が本番です。開発者本人限定のスマホ確認にはChatGPT Sitesを使い、配置先を `.openai/hosting.json` に記録します。本番のGitHub Pagesとは別に更新します。
 GitHub Actionsは学習ルールを検証し、本番の配信は `main` へのpushだけで行います。本番へのPR・マージはユーザーが行います。
+
+## プレイテスト
+
+AIテスター（muse）が毎日プレイして報告します。テスト版は Cloudflare Pages が `develop` ブランチから自動で配信します（本番のGitHub Pagesとは別）。
+報告への対応の変更点は `js/version.js` の「こうしん きろく」でテスターへ伝えます。
 
 ## ライセンス
 
