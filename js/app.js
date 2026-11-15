@@ -269,7 +269,8 @@
         $('feedback').textContent = ok ? (change === 'ready' ? 'きょうは OK！' : change === 'mastered' ? 'しっかり おぼえた！' : 'できた！') : 'まずは きいてね';
         setKeys(false);
         sound.cancelSpeech();
-        updateParade(session.index + 1);
+        // A wrong answer still counts as answered, but without the star flight or a stage change.
+        if (ok) updateParade(session.index + 1); else fx.progress(session.index + 1, session.plan.count, false);
         sound.effect(ok ? 'correct' : 'reveal', session.combo);
         if (ok) {
             fx.burst(false, session.combo);
@@ -371,7 +372,7 @@
         const dayMs = L.daily(s, L.day()).ms;
         $('result-time').textContent = `このかい ${Math.round(session.elapsed / 1000)}びょう ・ きょう ${Math.floor(dayMs / 60000)}ふん`;
         const enough = dayMs >= 600000;
-        $('continue').textContent = enough ? 'きょうは おしまい →' : session.plan.kind === 'challenge' ? 'だんを えらぶ →' : session.plan.kind === 'mix' ? 'つぎの 10もん →' : 'つぎの れんしゅう →';
+        $('continue').textContent = enough ? 'きょうは おしまい →' : session.plan.kind === 'challenge' ? 'だんを えらぶ →' : session.plan.kind === 'mix' ? (R.plan(s).next ? 'つぎの だんへ →' : 'つぎの 10もん →') : 'つぎの れんしゅう →';
         $('finish').textContent = enough ? 'もうすこし あそぶ' : 'きょうは おしまい';
         $('continue').dataset.finish = String(enough);
         if (enough && !passed)
@@ -409,7 +410,7 @@
     function follow() {
         const p = session?.plan;
         if (p?.kind === 'challenge') { show('route'); return; }
-        if (p?.kind === 'mix') { start(R.mixPlan(s, p.dans)); return; }
+        if (p?.kind === 'mix') { const nextPlan = R.plan(s); start(nextPlan.next ? nextPlan : R.mixPlan(s, p.dans)); return; }
         if (p?.kind === 'manual')
             start(p);
         else {

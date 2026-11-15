@@ -72,7 +72,7 @@ try {
  await shot('diagnostic-panel');
  await check(`KukuSound.prepare()`, 'recordings are ready before measurements');
  await evaluate(`document.getElementById('diag-mode').value='normal'`);
- await click('diag-start');await sleep(250);
+ await click('diag-start');await sleep(900);
  await check(`document.getElementById('equation').textContent==='4 × 9 =' && KukuSound.isPlaying()`,'baseline starts fixed questions with sound');
  await evaluate(`document.querySelector('[data-digit="3"]').click();__holdFrames=true`);await sleep(350);
  await evaluate('__holdFrames=false');await sleep(120);
@@ -84,18 +84,18 @@ try {
  await click('diag-open');
  const count=await evaluate('KukuDiagnostics.report().events.length');await sleep(250);
  await check(`KukuDiagnostics.report().events.length===${count}`,'paused measurements excluded');
- await evaluate(`document.getElementById('diag-mode').value='silent'`);await click('diag-start');await sleep(200);
+ await evaluate(`document.getElementById('diag-mode').value='silent'`);await click('diag-start');await sleep(850);
  await check(`!KukuSound.isPlaying() && KukuSound.speak('test')===false`,'silent condition disables music effects and speech');
  await evaluate(`document.querySelector('[data-digit="3"]').click()`);
  await check(`document.querySelector('[data-digit="3"]').getAnimations().length>0`,'silent condition keeps input animation');
- await click('diag-open');await evaluate(`document.getElementById('diag-mode').value='no-input-fx'`);await click('diag-start');await sleep(200);
+ await click('diag-open');await evaluate(`document.getElementById('diag-mode').value='no-input-fx'`);await click('diag-start');await sleep(850);
  await evaluate(`document.querySelector('[data-digit="3"]').click()`);
  await check(`KukuSound.isPlaying()&&document.querySelector('[data-digit="3"]').getAnimations().length===0&&document.getElementById('answer').textContent==='3'`,'no-input-animation condition keeps sound and input');
  await check(`KukuDiagnostics.report().runs.length===3`,'all conditions retained in one report');
  await check(`localStorage.getItem('kuku:learning:v1')===${JSON.stringify(original)}`,'normal learning data untouched');
  await click('diag-open');await shot('diagnostic-results');
  await check(`document.getElementById('diag-output').value.includes('A 通常')&&document.getElementById('diag-output').value.includes('C 入力演出なし')`,'copyable summary has all conditions');
- await evaluate(`document.getElementById('diag-mode').value='voice-only'`);await click('diag-start');await sleep(150);
+ await evaluate(`document.getElementById('diag-mode').value='voice-only'`);await click('diag-start');await sleep(800);
  await check(`!KukuSound.isPlaying()`,'voice-only condition has no music');
  await evaluate(`document.querySelector('[data-digit="3"]').click();document.querySelector('[data-digit="6"]').click()`);
  const speechDeadline=Date.now()+10000;
@@ -103,7 +103,7 @@ try {
   if(Date.now()>speechDeadline)throw Error('recording completion timeout');await sleep(100);
  }
  await check(`KukuDiagnostics.report().events.some(e=>e.run===4&&e.type==='recording-start')&&KukuDiagnostics.report().events.some(e=>e.run===4&&e.type==='audio-call'&&e.name==='effect'&&e.skipped)`,'recording lifecycle recorded while effects are bypassed');
- await click('diag-open');await evaluate(`document.getElementById('diag-mode').value='synth-only'`);await click('diag-start');await sleep(150);
+ await click('diag-open');await evaluate(`document.getElementById('diag-mode').value='synth-only'`);await click('diag-start');await sleep(800);
  await evaluate(`document.querySelector('[data-digit="3"]').click();document.querySelector('[data-digit="6"]').click()`);
  await check(`KukuSound.isPlaying()&&!KukuDiagnostics.report().events.some(e=>e.run===5&&e.type==='speech-created')&&KukuDiagnostics.report().events.some(e=>e.run===5&&e.type==='audio-call'&&e.name==='speak'&&e.skipped)`,'music and effects remain active without creating speech utterances');
  await click('diag-open');

@@ -81,7 +81,7 @@ node --test --experimental-test-isolation=none tests/*.test.cjs
 
 ブラウザ検証ツールの実行方法・保存データの扱い・出力先は [tools/README.md](tools/README.md) を参照してください。
 
-ローカルの `develop` が動作確認用、`main` が本番です。開発者本人限定のスマホ確認にはChatGPT Sitesを使い、配置先を `.openai/hosting.json` に記録します。本番のGitHub Pagesとは別に更新します。
+ローカルの `develop` が動作確認用、`main` が本番です。動作確認・プレイテスト用のテスト版は Cloudflare Pages が `develop` から自動配信します（「プレイテスト」参照）。以前使っていたChatGPT Sites（`.openai/hosting.json`・`dist/`）は更新を終了しました。
 GitHub Actionsは学習ルールを検証し、本番の配信は `main` へのpushだけで行います。本番へのPR・マージはユーザーが行います。
 
 ## プレイテスト
