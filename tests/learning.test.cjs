@@ -171,7 +171,7 @@ test('the map explains what earns the next star',()=>{
  assert.match(L.nextStep(r,now),/まちがえた/);assert.match(L.nextStep(r,now),/2かい/);
  Object.assign(r,{stage:1,due:'2026-11-17',stars:1});assert.equal(L.nextStep(r,now),'11月17日から また できたら ★2！');
  r.stars=2;assert.match(L.nextStep(r,now),/つぎの だんかい/);
- Object.assign(r,{stage:3,due:'2026-11-16'});assert.equal(L.nextStep(r,now),'きょう できたら ★3！');
+ Object.assign(r,{stage:3,due:'2026-11-16'});assert.equal(L.nextStep(r,now),'きょう 3びょう いないで できたら ★3！');
  Object.assign(r,{stage:4,mastered:true,repair:false,due:'2026-11-30'});assert.match(L.nextStep(r,now),/ときどき/);
 });
 test('a hinted correct answer is practice: no self-correct count, no restart, no stage credit, no pace timing',()=>{
@@ -183,4 +183,17 @@ test('a hinted correct answer is practice: no self-correct count, no restart, no
  assert.equal(r.correct,before.correct);assert.equal(r.stage,before.stage);assert.equal(r.hits,before.hits);
  assert.equal(r.history.at(-1).kind,'hint');
  assert.equal(L.hint(3,7),'3×6＝18。それに 3を たすと？');assert.equal(L.hint(4,1),'4が 1つ。');
+});
+test('the last two spaced checks must be recalled within three seconds; ★1 and ★2 may be counted out',()=>{
+ const s=L.fresh(),q={a:7,b:8},day=d=>new Date(d+'T12:00:00').getTime();
+ const t=day('2026-11-16');L.submit(s,q,true,t,6000);s.serial+=5;assert.equal(L.submit(s,q,true,t+31000,6000),'ready');
+ assert.equal(L.submit(s,q,true,day('2026-11-17'),8000),'reviewed','★2 can be reached by counting');
+ const r=s.problems['7x8'];assert.equal(r.stage,2);assert.equal(L.mapStars(r),2);
+ assert.equal(L.submit(s,q,true,day('2026-11-20'),4000),'slow');
+ assert.equal(r.stage,2);assert.equal(r.due,'2026-11-20');assert.equal(r.lastReview,'2026-11-17');
+ s.serial+=5;assert.equal(L.submit(s,q,true,day('2026-11-20')+60000,L.FLUENT_MS),'reviewed');assert.equal(r.stage,3);
+ assert.equal(L.submit(s,q,true,day('2026-11-27'),5000),'slow');assert.equal(r.mastered,false);
+ s.serial+=5;assert.equal(L.submit(s,q,true,day('2026-11-27')+60000,2000),'mastered');assert.equal(L.mapStars(r),3);
+ assert.equal(L.submit(s,q,true,day('2026-12-11'),9000),'slow');assert.equal(r.mastered,true);assert.equal(r.stage,4);
+ assert.equal(L.countMastered(s),1);
 });
