@@ -110,7 +110,7 @@
         sound.cancelSpeech();
         const rowDan = ['intro', 'ordered'].includes(p.kind) ? p.dan : p.courseId?.startsWith('dan-') ? p.dans[0] : 0;
         if (rowDan >= 2) L.chooseDan(s, rowDan);
-        session = { pace: chosenPace || L.roundPace(s, p), score: 0, speedPoints: 0, chainPoints: 0, answers: [], responses: [], bestCrossed: false, plan: p, index: 0, recent: [], correct: 0, combo: 0, changes: { ready: 0, reviewed: 0, mastered: 0 }, elapsed: 0, questionMs: 0, phaseMs: 0, paused: false, phase: 'question', input: '', extended: false, lockMs: 0 };
+        session = { pace: chosenPace || L.roundPace(s, p), score: 0, speedPoints: 0, chainPoints: 0, answers: [], responses: [], bestCrossed: false, plan: p, index: 0, recent: [], correct: 0, combo: 0, changes: { ready: 0, reviewed: 0, mastered: 0 }, quick: 0, elapsed: 0, questionMs: 0, phaseMs: 0, paused: false, phase: 'question', input: '', extended: false, lockMs: 0 };
         R.ensureDay(s);
         fx.clear();
         $('score-strip').hidden = p.kind === 'intro';
@@ -177,7 +177,9 @@
         session.questionMs = 0;
         session.phaseMs = 0;
         session.extended = false;
-        const intro = session.plan.kind === 'intro' && (session.plan.dan !== 1 || session.index < 3);
+        // Every lecture question starts by listening; in the 1のだん tutorial the child then types the same fact (startCopy).
+        const intro = session.plan.kind === 'intro';
+        session.copy = false;
         session.phase = intro ? 'intro' : 'question';
         updateParade(session.index);
         $('game').classList.remove('correct', 'revealed');
@@ -294,9 +296,11 @@
         if (!reveal && session.input === '')
             return;
         const right = !reveal && Number(session.input) === session.q.a * session.q.b;
-        const helped = right && session.hinted, ok = right && !helped;
+        const helped = right && session.hinted && !session.copy, ok = right && !helped;
         session.review = R.ensureDay(s).reviewKeys.includes(L.key(session.q.a, session.q.b));
-        const change = L.submit(s, session.q, right, Date.now(), session.questionMs, helped ? 'hint' : session.plan.kind === 'ordered' ? 'ordered' : 'random');
+        const change = L.submit(s, session.q, right, Date.now(), session.questionMs, session.copy ? 'intro' : helped ? 'hint' : session.plan.kind === 'ordered' ? 'ordered' : 'random');
+        const quick = ok && !session.copy && session.questionMs <= L.FLUENT_MS;
+        if (quick) session.quick++;
         session.justMastered = change === 'mastered';
         session.newBest = false;
         session.recent.push(L.key(session.q.a, session.q.b));
@@ -311,7 +315,7 @@
         const response = { a: session.q.a, b: session.q.b, ok, ms: session.questionMs, given: session.input || null, reason: reveal ? reason : ok ? 'correct' : helped ? 'hint' : 'wrong' };
         session.answers.push(response);
         session.responses.push(response);
-        journey.event({ type: 'answer', ok, roundCorrect: session.correct });
+        journey.event({ type: 'answer', ok: ok && !session.copy, roundCorrect: session.copy ? 0 : session.correct });
         if (session.plan.kind !== 'intro') {
             session.score += award.total;session.speedPoints += award.speed;session.chainPoints += award.chain;
             $('game-score').textContent = session.score.toLocaleString();
@@ -326,7 +330,9 @@
         $('answer').textContent = String(session.q.a * session.q.b);
         $('reading').textContent = session.q.q_read + session.q.a_read;
         $('round-progress').value = session.index + 1;
-        $('feedback').textContent = helped ? 'ヒントで できた！' : ok ? (change === 'ready' ? 'きょうは OK！' : change === 'mastered' ? 'しっかり おぼえた！' : 'できた！') : 'まずは きいてね';
+        // A status worth reading stays on screen through the answer's recitation.
+        session.status = helped ? 'ヒントで できた！' : !ok ? '' : change === 'ready' ? 'きょうは OK！' : change === 'mastered' ? 'しっかり おぼえた！' : change === 'slow' ? 'できた！ つぎは もっと はやく' : quick ? 'すぐ いえた！' : '';
+        $('feedback').textContent = session.status || (ok || right ? 'できた！' : 'まずは きいてね');
         setKeys(false);
         sound.cancelSpeech();
         // A wrong answer still counts as answered, but without the star flight or a stage change.
@@ -372,13 +378,13 @@
                 if (session !== active || session.q !== question) return;
                 $('game').dataset.recitation = name;
                 if (!repeatOnly) fx.lessonStep(name);
-                $('feedback').textContent = label;
+                $('feedback').textContent = repeatOnly && active.status ? active.status : label;
             },
             onDone() {
                 if (session !== active || active.paused || active.recitation !== flow) return;
                 active.recitation = null;
                 journey.event({ type: 'recite', review: !intro && active.review });
-                if (intro) advanceIntro();
+                if (intro) active.plan.dan === 1 ? startCopy() : advanceIntro();
                 // After a miss, let the child say it and move on with a tap instead of racing to the next question.
                 else if (!repeatOnly) waitForNext();
                 else { active.index++; next(); }
@@ -386,6 +392,22 @@
         });
         active.recitation = flow;
         flow.start();
+    }
+    function startCopy() {
+        // Tutorial: type the fact that was just heard, so the first answers practise the keys, not unheard facts.
+        if (!session || session.phase !== 'intro' || session.paused || session.recitation)
+            return;
+        Object.assign(session, { copy: true, hinted: true, phase: 'question', input: '', questionMs: 0, extended: false, lockMs: INPUT_GUARD_MS });
+        $('answer').textContent = '?';
+        $('reading').textContent = session.q.q_read;
+        $('feedback').textContent = 'きいた こたえを おしてみよう';
+        $('reveal').textContent = 'こたえを きく';
+        $('input-controls').hidden = false;
+        $('intro-guide').hidden = true;
+        delete $('game').dataset.recitation;
+        hideDots();
+        setKeys(false);
+        sound.effect('ready');
     }
     function advanceIntro() {
         if (!session || session.phase !== 'intro' || session.paused || session.recitation)
@@ -420,7 +442,7 @@
         $('result-detail').textContent = complete ? intro ? 'つぎは こたえを おもいだしてみよう。' : `じぶんで できた ${session.correct} / ${session.index}もん` : 'じぶんで えらんで あそぶことも できるよ。';
         const c = session.changes;
         $('result-changes').replaceChildren();
-        for (const [count, label] of [[c.ready, 'もん きょうの かくにん OK'], [c.reviewed, 'もん 日を あけても できた！'], [c.mastered, 'もん しっかり おぼえた！']]) {
+        for (const [count, label] of [[session.quick, 'もん すぐ いえた！'], [c.ready, 'もん きょうの かくにん OK'], [c.reviewed, 'もん 日を あけても できた！'], [c.mastered, 'もん しっかり おぼえた！']]) {
             if (count) {
                 const p = document.createElement('p');
                 p.textContent = count + label;

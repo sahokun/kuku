@@ -139,7 +139,8 @@ try {
     await click('pause');await evaluate('__advance(5000)');
     await check(`document.getElementById('counter').textContent==='1もんめ / 9'`, 'lecture pause holds the problem');
     await evaluate('__holdSpeech=false;__spoken=[]');await click('resume');
-    await evaluate('__advance(100000)');
+    // Each tutorial fact is heard first, then the same fact is typed.
+    await evaluate(`(()=>{for(let i=0;i<9;i++){let left=4000;const keys=()=>!document.getElementById('input-controls').hidden&&!document.querySelector('[data-digit="1"]').disabled;while(left-->0&&!keys()&&document.getElementById('result').hidden)__advance(50);if(!document.getElementById('result').hidden)break;const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);if(n[1]!==i+1)throw Error('tutorial asked an unheard fact');String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());__finishFeedback();}__advance(3000);})()`);
     await check(`__spoken[0]===__spoken[2] && __spoken[1]==='いってみよう。せーのっ！'`, 'lecture reads, cues, then repeats');
     await check(`KukuStore.state.tutorial && !document.getElementById('result').hidden`, 'tutorial completes');
     await click('continue');

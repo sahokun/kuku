@@ -8,6 +8,8 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
     'use strict';
     const VERSION = 1;
+    // ★3 (しっかり おぼえた) means recalling, not counting: the later spaced checks must be answered this fast.
+    const FLUENT_MS = 3000;
     const answerTimes = Object.freeze({ first: Infinity, easy: 10000, normal: 5000, hard: 3000, robot: 1500 });
     function answerTime(pace) { return Object.hasOwn(answerTimes, pace) ? answerTimes[pace] : answerTimes.normal; }
     function answerDeadline(pace, firstDigitMs = null) {
@@ -144,10 +146,10 @@
         if (!r || !r.attempts) return 'じぶんで こたえて みよう。';
         const answered = (r.history || []).filter(x => x.kind !== 'intro'), last = answered[answered.length - 1];
         const from = r.due && r.due > today ? `${Number(r.due.slice(5, 7))}月${Number(r.due.slice(8))}日から ` : 'きょう ';
-        if (r.mastered && !r.repair && r.stage === 4) return isDue(r, now) ? 'きょう たしかめよう。' : 'ときどき たしかめるよ。';
+        if (r.mastered && !r.repair && r.stage === 4) return isDue(r, now) ? 'きょう すぐ いえるか たしかめよう（3びょう）。' : 'ときどき たしかめるよ。';
         if (r.stage === 1) return `${from}また できたら ` + ((r.stars || 0) >= 2 ? 'つぎの だんかいへ。' : '★2！');
-        if (r.stage === 2) return `${from}できたら つぎへ。あと 2かいで ★3！`;
-        if (r.stage === 3) return `${from}できたら ★3！`;
+        if (r.stage === 2) return `${from}3びょう いないで できたら つぎへ。あと 2かいで ★3！`;
+        if (r.stage === 3) return `${from}3びょう いないで できたら ★3！`;
         const missed = last && !last.ok ? 'まちがえたので やりなおし。' : '';
         const hits = r.today === today ? r.hits : 0;
         if (hits === 1) return missed + 'きょう あと 1かい！（あいだに ほかの 5もん）';
@@ -198,6 +200,13 @@
             return change;
         }
         if (r.stage > 0 && r.lastReview !== today) {
+            if (r.stage >= 2 && elapsed > FLUENT_MS) {
+                // Right but still counted out: keep the stage and the due date so it comes back, without a restart.
+                r.lastSerial = s.serial;
+                r.lastAt = now;
+                r.gap = 5;
+                return 'slow';
+            }
             r.stage = Math.min(4, r.stage + 1);
             r.lastReview = today;
             r.hits = 2;
@@ -297,5 +306,5 @@
                     n++;
         return n;
     }
-    return { VERSION, mapStars, roundPace, nextStep, hint, paceLabel, answerTime, answerDeadline, key, day, plusDays, fresh, restore, record, daily, eligible, isDue, activeDan, danProgress, chooseDan, plan, submit, finishIntro, pick, status, countMastered };
+    return { VERSION, FLUENT_MS, mapStars, roundPace, nextStep, hint, paceLabel, answerTime, answerDeadline, key, day, plusDays, fresh, restore, record, daily, eligible, isDue, activeDan, danProgress, chooseDan, plan, submit, finishIntro, pick, status, countMastered };
 });
