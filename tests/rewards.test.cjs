@@ -92,7 +92,7 @@ test('preferred rows start independently and a perfect scrambled row unlocks mix
  const s=state();s.tutorial=true;s.focusDan=7;
  assert.equal(R.plan(s).dan,7);s.introduced=[7];assert.equal(R.plan(s).kind,'ordered');s.ordered=[7];assert.equal(R.plan(s).courseId,'dan-7');
  const run=answers('dan-7');run[0].ok=false;R.recordRun(s,'dan-7',run);assert.deepEqual(R.cleared(s),[]);
- R.recordRun(s,'dan-7',answers('dan-7'));assert.deepEqual(R.cleared(s),[7]);assert.equal(R.plan(s).kind,'route');assert.deepEqual(s.problems,{});
+ R.recordRun(s,'dan-7',answers('dan-7'));assert.deepEqual(R.cleared(s),[7]);assert.deepEqual([R.plan(s).kind,R.plan(s).dan,R.plan(s).next],['intro',8,true]);assert.deepEqual(s.problems,{});
  R.recordRun(s,'dan-3',answers('dan-3'));s.ordered.push(3);assert.equal(R.plan(s).kind,'mix');
 });
 test('arbitrary cleared rows produce ten unique balanced questions and preserve the selected set',()=>{
@@ -222,4 +222,33 @@ test('records retain the selected answer time for the best and most recent run',
  R.recordRun(s,'all-81',answers('all-81',8000),'2026-10-07','easy');
  s.rewards=R.restore(JSON.parse(JSON.stringify(s.rewards)),s);
  assert.equal(s.rewards.bests['all-81'].pace,'normal');assert.equal(s.rewards.bests['all-81'].last.pace,'easy');
+});
+
+test('after one finished mix a day, home moves on to the next uncleared row unless a row was cleared today',()=>{
+ const s=state();s.tutorial=true;s.focusDan=4;s.introduced=[2,3,4];s.ordered=[2,3,4];s.rewards.trail.cleared=[2,3,4];s.rewards.trail.selected=[2,3,4];
+ const today=at('2026-11-16'),date='2026-11-16';
+ const first=R.plan(s,today);assert.equal(first.kind,'mix');
+ assert.equal(R.finishMix(s,first,first.queue.map(q=>({...q,ok:true,ms:3000})),date),true);
+ assert.equal(s.rewards.days[date].mixRounds,1);
+ const next=R.plan(s,today);assert.deepEqual([next.kind,next.dan,next.next],['intro',5,true]);
+ s.introduced.push(5);s.ordered.push(5);s.focusDan=5;
+ R.recordRun(s,'dan-5',answers('dan-5'),date);
+ assert.equal(s.rewards.days[date].danClears,1);assert.deepEqual(R.selected(s),[2,3,4,5]);
+ assert.equal(R.plan(s,today).kind,'mix');
+ assert.equal(R.plan(s,at('2026-11-17')).kind,'mix');
+ const restored=R.restore(JSON.parse(JSON.stringify(s.rewards)),s);
+ assert.equal(restored.days[date].mixRounds,1);assert.equal(restored.days[date].danClears,1);
+ assert.equal(R.nextDan(s,9),6);
+ for(let a=2;a<=9;a++)if(!s.rewards.trail.cleared.includes(a))s.rewards.trail.cleared.push(a);
+ assert.equal(R.nextDan(s,5),null);assert.equal(R.plan(s,today).kind,'mix');
+});
+test('round length estimates come from recent real play and wait for enough history',()=>{
+ const s=state(),now=at('2026-11-16');
+ assert.equal(R.estimate(s,{count:10},now),null);
+ s.days['2026-11-15']={ms:660000,games:3,answers:30};
+ assert.deepEqual(R.estimate(s,{count:10},now),[3,4]);
+ s.days['2026-10-01']={ms:6000000,games:3,answers:30};
+ assert.deepEqual(R.estimate(s,{count:10},now),[3,4]);
+ s.days['2026-11-14']={ms:180000,games:3,answers:30};
+ assert.deepEqual(R.estimate(s,{count:10},now),[2,3]);
 });

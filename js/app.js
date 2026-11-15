@@ -5,6 +5,9 @@
     const data = new Map(KukuData.map(q => [L.key(q.a, q.b), q]));
     let session = null, screen = 'home', lastTick = performance.now(), selected = new Set([2]), custom = new Set();
     const narrated = new Set();
+    // Taps that land just after the screen moves on belong to the previous question, not the new one.
+    const INPUT_GUARD_MS = 600;
+    const minutes = n => `${n}${[1, 3, 4, 6, 8, 10].includes(n) ? 'ぷん' : 'ふん'}`;
     let answerPage = 0, pendingPlan = null;
     const backTargets = {}, roots = ['home', 'route', 'records', 'menu'];
     const journey = KukuJourney.create({ state: s, start, show, save });
@@ -57,9 +60,9 @@
     }
     function syncSound() {
         $('sound').setAttribute('aria-pressed', String(s.settings.sound));
-        $('sound').setAttribute('aria-label', s.settings.sound ? 'おとを とめる' : 'おとを だす');
+        $('sound').setAttribute('aria-label', s.settings.sound ? 'おんがくを とめる' : 'おんがくを ながす');
         $('sound').style.opacity = s.settings.sound ? '1' : '.8';
-        $('sound').querySelector('span').textContent = s.settings.sound ? 'おと あり' : 'おと なし';
+        $('sound').querySelector('span').textContent = s.settings.sound ? 'おんがく あり' : 'おんがく なし';
     }
     function renderHome() {
         fx.setEnergy(.08);
@@ -68,14 +71,15 @@
         $('recommendation-title').textContent = p.title;
         $('choose-course').hidden = p.kind === 'route';
         $('auto-start').textContent = p.kind === 'route' ? 'だんを えらぶ ▶' : p.kind === 'intro' ? 'きいてみる ▶' : 'はじめる ▶';
-        $('round-estimate').textContent = p.kind === 'route' ? 'すきな だんから' : p.kind === 'intro' ? '9もん・2〜3ぷん' : `${p.count || 9}もん・1〜2ふん`;
+        const span = p.kind === 'intro' ? [2, 3] : R.estimate(s, p) || [2, 4];
+        $('round-estimate').textContent = p.kind === 'route' ? 'すきな だんから' : `${p.count || 9}もん・やく ${span[0]}〜${minutes(span[1])}`;
         const now = new Date();
         $('home-date').textContent = `${now.getMonth() + 1}月${now.getDate()}日 ${'日月火水木金土'[now.getDay()]}`;
         const missions = R.missions(s), completed = missions.filter(m => m.done).length;
         $('home-mission-count').textContent = `${completed} / ${missions.length}`;
         $('home-mission-note').textContent = completed === missions.length ? 'できた！ はなが さいたよ' : 'あそんで はなを さかせよう';
-        $('auto-description').textContent = p.kind === 'mix' ? `${p.dans.join('・')}のだんを まぜて 10もん。` : p.kind === 'route' ? 'すきな だんを えらんで、クリアを ふやそう。' : p.kind === 'intro' ? 'まずは こえを きいて、いっしょに いってみよう。' : p.kind === 'challenge' ? 'ばらばらの 9もん。ぜんぶ できたら クリア！' : 'この だんを、じゅんばんに れんしゅうしよう。';
-        $('daily-time').textContent = `${Math.floor(d.ms / 60000)} / 10ふん`;
+        $('auto-description').textContent = p.next ? 'あたらしい だんに ちょうせん！' : (p.kind === 'mix' ? `${p.dans.join('・')}のだんを まぜて 10もん。` : p.kind === 'route' ? 'すきな だんを えらんで、クリアを ふやそう。' : p.kind === 'intro' ? 'まずは こえを きいて、いっしょに いってみよう。' : p.kind === 'challenge' ? 'ばらばらの 9もん。ぜんぶ できたら クリア！' : 'この だんを、じゅんばんに れんしゅうしよう。');
+        $('daily-time').textContent = d.ms >= 600000 ? `${Math.floor(d.ms / 60000)}ふん ✓` : `${Math.floor(d.ms / 60000)} / 10ふん`;
         $('daily-progress').value = Math.min(600000, d.ms);
         $('daily-note').textContent = d.ms >= 600000 ? 'きょうも がんばったね！ また あした。' : 'きく・いう れんしゅうは、ゆっくりで OK。';
         $('mastered-count').textContent = `しっかり おぼえた ${L.countMastered(s)} / 72`;
@@ -104,7 +108,9 @@
         }
         session?.recitation?.cancel();
         sound.cancelSpeech();
-        session = { pace: chosenPace || L.roundPace(s, p), score: 0, speedPoints: 0, chainPoints: 0, answers: [], responses: [], bestCrossed: false, plan: p, index: 0, recent: [], correct: 0, combo: 0, changes: { ready: 0, reviewed: 0, mastered: 0 }, elapsed: 0, questionMs: 0, phaseMs: 0, paused: false, phase: 'question', input: '', extended: false };
+        const rowDan = ['intro', 'ordered'].includes(p.kind) ? p.dan : p.courseId?.startsWith('dan-') ? p.dans[0] : 0;
+        if (rowDan >= 2) L.chooseDan(s, rowDan);
+        session = { pace: chosenPace || L.roundPace(s, p), score: 0, speedPoints: 0, chainPoints: 0, answers: [], responses: [], bestCrossed: false, plan: p, index: 0, recent: [], correct: 0, combo: 0, changes: { ready: 0, reviewed: 0, mastered: 0 }, elapsed: 0, questionMs: 0, phaseMs: 0, paused: false, phase: 'question', input: '', extended: false, lockMs: 0 };
         R.ensureDay(s);
         fx.clear();
         $('score-strip').hidden = p.kind === 'intro';
@@ -176,7 +182,7 @@
         updateParade(session.index);
         $('game').classList.remove('correct', 'revealed');
         $('round-name').textContent = session.plan.kind === 'mix' ? `${session.plan.dans.join('・')}のだんを まぜよう` : intro ? `${q.a}のだんを きこう` : session.plan.kind === 'ordered' ? `${q.a}のだんを じゅんばんに` : session.plan.kind === 'challenge' ? `${session.plan.title}に ちょうせん` : session.plan.kind === 'manual' ? 'じぶんの れんしゅう' : session.plan.dan < 10 ? `${session.plan.dan}のだんと おさらい` : 'きょうの10もん';
-        $('counter').textContent = `${session.index + 1} / ${session.plan.count}`;
+        $('counter').textContent = `${session.index + 1}もんめ / ${session.plan.count}`;
         $('round-progress').max = session.plan.count;
         $('round-progress').value = session.index;
         $('mode-note').textContent = intro ? 'いっしょに いってみよう' : L.paceLabel(session.pace);
@@ -189,7 +195,8 @@
         $('intro-guide').hidden = !intro;
         delete $('game').dataset.recitation;
         $('combo').textContent = session.combo >= 2 ? `${session.combo}もん れんぞく！` : '';
-        setKeys(true);
+        session.lockMs = intro ? 0 : INPUT_GUARD_MS;
+        setKeys(intro);
         if (intro)
             startRecitation(true);
         else {
@@ -208,7 +215,7 @@
         $('input-controls').querySelectorAll('button').forEach(b => b.disabled = !enabled);
     }
     function digit(n) {
-        if (!session || session.paused || session.phase !== 'question' || screen !== 'game')
+        if (!session || session.paused || session.phase !== 'question' || session.lockMs > 0 || screen !== 'game')
             return;
         if (session.input.length >= 2)
             return;
@@ -224,7 +231,7 @@
             answer(false);
     }
     function answer(reveal, reason = 'shown') {
-        if (!session || session.phase !== 'question' || session.paused)
+        if (!session || session.phase !== 'question' || session.paused || session.lockMs > 0)
             return;
         if (!reveal && session.input === '')
             return;
@@ -249,7 +256,7 @@
         if (session.plan.kind !== 'intro') {
             session.score += award.total;session.speedPoints += award.speed;session.chainPoints += award.chain;
             $('game-score').textContent = session.score.toLocaleString();
-            $('score-gain').textContent = ok ? `+${award.total}` : '';
+            $('score-gain').textContent = ok ? `+${award.total}` : reveal ? (reason === 'timeout' ? 'じかんぎれ' : '') : `きみの こたえ：${session.input}`;
         }
         if (Object.hasOwn(session.changes, change))
             session.changes[change]++;
@@ -258,10 +265,11 @@
         $('game').classList.add(ok ? 'correct' : 'revealed');
         $('answer').textContent = String(session.q.a * session.q.b);
         $('reading').textContent = session.q.q_read + session.q.a_read;
+        $('round-progress').value = session.index + 1;
         $('feedback').textContent = ok ? (change === 'ready' ? 'きょうは OK！' : change === 'mastered' ? 'しっかり おぼえた！' : 'できた！') : 'まずは きいてね';
         setKeys(false);
         sound.cancelSpeech();
-        if (ok) updateParade(session.index + 1);
+        updateParade(session.index + 1);
         sound.effect(ok ? 'correct' : 'reveal', session.combo);
         if (ok) {
             fx.burst(false, session.combo);
@@ -344,7 +352,7 @@
         const course = R.course(session.plan.courseId);
         const passed = !!(complete && course?.pass && session.correct >= course.pass);
         answerPage = 0;
-        $('result-title').textContent = passed ? 'クリア！' : complete ? 'はなまる！' : 'きょうは OK！';
+        $('result-title').textContent = passed ? 'クリア！' : !complete ? 'きょうは OK！' : intro ? 'はなまる！' : session.correct === session.plan.count ? 'ぜんもん せいかい！' : session.correct * 2 >= session.plan.count ? 'はなまる！' : 'もう すこし！';
         $('result-main').textContent = complete ? intro ? `${session.plan.dan}のだんで あそべたね！` : `${session.index}もん がんばったね！` : 'おさらいは また あした';
         $('result-detail').textContent = complete ? intro ? 'つぎは こたえを おもいだしてみよう。' : `じぶんで できた ${session.correct} / ${session.index}もん` : 'じぶんで えらんで あそぶことも できるよ。';
         const c = session.changes;
@@ -415,9 +423,15 @@
         if (screen !== 'game' || !session || session.paused || session.phase === 'loading' || document.hidden)
             return;
         session.elapsed += dt;
+        L.daily(s, L.day()).ms += dt;
+        if (session.phase === 'question' && session.lockMs > 0) {
+            // The answer clock starts when the keys come alive.
+            session.lockMs -= dt;
+            if (session.lockMs <= 0) { session.lockMs = 0; setKeys(true); }
+            return;
+        }
         session.questionMs += dt;
         session.phaseMs += dt;
-        L.daily(s, L.day()).ms += dt;
         if (session.recitation) { session.recitation.tick(dt); return; }
         if (session.phase === 'question' && session.questionMs >= (session.extended ? session.deadline : L.answerTime(session.pace)))
             answer(true, 'timeout');
@@ -489,6 +503,7 @@
     }
     function renderMap() {
         $('map-count').textContent = `しっかり おぼえた ${L.countMastered(s)} / 72もん`;
+        $('map').classList.remove('picked');
         makeGrid('map-grid', (button, a, b) => {
             const r = s.problems[L.key(a, b)], status = L.status(r), stars = L.mapStars(r);
             const review = stars > 0 && (r?.repair || !r?.stage || L.isDue(r, Date.now()));
@@ -496,8 +511,9 @@
             button.innerHTML = '<svg viewBox="0 0 36 26" aria-hidden="true">' + [0,1,2].map((i) => `<path class="${i < stars ? 'filled' : ''}" transform="translate(${i*12} ${i === 1 ? 0 : 7})" d="M6 1 7.5 4.5 11 5 8.5 7.5 9 11 6 9.3 3 11 3.5 7.5 1 5 4.5 4.5Z"/>`).join('') + '</svg>';
             button.setAttribute('aria-label', `${a}かける${b}、ほし ${stars}こ、${names[status]}${review ? '、おさらいしよう' : ''}`);
             button.onclick = () => {
+                $('map').classList.add('picked');
                 $('map-detail').textContent = `${a} × ${b} = ${a * b}　ほし ${stars}こ。${names[status]}。` +
-                    (review ? ' おさらいしよう！' : '') + (r ? ` じぶんで できた ${r.correct}かい。` : '');
+                    (review ? ' おさらいしよう！' : '') + (r ? ` じぶんで できた ${r.correct}かい。` : '') + ' ' + L.nextStep(r);
             };
         }, 2);
     }
@@ -516,16 +532,17 @@
         }
     }
     let updatesPage = 0;
+    // Two notes per page keep the list readable on a phone without scrolling.
+    const updatePages = KukuVersion.notes.flatMap(note => Array.from({ length: Math.ceil(note.items.length / 2) }, (_, i) => ({ ...note, items: note.items.slice(i * 2, i * 2 + 2) })));
     function renderUpdates() {
-        const notes = KukuVersion.notes;
-        updatesPage = Math.max(0, Math.min(notes.length - 1, updatesPage));
-        const note = notes[updatesPage];
+        updatesPage = Math.max(0, Math.min(updatePages.length - 1, updatesPage));
+        const note = updatePages[updatesPage];
         $('updates-version').textContent = `バージョン ${note.version}`;
         $('updates-date').textContent = note.date.replace(/^(\d+)-0?(\d+)-0?(\d+)$/, '$1年$2月$3日');
         $('updates-list').replaceChildren(...note.items.map(text => { const li = document.createElement('li'); li.textContent = text; return li; }));
-        $('updates-page').textContent = `${updatesPage + 1} / ${notes.length}`;
+        $('updates-page').textContent = `${updatesPage + 1} / ${updatePages.length}`;
         $('updates-newer').disabled = updatesPage === 0;
-        $('updates-older').disabled = updatesPage + 1 >= notes.length;
+        $('updates-older').disabled = updatesPage + 1 >= updatePages.length;
     }
     $('updates-newer').onclick = () => { updatesPage--; renderUpdates(); };
     $('updates-older').onclick = () => { updatesPage++; renderUpdates(); };
@@ -547,7 +564,7 @@
         if (!pendingPlan) return;
         const pace = L.roundPace(s, pendingPlan, $('round-pace').value);
         $('round-pace-preview').textContent = 'こんかいは ' + L.paceLabel(pace);
-        $('round-pace-note').textContent = $('round-pace').value === 'auto' ? 'この もんだいの れんしゅうに あわせたよ。' : 'この 1かいは、えらんだ じかんで あそぶよ。';
+        $('round-pace-note').textContent = $('round-pace').value === 'auto' ? 'これまでの せいかいと、こたえるのに かかった じかんに あわせたよ。' : 'この 1かいは、えらんだ じかんで あそぶよ。';
     }
     $('round-pace').onchange = updateRoundPace;
     $('round-go').onclick = () => {
@@ -598,7 +615,7 @@
         show('home');
     } }
     $('next-dan').onclick = () => show('route');
-    $('result-next-dan').onclick = () => show('route');
+    $('result-next-dan').onclick = () => { show('route'); document.querySelector('[data-route-page="rows"]').click(); };
     $('manual-focus').onclick = () => moveFocus([...selected][0]);
     $('manual-start').onclick = () => {
         if (selected.size)

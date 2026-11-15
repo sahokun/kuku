@@ -118,12 +118,36 @@
         const rows = p.dans || (p.kind === 'ordered' ? [p.dan] : s.introduced.filter(a => a <= p.dan));
         const pool = p.queue || (p.keys ? p.keys.map(id => { const [a,b] = id.split('x').map(Number);return {a,b}; }) : rows.flatMap(a => Array.from({length:9},(_,i)=>({a,b:i+1}))));
         let pace = 'normal';
+        const times = [];
         for (const q of pool) {
-            const r = s.problems[key(q.a,q.b)], recent = (r?.history || []).filter(x => x.kind !== 'intro').slice(-2);
+            const r = s.problems[key(q.a,q.b)], answered = (r?.history || []).filter(x => x.kind !== 'intro'), recent = answered.slice(-2);
             if (!recent.length || recent.length === 2 && recent.every(x => !x.ok)) return 'first';
             if (!r?.everReady || !r.stage || r.repair || !recent[recent.length-1].ok) pace = 'easy';
+            for (const x of answered.filter(x => x.ok && Number.isFinite(x.ms)).slice(-3)) times.push(x.ms);
         }
-        return pool.length ? pace : 'first';
+        if (!pool.length) return 'first';
+        // Leave room for how long this child actually takes: a child who counts up needs no limit, not a shorter one.
+        if (times.length >= 3) {
+            times.sort((a, b) => a - b);
+            const need = times[Math.ceil(times.length * .8) - 1] * 1.5;
+            if (need > answerTimes.easy) return 'first';
+            if (need > answerTimes.normal) pace = 'easy';
+        }
+        return pace;
+    }
+    function nextStep(r, now = Date.now()) {
+        const today = day(now);
+        if (!r || !r.attempts) return 'じぶんで こたえて みよう。';
+        const answered = (r.history || []).filter(x => x.kind !== 'intro'), last = answered[answered.length - 1];
+        const from = r.due && r.due > today ? `${Number(r.due.slice(5, 7))}月${Number(r.due.slice(8))}日から ` : 'きょう ';
+        if (r.mastered && !r.repair && r.stage === 4) return isDue(r, now) ? 'きょう たしかめよう。' : 'ときどき たしかめるよ。';
+        if (r.stage === 1) return `${from}また できたら ` + ((r.stars || 0) >= 2 ? 'つぎの だんかいへ。' : '★2！');
+        if (r.stage === 2) return `${from}できたら つぎへ。あと 2かいで ★3！`;
+        if (r.stage === 3) return `${from}できたら ★3！`;
+        const missed = last && !last.ok ? 'まちがえたので やりなおし。' : '';
+        const hits = r.today === today ? r.hits : 0;
+        if (hits === 1) return missed + 'きょう あと 1かい！（あいだに ほかの 5もん）';
+        return missed + 'きょう 2かい できたら OK（あいだに ほかの 5もん）。';
     }
     function submit(s, q, ok, now, elapsed, kind = 'random') {
         const previousStars = mapStars(s.problems[key(q.a,q.b)]);
@@ -268,5 +292,5 @@
                     n++;
         return n;
     }
-    return { VERSION, mapStars, roundPace, paceLabel, answerTime, answerDeadline, key, day, plusDays, fresh, restore, record, daily, eligible, isDue, activeDan, danProgress, chooseDan, plan, submit, finishIntro, pick, status, countMastered };
+    return { VERSION, mapStars, roundPace, nextStep, paceLabel, answerTime, answerDeadline, key, day, plusDays, fresh, restore, record, daily, eligible, isDue, activeDan, danProgress, chooseDan, plan, submit, finishIntro, pick, status, countMastered };
 });

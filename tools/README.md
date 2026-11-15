@@ -22,6 +22,8 @@ node tools/verify-voice.mjs http://127.0.0.1:9223
 node tools/verify-diagnostics.mjs http://127.0.0.1:9223
 ```
 
+問題が切り替わってから600msは数字キーが無効です（`js/app.js` の `INPUT_GUARD_MS`）。入力を送る確認では、問題の表示から600ms以上待つか時計を進めてください。
+
 スクリプトは同じタブを操作するため1本ずつ実行します。Windows Chromeへの接続でWindows版Node.jsを使う場合、スクリプトのパスもWindowsからアクセスできる形式で渡してください。
 
 ## 保存データと後始末

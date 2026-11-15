@@ -220,3 +220,5 @@ dialog {border:3px solid var(--ink);border-radius:12px;box-shadow:5px 5px 0 #ed7
 .version-link {align-self:center;font-size:12px;min-height:36px;margin-top:auto}
 .updates-card {flex:1;min-height:0;overflow:auto;background:#fffef4;border:2px solid var(--ink);border-radius:9px;padding:10px 14px}
 .updates-card h2 {margin:0}.updates-card ul {margin:6px 0 0;padding-left:1.2em;display:grid;gap:6px;font-size:13px;line-height:1.5}
+@media(max-height:559px){#updates>.help {display:none}.updates-card {padding:8px 12px}.updates-card ul {font-size:12px;line-height:1.45}}
+@media(max-height:559px){#map.picked>.help {display:none}}
