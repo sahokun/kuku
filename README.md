@@ -86,7 +86,7 @@ GitHub Actionsは学習ルールを検証し、本番の配信は `main` へのp
 
 ## プレイテスト
 
-AIテスター（muse）が毎日プレイして報告します。テスト版は Cloudflare Pages が `develop` ブランチから自動で配信します（本番のGitHub Pagesとは別）。
+AIテスター（muse）が毎日プレイして報告します。テスト版は Cloudflare Pages が `develop` ブランチから自動で配信します（https://kuku-develop.pages.dev/ 、本番のGitHub Pagesとは別）。
 報告への対応の変更点は `js/version.js` の「こうしん きろく」でテスターへ伝えます。
 
 ## ライセンス
