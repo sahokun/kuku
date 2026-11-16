@@ -215,6 +215,7 @@ dialog {border:3px solid var(--ink);border-radius:12px;box-shadow:5px 5px 0 #ed7
 #round-pace-preview {display:block;font-size:18px}#round-setup .help {margin:8px 0;font-size:11px}
 #round-setup .wide {display:block;width:100%;margin-top:10px}#round-setup .eyebrow {margin:0}
 #reveal {font-weight:900;color:var(--ink);background:#fff2b4;border:2px solid var(--ink);border-radius:6px;font-size:12px}
+#game[data-wait] #reveal {background:var(--yellow);font-size:14px;box-shadow:0 3px 0 var(--ink)!important}
 @media(max-height:559px){#round-setup {padding:12px}#round-setup h2 {font-size:19px;margin:3px 0 8px}#round-pace {padding:6px;margin-bottom:8px}#round-setup .wide {min-height:36px;padding:6px;margin-top:7px}#round-pace-preview {font-size:16px}.map-growth strong {font-size:12px;letter-spacing:0}}
 @media(min-width:600px) and (max-height:500px){#map-grid {height:210px;grid-row:2/7}#map .map-growth,#map .map-tutorial {grid-column:2}#map .map-growth {flex-wrap:wrap}#map .map-tutorial {margin:0}}
 .version-link {align-self:center;font-size:12px;min-height:36px;margin-top:auto}
