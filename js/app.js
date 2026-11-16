@@ -351,6 +351,8 @@
         }
         else {
             fx.reveal();
+            // Show the button that comes next, locked until the child has said the fact together with the voice.
+            $('reveal').textContent = session.index + 1 < session.plan.count ? 'いっしょに いったら つぎへ ▶' : 'いっしょに いったら けっかへ ▶';
             startRecitation(false);
         }
         save(true);
@@ -372,6 +374,7 @@
             text: fullRead(question),
             repeatOnly,
             encouragement: s.settings.voice ? encouragement : null,
+            silent: !sound.canSpeak(),
             say: sound.speak,
             stop: sound.cancelSpeech,
             onStep(name, label) {

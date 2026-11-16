@@ -4,10 +4,10 @@
     if (typeof module === 'object' && module.exports) module.exports = api;
     else root.KukuRecitation = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
-    function create({ text, say, stop, onStep, onDone, repeatOnly = false, encouragement = null }) {
+    function create({ text, say, stop, onStep, onDone, repeatOnly = false, encouragement = null, silent = false }) {
         const readingTime = Math.max(2400, text.length * 180 + 400);
         const sequence = [
-            { name: 'listen', text, label: 'まずは きいてね', fallback: readingTime, gap: 400 },
+            { name: 'listen', text, label: silent ? 'まずは よんでね' : 'まずは きいてね', fallback: readingTime, gap: 400 },
             { name: 'cue', text: 'いってみよう。せーのっ！', label: 'いってみよう、せーのっ！', fallback: 2200, gap: 500 },
             { name: 'repeat', text, label: repeatOnly ? 'こたえを きこう' : 'いっしょに いってみよう', fallback: readingTime, gap: 900 }
         ];

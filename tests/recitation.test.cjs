@@ -28,6 +28,10 @@ test('cancelling a question suppresses every remaining step',()=>{
 test('voice-off mode keeps the same visual sequence with time to speak',()=>{
  const r=setup(false);r.flow.start();r.advance(2000);assert.deepEqual(r.steps,['listen']);r.advance(7000);assert.deepEqual(r.steps,['listen','cue','repeat']);assert.equal(r.done,1);
 });
+test('voice-off mode asks the child to read, not to listen',()=>{
+ const labels=[];const flow=create({text:'にさんがろく',silent:true,say(){return false;},stop(){},onStep(name,label){labels.push(label);},onDone(){}});
+ flow.start();for(let i=0;i<9000;i+=50)flow.tick(50);assert.deepEqual(labels,['まずは よんでね','いってみよう、せーのっ！','いっしょに いってみよう']);
+});
 test('speech errors use paced fallback instead of skipping the exercise',()=>{
  const r=setup();r.flow.start();r.spoken[0].end(false);r.advance(2000);assert.equal(r.spoken.length,1);r.advance(800);assert.equal(r.spoken.length,2);
 });
