@@ -19,5 +19,6 @@
 !.claude/skills/
 
 .github/*
+!.github/dependabot.yml
 !.github/copilot-instructions.md
 !.github/workflows/
