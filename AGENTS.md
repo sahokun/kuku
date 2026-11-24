@@ -67,10 +67,11 @@ kuku/
 ### ブランチと PR
 
 <!-- branch-model:begin -->
-- 既定のブランチは `main`（本番）。統合用の `develop` を持つ。
+- 既定のブランチは統合用の `develop`。`main` は本番。
 - 作業はブランチを切り、`develop` への PR にする。squash merge で取り込み、develop の履歴には PR のタイトルだけが残る。
 - `develop` から `main` へはマージコミットで取り込む。squash や rebase にすると、2 つのブランチの履歴が別物になり、次の取り込みで同じ差分や衝突が繰り返し出るため。
-- `main` を直接直したとき（Dependabot のセキュリティ更新・緊急の修正）は、`main` を `develop` にマージし戻す。セキュリティ更新は常に既定のブランチ（main）に届く。
+- Dependabot のセキュリティ更新とアラートの判定は既定のブランチ（develop）で行われるので、セキュリティ更新は develop で取り込み、ほかの変更と一緒に main へ反映する。
+- `main` を直接直したとき（緊急の修正）は、`main` を `develop` にマージし戻す。
 - 管理者は `develop` に直接 push できる（ローカルでの検証用）。`main` には PR でしか入れない。
 <!-- branch-model:end -->
 - PR のタイトルは Conventional Commits（`feat: ...`・`fix: ...` など）で、変更の内容が 1 行で分かるように書く。
