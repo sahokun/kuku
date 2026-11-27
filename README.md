@@ -51,7 +51,7 @@ Google Fonts以外の実行時外部依存はありません。フォントを�
 | --- | --- |
 | `index.html` | 画面構造とスクリプトの読み込み |
 | `css/` | 画面・数字キー・レスポンシブ表示。`theme.css` は配色・ボタンの優先順位・共通ナビゲーション |
-| `js/version.js` | バージョンと「こうしん きろく」の内容。変更をテスト版へ出すたびに先頭へ追加 |
+| `js/version.js` | バージョンと「こうしん きろく」の内容。変更を配信するたびに先頭へ追加 |
 | `js/data.js` | 九九81問と日本語の読み |
 | `js/learning.js` | 学習判定・出題計画・保存データの検証。DOMに依存しない |
 | `js/results.js` | 回答履歴の表示と5問ごとのページ分け |
@@ -82,13 +82,7 @@ node --test --experimental-test-isolation=none tests/*.test.cjs
 
 ブラウザ検証ツールの実行方法・保存データの扱い・出力先は [tools/README.md](tools/README.md) を参照してください。
 
-ローカルの `develop` が動作確認用、`main` が本番です。動作確認・プレイテスト用のテスト版は Cloudflare Pages が `develop` から自動配信します（「プレイテスト」参照）。以前使っていたChatGPT Sites（`.openai/hosting.json`・`dist/`）は更新を終了しました。
-GitHub Actionsは学習ルールを検証し、本番の配信は `main` へのpushだけで行います。本番へのPR・マージはユーザーが行います。
-
-## プレイテスト
-
-AIテスター（muse）が毎日プレイして報告します。テスト版は Cloudflare Pages が `develop` ブランチから自動で配信します（https://kuku-develop.pages.dev/ 、本番のGitHub Pagesとは別）。
-報告への対応の変更点は `js/version.js` の「こうしん きろく」でテスターへ伝えます。
+ブランチは `main` だけで、`main` が本番です。作業はブランチを切って `main` への PR にし、マージすると GitHub Actions が GitHub Pages へ配信します。GitHub Actions は PR で学習ルールも検証します。以前使っていたChatGPT Sites（`.openai/hosting.json`・`dist/`）は更新を終了しました。
 
 ## ライセンス
 
