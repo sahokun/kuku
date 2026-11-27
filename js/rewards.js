@@ -161,9 +161,11 @@
         const used = new Set(), rows = new Map(dans.map(a => [a, 0])), queue = [];
         const pool = dans.flatMap(a => Array.from({length: 9}, (_, i) => ({a, b: i + 1, tie: random()})));
         for (let i = 0; i < 10; i++) {
+            // A fact back in practice (missed, or one check left today) comes first: slow but right answers keep
+            // ★2 facts due for days, so being due alone would leave a missed fact to random tie-breaks.
             const rank = q => {
-                const id = L.key(q.a, q.b), r = s.problems[id];
-                return (r && !L.eligible(s, r, now) ? 100 : 0) + (s.rewards.trail.mixed.includes(id) ? 10 : 0) + (r?.due && r.due <= L.day(now) ? 0 : 2) + q.tie;
+                const id = L.key(q.a, q.b), r = s.problems[id], practising = r?.stage === 0 && r.history.some(x => x.kind !== 'intro');
+                return (r && !L.eligible(s, r, now) ? 100 : 0) + (practising ? 0 : 20) + (s.rewards.trail.mixed.includes(id) ? 10 : 0) + (L.isDue(r, now) ? 0 : 2) + q.tie;
             };
             const min = Math.min(...rows.values());
             const candidates = pool.filter(q => !used.has(L.key(q.a, q.b)) && rows.get(q.a) === min).sort((a,b) => rank(a) - rank(b));

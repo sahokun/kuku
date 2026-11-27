@@ -217,6 +217,8 @@
         fx.progress(done, session.plan.count);
     }
     const GUIDE = 'おしたら すぐ こたえあわせ（2けたは 2つ）';
+    // Said when the hint appears, so a hinted answer scoring nothing is not a surprise afterwards.
+    const HINT_RULE = '（ヒントの あとは △。てんは つかないよ）';
     // "a × b" read as "a pieces, b times": b groups of a dots (rows of five), laid out to fit the stage.
     function showDots(q, total) {
         const board = $('dot-board');
@@ -250,7 +252,7 @@
         if (session.hinted) { answer(true); return; }
         session.hinted = true;
         showDots(session.q, false);
-        $('feedback').textContent = L.hint(session.q.a, session.q.b);
+        $('feedback').textContent = L.hint(session.q.a, session.q.b) + HINT_RULE;
         $('reveal').textContent = 'こたえを きく';
         // A hint restarts a limited clock so the child can use it.
         if (Number.isFinite(L.answerTime(session.pace))) { session.questionMs = 0; session.extended = false; }
@@ -433,6 +435,7 @@
         if (session.index)
             L.daily(s, L.day()).games++;
         const complete = session.index === session.plan.count, intro = session.plan.kind === 'intro';
+        const perfect = complete && !intro && session.correct === session.plan.count;
         if (complete) journey.event({ type: 'finish' });
         const record = session.plan.kind === 'challenge' ? R.recordRun(s, session.plan.courseId, session.answers, L.day(), session.pace) : null;
         R.finishMix(s, session.plan, session.answers);
@@ -440,9 +443,9 @@
         const course = R.course(session.plan.courseId);
         const passed = !!(complete && course?.pass && session.correct >= course.pass);
         answerPage = 0;
-        $('result-title').textContent = passed ? 'クリア！' : !complete ? 'きょうは OK！' : intro ? 'はなまる！' : session.correct === session.plan.count ? 'ぜんもん せいかい！' : session.correct * 2 >= session.plan.count ? 'はなまる！' : 'もう すこし！';
+        $('result-title').textContent = passed ? 'クリア！' : !complete ? 'きょうは OK！' : intro ? 'はなまる！' : perfect ? 'ぜんもん せいかい！' : session.correct * 2 >= session.plan.count ? 'はなまる！' : 'もう すこし！';
         $('result-main').textContent = complete ? intro ? `${session.plan.dan}のだんで あそべたね！` : `${session.index}もん がんばったね！` : 'おさらいは また あした';
-        $('result-detail').textContent = complete ? intro ? 'つぎは こたえを おもいだしてみよう。' : `じぶんで できた ${session.correct} / ${session.index}もん` : 'じぶんで えらんで あそぶことも できるよ。';
+        $('result-detail').textContent = complete ? intro ? 'つぎは こたえを おもいだしてみよう。' : selfCorrectLine(session) : 'じぶんで えらんで あそぶことも できるよ。';
         const c = session.changes;
         $('result-changes').replaceChildren();
         for (const [count, label] of [[session.quick, 'もん すぐ いえた！'], [c.ready, 'もん きょうの かくにん OK'], [c.reviewed, 'もん 日を あけても できた！'], [c.mastered, 'もん しっかり おぼえた！']]) {
@@ -462,7 +465,8 @@
         $('continue').textContent = enough ? 'きょうは おしまい →' : session.plan.kind === 'challenge' ? 'だんを えらぶ →' : session.plan.kind === 'mix' ? (R.plan(s).next ? 'つぎの だんへ →' : 'つぎの 10もん →') : 'つぎの れんしゅう →';
         $('finish').textContent = enough ? 'もうすこし あそぶ' : 'きょうは おしまい';
         $('continue').dataset.finish = String(enough);
-        if (enough && !passed)
+        // A perfect round keeps its own heading; reaching ten minutes is told by the buttons and the message instead.
+        if (enough && !passed && !perfect)
             $('result-title').textContent = 'きょうも がんばったね！';
         session.phase = 'done';
         save();
@@ -471,9 +475,14 @@
         if (complete) {
             fx.burst(true);
             sound.effect('finish');
-            sound.message(course?.test && passed ? 'final-clear' : passed ? 'clear' : enough ? 'daily-finish' :
-                intro ? 'intro-finish' : session.correct === session.plan.count ? 'perfect' : 'finish');
+            sound.message(course?.test && passed ? 'final-clear' : passed ? 'clear' : perfect ? 'perfect' : enough ? 'daily-finish' :
+                intro ? 'intro-finish' : 'finish');
         }
+    }
+    // Hinted answers are neither 'by yourself' nor wrong, so count them apart from the misses.
+    function selfCorrectLine(round) {
+        const hinted = round.answers.filter(a => a.reason === 'hint').length;
+        return `じぶんで できた ${round.correct} / ${round.index}もん` + (hinted ? `（ヒントで ${hinted}もん）` : '');
     }
     function renderAnswers() {
         const view = KukuResults.page(session?.responses || [], answerPage);
@@ -589,9 +598,11 @@
                 }
             }
     }
+    const MAP_DETAIL_PROMPT = 'マスを おすと、きろくが 見られるよ。';
     function renderMap() {
         $('map-count').textContent = `しっかり おぼえた ${L.countMastered(s)} / 72もん`;
         $('map').classList.remove('picked');
+        $('map-detail').textContent = MAP_DETAIL_PROMPT;
         makeGrid('map-grid', (button, a, b) => {
             const r = s.problems[L.key(a, b)], status = L.status(r), stars = L.mapStars(r);
             const review = stars > 0 && (r?.repair || !r?.stage || L.isDue(r, Date.now()));
@@ -652,7 +663,13 @@
         if (!pendingPlan) return;
         const pace = L.roundPace(s, pendingPlan, $('round-pace').value);
         $('round-pace-preview').textContent = 'こんかいは ' + L.paceLabel(pace);
-        $('round-pace-note').textContent = $('round-pace').value === 'auto' ? 'これまでの せいかいと、こたえるのに かかった じかんに あわせたよ。' : 'この 1かいは、えらんだ じかんで あそぶよ。';
+        $('round-pace-note').textContent = paceNote($('round-pace').value, pace);
+    }
+    function paceNote(choice, pace) {
+        if (choice !== 'auto') return 'この 1かいは、えらんだ じかんで あそぶよ。';
+        // おまかせ stays unlimited while the child counts up; say so, or it looks as if the time never moves on.
+        if (pace === 'first') return 'はじめての 九九や、かぞえて こたえて いる あいだは じかん なし。はやく いえる ように なると、みじかく なるよ。';
+        return 'これまでの せいかいと、こたえるのに かかった じかんに あわせたよ。';
     }
     $('round-pace').onchange = updateRoundPace;
     $('round-go').onclick = () => {
