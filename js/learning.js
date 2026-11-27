@@ -122,10 +122,10 @@
         let pace = 'normal';
         const times = [];
         for (const q of pool) {
-            const r = s.problems[key(q.a,q.b)], answered = (r?.history || []).filter(x => x.kind !== 'intro'), recent = answered.slice(-2);
+            const r = s.problems[key(q.a,q.b)], answered = graded(r), recent = answered.slice(-2);
             if (!recent.length || recent.length === 2 && recent.every(x => !x.ok)) return 'first';
             if (!r?.everReady || !r.stage || r.repair || !recent[recent.length-1].ok) pace = 'easy';
-            for (const x of answered.filter(x => x.ok && x.kind !== 'hint' && Number.isFinite(x.ms)).slice(-3)) times.push(x.ms);
+            for (const x of answered.filter(x => x.ok && Number.isFinite(x.ms)).slice(-3)) times.push(x.ms);
         }
         if (!pool.length) return 'first';
         // Leave room for how long this child actually takes: a child who counts up needs no limit, not a shorter one.
@@ -141,16 +141,19 @@
         // Build the answer from the previous step instead of showing it.
         return b === 1 ? `${a}が 1つ。` : `${a}×${b - 1}＝${a * (b - 1)}。それに ${a}を たすと？`;
     }
+    // Answers that judge the child: a hinted answer is practice, so it neither clears a miss nor counts as a recent result.
+    function graded(r) { return (r?.history || []).filter(x => x.kind !== 'intro' && x.kind !== 'hint'); }
     function nextStep(r, now = Date.now()) {
         const today = day(now);
         if (!r || !r.attempts) return 'じぶんで こたえて みよう。';
-        const answered = (r.history || []).filter(x => x.kind !== 'intro'), last = answered[answered.length - 1];
+        const answered = graded(r), last = answered[answered.length - 1];
         const from = r.due && r.due > today ? `${Number(r.due.slice(5, 7))}月${Number(r.due.slice(8))}日から ` : 'きょう ';
         if (r.mastered && !r.repair && r.stage === 4) return isDue(r, now) ? 'きょう すぐ いえるか たしかめよう（3びょう）。' : 'ときどき たしかめるよ。';
         if (r.stage === 1) return `${from}また できたら ` + ((r.stars || 0) >= 2 ? 'つぎの だんかいへ。' : '★2！');
         if (r.stage === 2) return `${from}3びょう いないで できたら つぎへ。あと 2かいで ★3！`;
         if (r.stage === 3) return `${from}3びょう いないで できたら ★3！`;
-        const missed = last && !last.ok ? 'まちがえたので やりなおし。' : '';
+        // A star the child once earned stays on the map, so say why the checks start over instead of leaving it unexplained.
+        const missed = r.everReady ? 'まちがえたので たしかめなおし（★は のこるよ）。' : last && !last.ok ? 'まちがえたので やりなおし。' : '';
         const hits = r.today === today ? r.hits : 0;
         if (hits === 1) return missed + 'きょう あと 1かい！（あいだに ほかの 5もん）';
         return missed + 'きょう 2かい できたら OK（あいだに ほかの 5もん）。';

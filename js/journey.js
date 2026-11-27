@@ -4,12 +4,13 @@ window.KukuJourney = (() => {
         let month = new Date(new Date().getFullYear(), new Date().getMonth(), 1), toastTimer, coursePage = 'rows';
         function toast(text) {
             clearTimeout(toastTimer);$('reward-toast').textContent = text;$('reward-toast').hidden = false;
-            toastTimer = setTimeout(() => $('reward-toast').hidden = true, 2400);
+            // Empty the hidden toast too: text left behind reads as a fresh notice to anything that scans the page.
+            toastTimer = setTimeout(() => { $('reward-toast').hidden = true;$('reward-toast').textContent = ''; }, 2400);
         }
         function event(ev, date = L.day()) {
             const result = R.event(s, date, ev);
             if (result.sealed) toast('✿ きょうの めあて、ぜんぶ できた！');
-            else if (result.earned.length) toast('✓ めあてが ひとつ できたよ！');
+            else if (result.earned.length) toast(`✓ めあて「${result.earned[0].text}」が できたよ！`);
             return result;
         }
         function startCourse(id) {
@@ -59,7 +60,7 @@ window.KukuJourney = (() => {
             $('mix-start').disabled = chosen.length < 2;
             $('mix-start').onclick = () => { const p = R.mixPlan(s);if (p) start(p); };
             const covered = trail.mixed.filter(id => chosen.includes(Number(id[0]))).length;
-            $('mix-help').textContent = open.length < 2 ? 'すきな 2つの だんを クリアすると、まぜられるよ。' : chosen.length < 2 ? 'まぜたい だんを 2つ いじょう えらぼう。' : `${chosen.join('・')}のだんを まぜて 10もん！`;
+            $('mix-help').textContent = mixHelp(open, chosen);
             $('mix-progress').max = Math.max(1,chosen.length*9);$('mix-progress').value = covered;
             $('mix-count').textContent = `えらんだ だん：${covered} / ${chosen.length*9}しゅるい できた`;
             $('mix-rounds').textContent = `${trail.rounds}かい 10もんを あそんだよ`;
@@ -74,6 +75,13 @@ window.KukuJourney = (() => {
                 $(buttonId).onclick = () => startCourse(id);
                 $(statusId).textContent = passed ? '✓ クリア！' + (best ? ` ベスト ${best.score.toLocaleString()}` : '') : best ? `ベスト ${best.correct}/${best.count}もん ・ ${best.score.toLocaleString()}てん` : ready ? 'ちょうせんする ▶' : 'まだ じゅんびちゅう';
             }
+        }
+        function mixHelp(open, chosen) {
+            if (open.length < 2) return 'すきな 2つの だんを クリアすると、まぜられるよ。';
+            if (chosen.length < 2) return 'まぜたい だんを 2つ いじょう えらぼう。';
+            // Locked buttons need a reason on screen: a dan joins the mix once its ばらばら 9もん is all right.
+            const locked = open.length < 8 ? ' ばらばら 9もん ぜんぶ できた だんが えらべるよ。' : '';
+            return `${chosen.join('・')}のだんを まぜて 10もん！` + locked;
         }
         document.querySelectorAll('[data-route-page]').forEach(button => button.onclick = () => {
             document.querySelectorAll('[data-route-page]').forEach(b => b.setAttribute('aria-pressed', String(b === button)));

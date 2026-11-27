@@ -197,3 +197,19 @@ test('the last two spaced checks must be recalled within three seconds; ★1 and
  assert.equal(L.submit(s,q,true,day('2026-12-11'),9000),'slow');assert.equal(r.mastered,true);assert.equal(r.stage,4);
  assert.equal(L.countMastered(s),1);
 });
+test('ヒントで正解しても、まちがえた問題の「やりなおし」の説明は消えない',()=>{
+ const now=new Date('2026-11-16T12:00:00').getTime(),today='2026-11-16';
+ const r={attempts:2,correct:0,today,hits:0,stage:0,history:[{at:now,ok:false,ms:3000,kind:'random'},{at:now+1000,ok:true,ms:9000,kind:'hint'}]};
+ assert.match(L.nextStep(r,now),/まちがえたので/);
+});
+test('★を取った問題が誤答で戻ったとき、たしかめなおしで★は残ると説明する',()=>{
+ const now=new Date('2026-11-16T12:00:00').getTime(),today='2026-11-16';
+ const r={attempts:9,correct:8,today,hits:1,stage:0,stars:2,everReady:true,history:[{at:now,ok:false,ms:3000,kind:'random'},{at:now+60000,ok:true,ms:4000,kind:'random'}]};
+ assert.match(L.nextStep(r,now),/たしかめなおし/);assert.match(L.nextStep(r,now),/★は のこる/);assert.match(L.nextStep(r,now),/あと 1かい/);
+});
+test('おまかせは、ヒントの回を直近の誤答・正解の判定に使わない',()=>{
+ const s=L.fresh(),now=Date.now();s.introduced=[2];
+ for(let b=1;b<=9;b++)Object.assign(L.record(s,{a:2,b}),{everReady:true,stage:2,history:[{at:now,ok:true,ms:1000,kind:'random'},{at:now,ok:true,ms:1000,kind:'random'}]});
+ L.record(s,{a:2,b:3}).history=[{at:now,ok:false,ms:1000,kind:'random'},{at:now,ok:true,ms:9000,kind:'hint'},{at:now,ok:false,ms:1000,kind:'random'}];
+ assert.equal(L.roundPace(s,{kind:'ordered',dan:2}),'first');
+});

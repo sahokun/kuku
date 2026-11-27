@@ -314,7 +314,8 @@ window.KukuVisuals = (() => {
     }
     function setScene(id){geometryDirty=true;scene=id;flights=[];deliveries=[];gains=[];scheduled=[];reciting=false;paused=false;document.body.dataset.scene=id;document.body.dataset.paused='false';if(id!=='game'&&id!=='result'){clear();setEnergy(.08);smoothed=.08;}}
     function setPaused(value){paused=value;document.body.dataset.paused=String(value);animations.forEach(a=>value?a.pause():a.play());}
-    function nextQuestion(){geometryDirty=true;flights=[];deliveries=[];gains=[];scheduled=[];reciting=false;action=null;}
+    // The seal is see-through until the next correct answer; empty it so the last streak's text does not linger.
+    function nextQuestion(){geometryDirty=true;flights=[];deliveries=[];gains=[];scheduled=[];reciting=false;action=null;seal.textContent='';}
     function lessonStep(name){
         reciting=name==='repeat';
         if(name==='cue'){announce('せーのっ！');action={kind:'reveal',start:clock};}

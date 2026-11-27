@@ -254,3 +254,14 @@ test('round length estimates come from recent real play and wait for enough hist
  s.days['2026-11-14']={ms:180000,games:3,answers:30};
  assert.deepEqual(R.estimate(s,{count:10},now),[2,3]);
 });
+test('まちがえて練習中に戻った問題は、期限の来たほかの問題より先に次の混合10問に入る',()=>{
+ const s=state();s.rewards.trail.cleared=[2,3,4,5,7];s.rewards.trail.selected=[2,3,4,5,7];
+ const now=at('2026-11-27'),past=at('2026-11-20');
+ for(const a of [2,3,4,5,7])for(let b=1;b<=9;b++){
+  const id=L.key(a,b);s.rewards.trail.mixed.push(id);
+  Object.assign(L.record(s,{a,b}),{attempts:5,correct:5,stage:2,everReady:true,due:'2026-11-23',lastAt:past,lastSerial:0,gap:5,history:[{at:past,ok:true,ms:5000,kind:'random'}]});
+ }
+ s.serial=100;
+ Object.assign(L.record(s,{a:3,b:7}),{stage:0,hits:0,due:'2026-11-27',lastAt:now-600000,lastSerial:90,gap:3,history:[{at:now-600000,ok:false,ms:5000,kind:'random'}]});
+ for(let i=0;i<5;i++)assert.ok(R.mixPlan(s,undefined,now,Math.random).queue.some(q=>q.a===3&&q.b===7));
+});
