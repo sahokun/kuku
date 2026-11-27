@@ -1,9 +1,9 @@
 name: Learning tests
 on:
   push:
-    branches: [develop, 'feature/**']
+    branches: [main]
   pull_request:
-    branches: [main, develop]
+    branches: [main]
 permissions:
   contents: read
 jobs:
