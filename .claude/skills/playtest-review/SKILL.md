@@ -14,7 +14,7 @@ description: |
 | --- | --- |
 | テスター | muse（AI）。九九を知らない小学2年生として毎日約10分プレイし、ブラウザ自動操作で遊ぶ |
 | 報告先 | 非公開リポジトリ `sahokun/kuku-playtest` のIssue（下表）。**Issueのコメントが正**。リポジトリ内の .md は 11/11 以降更新されていない |
-| テスト版 | Cloudflare Pages。`develop` へのpushで自動配信。URLはこのファイル末尾の「環境メモ」 |
+| テスト版 | Cloudflare Pages。`develop` に入る（PR のマージ）と自動配信。URLはこのファイル末尾の「環境メモ」 |
 | 本番 | GitHub Pages（`main`）。PR・マージはユーザーのみ。触らない |
 | muse への伝達 | アプリ内の「メニュー → こうしん きろく」（`js/version.js`）だけ。kuku-playtest へ新しいコメントは書かない |
 
@@ -67,18 +67,20 @@ muse の観察を読むときの注意:
 
 主なコードの場所: 進行・入力・タイマーは `js/app.js`（`next` `digit` `answer` `tick`）、定着・星・おまかせ時間は `js/learning.js`（`submitAttempt` `roundPace` `mapStars`）、おすすめ・まぜて・段クリア・めあては `js/rewards.js`（`plan` `mixPlan` `recordRun` `missions`）、結果一覧は `js/results.js`、ルート・結果画面は `js/journey.js`、復唱の流れは `js/recitation.js`。
 
-### 3. 修正（AGENTS.md のGit運用どおり）
+### 3. 修正（AGENTS.md の「ブランチと PR」どおり）
 
 1. `sahokun/kuku` にIssueを作る。ラベルは `playtest` と `bug` / `enhancement`。1回の対応を1つのIssueにまとめてよい。大きな機能は別のIssueにする。
-2. `git checkout -b feature/<Issue番号>-playtest-<内容> develop`
+2. `git fetch origin && git checkout -b fix/<Issue番号>-playtest-<内容> origin/develop`
 3. 実装する。仕様を変えたら `docs/learning.md` と `README.md` も直す。UIの文字はひらがな中心（AGENTS.md）。
 4. `js/version.js` の先頭に、その日のバージョン（`YYYY.MM.DD`、同じ日の2回目は `.2`）と変更点を足す。変更点は muse が読んで「何を確かめればよいか」が分かる書き方にする。例: 「〇〇の とき、△△に なるように した」
 5. 確認する。
    - `node --test --experimental-test-isolation=none tests/*.test.cjs`
-   - ブラウザで確認する。`python3 -m http.server` などでローカル配信し、chrome-devtools MCP で 375×667 と 320×480 にして、直した画面を実際に操作する。時計に関わるものは `evaluate_script` で状態を作る。保存データ `kuku:learning:v1` は、確認の前に退避して後で戻す。
+   - ブラウザで確認する。`python3 -m http.server` などでローカル配信し、Playwright MCP（`chrome-devtools-wsl-windows` スキル）で 375×667 と 320×480 にして、直した画面を実際に操作する。時計に関わるものは `browser_evaluate` で状態を作る。
+   - 保存データ `kuku:learning:v1` は、確認の前に退避して後で戻す。アプリは離脱時に今の状態を保存し直すので、確認用のデータは同じ配信元のアプリ以外のページ（例: `/README.md`）で書き込んでから `index.html` を開く。
    - `tools/verify-*.mjs` は CDP で起動済みの Chrome が必要。使えるときだけ使う（`tools/README.md`）。
-6. コミット: `git checkout develop && git merge --squash feature/...` → AGENTS.md の形式（`Fixes #N`）。その後 feature ブランチを削除する。
-7. `git push origin develop` → 1〜2分後、テスト版の `js/version.js` を取得し、新しいバージョンになったことを確かめる。
+6. コミットして push し、develop への PR を作る。PR のタイトルは Conventional Commits（例: `fix: プレイテスト第5回の対応（…）`）、本文の末尾に `Fixes #N`。
+7. CI（`learning` など）が通ったら、自分で squash merge する（`gh pr merge <番号> --squash`。2026-11-27 にユーザーが「PR にして自分でマージ」と決めた）。作業ブランチは自動で削除される。ローカルの develop を `git pull --ff-only` で揃える。
+8. 1〜2分後、テスト版の `js/version.js` を取得し、新しいバージョンになったことを確かめる。変わらないときは、ほかのファイル（例: `AGENTS.md`）がどのコミットの内容かも見て、配信が止まっていないかを確かめる（止まっていたらユーザーに Cloudflare の確認を頼む）。
 
 ### 4. kuku-playtest の印付け（管理用。muse は読まない）
 
