@@ -187,5 +187,5 @@ window.KukuSound = (() => {
     }
     function update(){if(ctx){master.gain.setTargetAtTime(settings().sound?settings().volume*.78:0,ctx.currentTime,.03);voiceGain.gain.setTargetAtTime(settings().voice?settings().volume:0,ctx.currentTime,.03);}}
     function setEnergy(e){energy=Math.max(0,Math.min(1,e));}
-    return {start,stop,pulse,effect,speak,cancelSpeech,prepare,ready,warm,phrase:voiceText,message,update,setEnergy,isPlaying(){return playing&&settings().sound&&ctx?.state==='running';}};
+    return {start,stop,pulse,effect,speak,cancelSpeech,prepare,ready,warm,canSpeak(){return settings().voice&&voiceAvailable;},phrase:voiceText,message,update,setEnergy,isPlaying(){return playing&&settings().sound&&ctx?.state==='running';}};
 })();

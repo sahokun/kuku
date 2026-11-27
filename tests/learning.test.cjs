@@ -149,3 +149,67 @@ test('old default normal pace migrates once; deliberate choices remain available
  old.settings.pace='robot';assert.equal(L.restore(old).settings.pace,'robot');
  assert.equal(L.mapStars({stars:100,stage:100}),0);
 });
+
+test('automatic pace follows how long correct answers actually take',()=>{
+ const make=ms=>{const s=L.fresh(),now=Date.now();
+  for(const b of [1,2,3]){const r=L.record(s,{a:3,b});r.attempts=3;r.everReady=true;r.stage=1;r.history=[{at:now,ok:true,ms,kind:'random'},{at:now,ok:true,ms,kind:'random'}];}
+  return s;};
+ const p={kind:'manual',keys:['3x1','3x2','3x3']};
+ assert.equal(L.roundPace(make(1500),p),'normal');
+ assert.equal(L.roundPace(make(4000),p),'easy');
+ assert.equal(L.roundPace(make(8000),p),'first');
+ const s=make(1500);s.problems['3x3'].history.push({at:Date.now(),ok:true,ms:9000,kind:'random'},{at:Date.now(),ok:true,ms:9000,kind:'random'});
+ assert.equal(L.roundPace(s,p),'first','a slow minority above the 80th percentile still needs room');
+ assert.equal(L.roundPace(make(8000),p,'normal'),'normal','a hand-picked pace is kept');
+});
+test('the map explains what earns the next star',()=>{
+ const now=new Date('2026-11-16T12:00:00').getTime(),today='2026-11-16';
+ assert.match(L.nextStep(undefined,now),/こたえて/);
+ const r={attempts:3,correct:2,today,hits:1,stage:0,history:[{at:now,ok:true,ms:3000,kind:'random'}]};
+ assert.match(L.nextStep(r,now),/あと 1かい/);
+ r.history.push({at:now,ok:false,ms:3000,kind:'random'});r.hits=0;
+ assert.match(L.nextStep(r,now),/まちがえた/);assert.match(L.nextStep(r,now),/2かい/);
+ Object.assign(r,{stage:1,due:'2026-11-17',stars:1});assert.equal(L.nextStep(r,now),'11月17日から また できたら ★2！');
+ r.stars=2;assert.match(L.nextStep(r,now),/つぎの だんかい/);
+ Object.assign(r,{stage:3,due:'2026-11-16'});assert.equal(L.nextStep(r,now),'きょう 3びょう いないで できたら ★3！');
+ Object.assign(r,{stage:4,mastered:true,repair:false,due:'2026-11-30'});assert.match(L.nextStep(r,now),/ときどき/);
+});
+test('a hinted correct answer is practice: no self-correct count, no restart, no stage credit, no pace timing',()=>{
+ const s=L.fresh(),now=new Date('2026-11-16T12:00:00').getTime(),q={a:3,b:7};
+ L.submit(s,q,true,now,2000);
+ const before={...s.problems['3x7']};
+ assert.equal(L.submit(s,q,true,now+60000,30000,'hint'),'practice');
+ const r=s.problems['3x7'];
+ assert.equal(r.correct,before.correct);assert.equal(r.stage,before.stage);assert.equal(r.hits,before.hits);
+ assert.equal(r.history.at(-1).kind,'hint');
+ assert.equal(L.hint(3,7),'3×6＝18。それに 3を たすと？');assert.equal(L.hint(4,1),'4が 1つ。');
+});
+test('the last two spaced checks must be recalled within three seconds; ★1 and ★2 may be counted out',()=>{
+ const s=L.fresh(),q={a:7,b:8},day=d=>new Date(d+'T12:00:00').getTime();
+ const t=day('2026-11-16');L.submit(s,q,true,t,6000);s.serial+=5;assert.equal(L.submit(s,q,true,t+31000,6000),'ready');
+ assert.equal(L.submit(s,q,true,day('2026-11-17'),8000),'reviewed','★2 can be reached by counting');
+ const r=s.problems['7x8'];assert.equal(r.stage,2);assert.equal(L.mapStars(r),2);
+ assert.equal(L.submit(s,q,true,day('2026-11-20'),4000),'slow');
+ assert.equal(r.stage,2);assert.equal(r.due,'2026-11-20');assert.equal(r.lastReview,'2026-11-17');
+ s.serial+=5;assert.equal(L.submit(s,q,true,day('2026-11-20')+60000,L.FLUENT_MS),'reviewed');assert.equal(r.stage,3);
+ assert.equal(L.submit(s,q,true,day('2026-11-27'),5000),'slow');assert.equal(r.mastered,false);
+ s.serial+=5;assert.equal(L.submit(s,q,true,day('2026-11-27')+60000,2000),'mastered');assert.equal(L.mapStars(r),3);
+ assert.equal(L.submit(s,q,true,day('2026-12-11'),9000),'slow');assert.equal(r.mastered,true);assert.equal(r.stage,4);
+ assert.equal(L.countMastered(s),1);
+});
+test('ヒントで正解しても、まちがえた問題の「やりなおし」の説明は消えない',()=>{
+ const now=new Date('2026-11-16T12:00:00').getTime(),today='2026-11-16';
+ const r={attempts:2,correct:0,today,hits:0,stage:0,history:[{at:now,ok:false,ms:3000,kind:'random'},{at:now+1000,ok:true,ms:9000,kind:'hint'}]};
+ assert.match(L.nextStep(r,now),/まちがえたので/);
+});
+test('★を取った問題が誤答で戻ったとき、たしかめなおしで★は残ると説明する',()=>{
+ const now=new Date('2026-11-16T12:00:00').getTime(),today='2026-11-16';
+ const r={attempts:9,correct:8,today,hits:1,stage:0,stars:2,everReady:true,history:[{at:now,ok:false,ms:3000,kind:'random'},{at:now+60000,ok:true,ms:4000,kind:'random'}]};
+ assert.match(L.nextStep(r,now),/たしかめなおし/);assert.match(L.nextStep(r,now),/★は のこる/);assert.match(L.nextStep(r,now),/あと 1かい/);
+});
+test('おまかせは、ヒントの回を直近の誤答・正解の判定に使わない',()=>{
+ const s=L.fresh(),now=Date.now();s.introduced=[2];
+ for(let b=1;b<=9;b++)Object.assign(L.record(s,{a:2,b}),{everReady:true,stage:2,history:[{at:now,ok:true,ms:1000,kind:'random'},{at:now,ok:true,ms:1000,kind:'random'}]});
+ L.record(s,{a:2,b:3}).history=[{at:now,ok:false,ms:1000,kind:'random'},{at:now,ok:true,ms:9000,kind:'hint'},{at:now,ok:false,ms:1000,kind:'random'}];
+ assert.equal(L.roundPace(s,{kind:'ordered',dan:2}),'first');
+});

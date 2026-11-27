@@ -51,7 +51,7 @@ test('daily mission selection stays fixed across learning changes and reloads',(
 });
 test('daily flower is awarded once and survives the following day and reload',()=>{
  const s=state(),date='2026-09-29';R.ensureDay(s,date);
- for(let i=0;i<3;i++)R.event(s,date,{type:'answer',ok:true,roundCorrect:i+1});
+ for(let i=0;i<5;i++)R.event(s,date,{type:'answer',ok:true,roundCorrect:i+1});
  for(let i=0;i<2;i++)R.event(s,date,{type:'finish'});
  assert.equal(s.rewards.days[date].seal,false);
  const result=R.event(s,date,{type:'finish'});assert.equal(result.sealed,true);assert.equal(result.earned[0].id,'play-three');
@@ -92,7 +92,7 @@ test('preferred rows start independently and a perfect scrambled row unlocks mix
  const s=state();s.tutorial=true;s.focusDan=7;
  assert.equal(R.plan(s).dan,7);s.introduced=[7];assert.equal(R.plan(s).kind,'ordered');s.ordered=[7];assert.equal(R.plan(s).courseId,'dan-7');
  const run=answers('dan-7');run[0].ok=false;R.recordRun(s,'dan-7',run);assert.deepEqual(R.cleared(s),[]);
- R.recordRun(s,'dan-7',answers('dan-7'));assert.deepEqual(R.cleared(s),[7]);assert.equal(R.plan(s).kind,'route');assert.deepEqual(s.problems,{});
+ R.recordRun(s,'dan-7',answers('dan-7'));assert.deepEqual(R.cleared(s),[7]);assert.deepEqual([R.plan(s).kind,R.plan(s).dan,R.plan(s).next],['intro',8,true]);assert.deepEqual(s.problems,{});
  R.recordRun(s,'dan-3',answers('dan-3'));s.ordered.push(3);assert.equal(R.plan(s).kind,'mix');
 });
 test('arbitrary cleared rows produce ten unique balanced questions and preserve the selected set',()=>{
@@ -156,6 +156,8 @@ test('three correct answers must come from one round, without requiring a streak
  assert.equal(R.missions(s,date).find(m=>m.id==='round-correct').done,false);
  R.event(s,date,{type:'answer',ok:false,roundCorrect:2});
  R.event(s,date,{type:'answer',ok:true,roundCorrect:3});
+ assert.equal(R.missions(s,date).find(m=>m.id==='round-correct').done,false,'accuracy goal needs five in one round');
+ R.event(s,date,{type:'answer',ok:true,roundCorrect:4});R.event(s,date,{type:'answer',ok:true,roundCorrect:5});
  assert.equal(R.missions(s,date).find(m=>m.id==='round-correct').done,true);
  s.rewards=R.restore(JSON.parse(JSON.stringify(s.rewards)),s);
  assert.equal(R.missions(s,date).find(m=>m.id==='round-correct').done,true);
@@ -173,7 +175,7 @@ test('review is an additional fourth mission and is required for the daily flowe
  const s=state(),date='2026-10-06';s.problems['2x3']={lastAt:at('2026-10-05'),due:date};
  assert.equal(R.missions(s,date).length,4);
  for(let i=0;i<3;i++) R.event(s,date,{type:'finish'});
- R.event(s,date,{type:'answer',ok:true,roundCorrect:3});
+ R.event(s,date,{type:'answer',ok:true,roundCorrect:5});
  assert.equal(s.rewards.days[date].seal,false);
  const result=R.event(s,date,{type:'recite',review:true});assert.equal(result.sealed,true);
 });
@@ -222,4 +224,44 @@ test('records retain the selected answer time for the best and most recent run',
  R.recordRun(s,'all-81',answers('all-81',8000),'2026-10-07','easy');
  s.rewards=R.restore(JSON.parse(JSON.stringify(s.rewards)),s);
  assert.equal(s.rewards.bests['all-81'].pace,'normal');assert.equal(s.rewards.bests['all-81'].last.pace,'easy');
+});
+
+test('after one finished mix a day, home moves on to the next uncleared row unless a row was cleared today',()=>{
+ const s=state();s.tutorial=true;s.focusDan=4;s.introduced=[2,3,4];s.ordered=[2,3,4];s.rewards.trail.cleared=[2,3,4];s.rewards.trail.selected=[2,3,4];
+ const today=at('2026-11-16'),date='2026-11-16';
+ const first=R.plan(s,today);assert.equal(first.kind,'mix');
+ assert.equal(R.finishMix(s,first,first.queue.map(q=>({...q,ok:true,ms:3000})),date),true);
+ assert.equal(s.rewards.days[date].mixRounds,1);
+ const next=R.plan(s,today);assert.deepEqual([next.kind,next.dan,next.next],['intro',5,true]);
+ s.introduced.push(5);s.ordered.push(5);s.focusDan=5;
+ R.recordRun(s,'dan-5',answers('dan-5'),date);
+ assert.equal(s.rewards.days[date].danClears,1);assert.deepEqual(R.selected(s),[2,3,4,5]);
+ assert.equal(R.plan(s,today).kind,'mix');
+ assert.equal(R.plan(s,at('2026-11-17')).kind,'mix');
+ const restored=R.restore(JSON.parse(JSON.stringify(s.rewards)),s);
+ assert.equal(restored.days[date].mixRounds,1);assert.equal(restored.days[date].danClears,1);
+ assert.equal(R.nextDan(s,9),6);
+ for(let a=2;a<=9;a++)if(!s.rewards.trail.cleared.includes(a))s.rewards.trail.cleared.push(a);
+ assert.equal(R.nextDan(s,5),null);assert.equal(R.plan(s,today).kind,'mix');
+});
+test('round length estimates come from recent real play and wait for enough history',()=>{
+ const s=state(),now=at('2026-11-16');
+ assert.equal(R.estimate(s,{count:10},now),null);
+ s.days['2026-11-15']={ms:660000,games:3,answers:30};
+ assert.deepEqual(R.estimate(s,{count:10},now),[3,4]);
+ s.days['2026-10-01']={ms:6000000,games:3,answers:30};
+ assert.deepEqual(R.estimate(s,{count:10},now),[3,4]);
+ s.days['2026-11-14']={ms:180000,games:3,answers:30};
+ assert.deepEqual(R.estimate(s,{count:10},now),[2,3]);
+});
+test('まちがえて練習中に戻った問題は、期限の来たほかの問題より先に次の混合10問に入る',()=>{
+ const s=state();s.rewards.trail.cleared=[2,3,4,5,7];s.rewards.trail.selected=[2,3,4,5,7];
+ const now=at('2026-11-27'),past=at('2026-11-20');
+ for(const a of [2,3,4,5,7])for(let b=1;b<=9;b++){
+  const id=L.key(a,b);s.rewards.trail.mixed.push(id);
+  Object.assign(L.record(s,{a,b}),{attempts:5,correct:5,stage:2,everReady:true,due:'2026-11-23',lastAt:past,lastSerial:0,gap:5,history:[{at:past,ok:true,ms:5000,kind:'random'}]});
+ }
+ s.serial=100;
+ Object.assign(L.record(s,{a:3,b:7}),{stage:0,hits:0,due:'2026-11-27',lastAt:now-600000,lastSerial:90,gap:3,history:[{at:now-600000,ok:false,ms:5000,kind:'random'}]});
+ for(let i=0;i<5;i++)assert.ok(R.mixPlan(s,undefined,now,Math.random).queue.some(q=>q.a===3&&q.b===7));
 });

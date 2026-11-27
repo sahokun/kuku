@@ -5,6 +5,9 @@
     const data = new Map(KukuData.map(q => [L.key(q.a, q.b), q]));
     let session = null, screen = 'home', lastTick = performance.now(), selected = new Set([2]), custom = new Set();
     const narrated = new Set();
+    // Taps that land just after the screen moves on belong to the previous question, not the new one.
+    const INPUT_GUARD_MS = 600;
+    const minutes = n => `${n}${[1, 3, 4, 6, 8, 10].includes(n) ? 'ぷん' : 'ふん'}`;
     let answerPage = 0, pendingPlan = null;
     const backTargets = {}, roots = ['home', 'route', 'records', 'menu'];
     const journey = KukuJourney.create({ state: s, start, show, save });
@@ -16,7 +19,7 @@
     function show(id, returning = false) {
         if (!returning && id !== screen && !roots.includes(id) && !['game', 'result', 'result-details', 'result-answers'].includes(id) && !['game', 'result', 'result-details', 'result-answers'].includes(screen)) backTargets[id] = screen;
         screen = id;
-        const section = ['game', 'result', 'result-details', 'result-answers'].includes(id) ? null : id === 'calendar' && backTargets.calendar === 'missions' ? 'home' : ['map', 'calendar', 'challenge', 'records'].includes(id) ? 'records' : ['manual', 'custom', 'table', 'settings', 'menu'].includes(id) ? 'menu' : id === 'route' ? 'route' : 'home';
+        const section = ['game', 'result', 'result-details', 'result-answers'].includes(id) ? null : id === 'calendar' && backTargets.calendar === 'missions' ? 'home' : ['map', 'calendar', 'challenge', 'records'].includes(id) ? 'records' : ['manual', 'custom', 'table', 'settings', 'menu', 'updates'].includes(id) ? 'menu' : id === 'route' ? 'route' : 'home';
         $('main-nav').hidden = !section;
         document.querySelectorAll('[data-nav]').forEach(b => { if (b.dataset.nav === section) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
         fx.setScene(id);
@@ -36,6 +39,7 @@
             renderTable();
         if (id === 'settings')
             renderSettings();
+        if (id === 'updates') { updatesPage = 0; renderUpdates(); }
         if (id === 'route') journey.route();
         if (id === 'challenge') journey.challenges();
         if (id === 'calendar') journey.calendar();
@@ -56,9 +60,9 @@
     }
     function syncSound() {
         $('sound').setAttribute('aria-pressed', String(s.settings.sound));
-        $('sound').setAttribute('aria-label', s.settings.sound ? 'おとを とめる' : 'おとを だす');
+        $('sound').setAttribute('aria-label', s.settings.sound ? 'おんがくを とめる' : 'おんがくを ながす');
         $('sound').style.opacity = s.settings.sound ? '1' : '.8';
-        $('sound').querySelector('span').textContent = s.settings.sound ? 'おと あり' : 'おと なし';
+        $('sound').querySelector('span').textContent = s.settings.sound ? 'おんがく あり' : 'おんがく なし';
     }
     function renderHome() {
         fx.setEnergy(.08);
@@ -67,14 +71,15 @@
         $('recommendation-title').textContent = p.title;
         $('choose-course').hidden = p.kind === 'route';
         $('auto-start').textContent = p.kind === 'route' ? 'だんを えらぶ ▶' : p.kind === 'intro' ? 'きいてみる ▶' : 'はじめる ▶';
-        $('round-estimate').textContent = p.kind === 'route' ? 'すきな だんから' : p.kind === 'intro' ? '9もん・2〜3ぷん' : `${p.count || 9}もん・1〜2ふん`;
+        const span = p.kind === 'intro' ? [2, 3] : R.estimate(s, p) || [2, 4];
+        $('round-estimate').textContent = p.kind === 'route' ? 'すきな だんから' : `${p.count || 9}もん・やく ${span[0]}〜${minutes(span[1])}`;
         const now = new Date();
         $('home-date').textContent = `${now.getMonth() + 1}月${now.getDate()}日 ${'日月火水木金土'[now.getDay()]}`;
         const missions = R.missions(s), completed = missions.filter(m => m.done).length;
         $('home-mission-count').textContent = `${completed} / ${missions.length}`;
         $('home-mission-note').textContent = completed === missions.length ? 'できた！ はなが さいたよ' : 'あそんで はなを さかせよう';
-        $('auto-description').textContent = p.kind === 'mix' ? `${p.dans.join('・')}のだんを まぜて 10もん。` : p.kind === 'route' ? 'すきな だんを えらんで、クリアを ふやそう。' : p.kind === 'intro' ? 'まずは こえを きいて、いっしょに いってみよう。' : p.kind === 'challenge' ? 'ばらばらの 9もん。ぜんぶ できたら クリア！' : 'この だんを、じゅんばんに れんしゅうしよう。';
-        $('daily-time').textContent = `${Math.floor(d.ms / 60000)} / 10ふん`;
+        $('auto-description').textContent = p.next ? 'あたらしい だんに ちょうせん！' : (p.kind === 'mix' ? `${p.dans.join('・')}のだんを まぜて 10もん。` : p.kind === 'route' ? 'すきな だんを えらんで、クリアを ふやそう。' : p.kind === 'intro' ? 'まずは こえを きいて、いっしょに いってみよう。' : p.kind === 'challenge' ? 'ばらばらの 9もん。ぜんぶ できたら クリア！' : 'この だんを、じゅんばんに れんしゅうしよう。');
+        $('daily-time').textContent = d.ms >= 600000 ? `${Math.floor(d.ms / 60000)}ふん ✓` : `${Math.floor(d.ms / 60000)} / 10ふん`;
         $('daily-progress').value = Math.min(600000, d.ms);
         $('daily-note').textContent = d.ms >= 600000 ? 'きょうも がんばったね！ また あした。' : 'きく・いう れんしゅうは、ゆっくりで OK。';
         $('mastered-count').textContent = `しっかり おぼえた ${L.countMastered(s)} / 72`;
@@ -103,7 +108,9 @@
         }
         session?.recitation?.cancel();
         sound.cancelSpeech();
-        session = { pace: chosenPace || L.roundPace(s, p), score: 0, speedPoints: 0, chainPoints: 0, answers: [], responses: [], bestCrossed: false, plan: p, index: 0, recent: [], correct: 0, combo: 0, changes: { ready: 0, reviewed: 0, mastered: 0 }, elapsed: 0, questionMs: 0, phaseMs: 0, paused: false, phase: 'question', input: '', extended: false };
+        const rowDan = ['intro', 'ordered'].includes(p.kind) ? p.dan : p.courseId?.startsWith('dan-') ? p.dans[0] : 0;
+        if (rowDan >= 2) L.chooseDan(s, rowDan);
+        session = { pace: chosenPace || L.roundPace(s, p), score: 0, speedPoints: 0, chainPoints: 0, answers: [], responses: [], bestCrossed: false, plan: p, index: 0, recent: [], correct: 0, combo: 0, changes: { ready: 0, reviewed: 0, mastered: 0 }, quick: 0, elapsed: 0, questionMs: 0, phaseMs: 0, paused: false, phase: 'question', input: '', extended: false, lockMs: 0 };
         R.ensureDay(s);
         fx.clear();
         $('score-strip').hidden = p.kind === 'intro';
@@ -170,25 +177,32 @@
         session.questionMs = 0;
         session.phaseMs = 0;
         session.extended = false;
-        const intro = session.plan.kind === 'intro' && (session.plan.dan !== 1 || session.index < 3);
+        // Every lecture question starts by listening; in the 1のだん tutorial the child then types the same fact (startCopy).
+        const intro = session.plan.kind === 'intro';
+        session.copy = false;
         session.phase = intro ? 'intro' : 'question';
         updateParade(session.index);
         $('game').classList.remove('correct', 'revealed');
         $('round-name').textContent = session.plan.kind === 'mix' ? `${session.plan.dans.join('・')}のだんを まぜよう` : intro ? `${q.a}のだんを きこう` : session.plan.kind === 'ordered' ? `${q.a}のだんを じゅんばんに` : session.plan.kind === 'challenge' ? `${session.plan.title}に ちょうせん` : session.plan.kind === 'manual' ? 'じぶんの れんしゅう' : session.plan.dan < 10 ? `${session.plan.dan}のだんと おさらい` : 'きょうの10もん';
-        $('counter').textContent = `${session.index + 1} / ${session.plan.count}`;
+        $('counter').textContent = `${session.index + 1}もんめ / ${session.plan.count}`;
         $('round-progress').max = session.plan.count;
         $('round-progress').value = session.index;
         $('mode-note').textContent = intro ? 'いっしょに いってみよう' : L.paceLabel(session.pace);
         $('equation').textContent = `${q.a} × ${q.b} =`;
         $('reading').textContent = intro ? session.q.q_read + session.q.a_read : session.q.q_read;
         $('answer').textContent = intro ? String(q.a * q.b) : '?';
-        $('feedback').textContent = '';
+        $('feedback').textContent = intro ? '' : GUIDE;
         $('score-gain').textContent = '';
+        session.hinted = false;
+        delete $('game').dataset.wait;
+        $('reveal').textContent = 'わからない → ヒント';
+        if (intro) showDots(session.q, true); else hideDots();
         $('input-controls').hidden = intro;
         $('intro-guide').hidden = !intro;
         delete $('game').dataset.recitation;
         $('combo').textContent = session.combo >= 2 ? `${session.combo}もん れんぞく！` : '';
-        setKeys(true);
+        session.lockMs = intro ? 0 : INPUT_GUARD_MS;
+        setKeys(intro);
         if (intro)
             startRecitation(true);
         else {
@@ -202,12 +216,66 @@
         sound.setEnergy(e);
         fx.progress(done, session.plan.count);
     }
+    const GUIDE = 'おしたら すぐ こたえあわせ（2けたは 2つ）';
+    // Said when the hint appears, so a hinted answer scoring nothing is not a surprise afterwards.
+    const HINT_RULE = '（ヒントの あとは △。てんは つかないよ）';
+    // "a × b" read as "a pieces, b times": b groups of a dots (rows of five), laid out to fit the stage.
+    function showDots(q, total) {
+        const board = $('dot-board');
+        board.hidden = false;
+        const area = board.getBoundingClientRect();
+        const width = area.width - 20, height = area.height - 30, cols = Math.min(q.a, 5), rows = Math.ceil(q.a / 5);
+        let best = { size: 0, per: q.b };
+        for (let lines = 1; lines <= q.b; lines++) {
+            const per = Math.ceil(q.b / lines), size = Math.min(width / (per * cols * 1.25 + (per - 1)), height / (lines * rows * 1.25 + (lines - 1)));
+            if (size > best.size) best = { size, per };
+        }
+        board.style.setProperty('--dot', Math.max(3, Math.min(16, Math.floor(best.size))) + 'px');
+        board.style.setProperty('--cols', cols);
+        const groups = Array.from({ length: q.b }, () => {
+            const g = document.createElement('span');g.className = 'dot-group';
+            g.append(...Array.from({ length: q.a }, () => document.createElement('i')));
+            return g;
+        });
+        $('dot-rows').replaceChildren(...Array.from({ length: Math.ceil(q.b / best.per) }, (_, i) => {
+            const line = document.createElement('div');line.className = 'dot-line';
+            line.append(...groups.slice(i * best.per, i * best.per + best.per));
+            return line;
+        }));
+        $('dot-caption').textContent = total ? `${q.a}こが ${q.b}つで ${q.a * q.b}こ` : `${q.a}こが ${q.b}つ`;
+    }
+    function hideDots() { $('dot-board').hidden = true; }
+    function help() {
+        if (!session || session.paused || screen !== 'game') return;
+        if (session.phase === 'wait') { proceed(); return; }
+        if (session.phase !== 'question' || session.lockMs > 0) return;
+        if (session.hinted) { answer(true); return; }
+        session.hinted = true;
+        showDots(session.q, false);
+        $('feedback').textContent = L.hint(session.q.a, session.q.b) + HINT_RULE;
+        $('reveal').textContent = 'こたえを きく';
+        // A hint restarts a limited clock so the child can use it.
+        if (Number.isFinite(L.answerTime(session.pace))) { session.questionMs = 0; session.extended = false; }
+    }
+    function waitForNext() {
+        session.phase = 'wait';
+        $('game').dataset.wait = 'true';
+        $('feedback').textContent = 'いえたら つぎへ';
+        $('reveal').textContent = session.index + 1 < session.plan.count ? 'つぎの もんだいへ ▶' : 'けっかを 見る ▶';
+        $('reveal').disabled = false;
+    }
+    function proceed() {
+        if (!session || session.phase !== 'wait' || session.paused) return;
+        delete $('game').dataset.wait;
+        session.index++;
+        next();
+    }
     function fullRead(q) { return (q.q_speak || q.q_read) + (q.a_speak || q.a_read); }
     function setKeys(enabled) {
         $('input-controls').querySelectorAll('button').forEach(b => b.disabled = !enabled);
     }
     function digit(n) {
-        if (!session || session.paused || session.phase !== 'question' || screen !== 'game')
+        if (!session || session.paused || session.phase !== 'question' || session.lockMs > 0 || screen !== 'game')
             return;
         if (session.input.length >= 2)
             return;
@@ -221,15 +289,20 @@
         }
         if (session.input.length >= String(session.q.a * session.q.b).length)
             answer(false);
+        else if (!session.hinted)
+            $('feedback').textContent = 'あと 1つ おすか「こたえる」';
     }
     function answer(reveal, reason = 'shown') {
-        if (!session || session.phase !== 'question' || session.paused)
+        if (!session || session.phase !== 'question' || session.paused || session.lockMs > 0)
             return;
         if (!reveal && session.input === '')
             return;
-        const ok = !reveal && Number(session.input) === session.q.a * session.q.b;
+        const right = !reveal && Number(session.input) === session.q.a * session.q.b;
+        const helped = right && session.hinted && !session.copy, ok = right && !helped;
         session.review = R.ensureDay(s).reviewKeys.includes(L.key(session.q.a, session.q.b));
-        const change = L.submit(s, session.q, ok, Date.now(), session.questionMs, session.plan.kind === 'ordered' ? 'ordered' : 'random');
+        const change = L.submit(s, session.q, right, Date.now(), session.questionMs, session.copy ? 'intro' : helped ? 'hint' : session.plan.kind === 'ordered' ? 'ordered' : 'random');
+        const quick = ok && !session.copy && session.questionMs <= L.FLUENT_MS;
+        if (quick) session.quick++;
         session.justMastered = change === 'mastered';
         session.newBest = false;
         session.recent.push(L.key(session.q.a, session.q.b));
@@ -241,30 +314,35 @@
             session.combo = 0;
         $('combo').textContent = session.combo >= 2 ? `${session.combo}もん れんぞく！` : '';
         const award = R.points(ok, session.questionMs, session.combo, session.plan.count);
-        const response = { a: session.q.a, b: session.q.b, ok, ms: session.questionMs, given: session.input || null, reason: reveal ? reason : ok ? 'correct' : 'wrong' };
+        const response = { a: session.q.a, b: session.q.b, ok, ms: session.questionMs, given: session.input || null, reason: reveal ? reason : ok ? 'correct' : helped ? 'hint' : 'wrong' };
         session.answers.push(response);
         session.responses.push(response);
-        journey.event({ type: 'answer', ok, roundCorrect: session.correct });
+        journey.event({ type: 'answer', ok: ok && !session.copy, roundCorrect: session.copy ? 0 : session.correct });
         if (session.plan.kind !== 'intro') {
             session.score += award.total;session.speedPoints += award.speed;session.chainPoints += award.chain;
             $('game-score').textContent = session.score.toLocaleString();
-            $('score-gain').textContent = ok ? `+${award.total}` : '';
+            $('score-gain').textContent = ok ? `+${award.total}` : helped ? 'ヒントで できた' : reveal ? (reason === 'timeout' ? 'じかんぎれ' : '') : `きみの こたえ：${session.input}`;
         }
         if (Object.hasOwn(session.changes, change))
             session.changes[change]++;
         session.phase = 'recitation';
         session.phaseMs = 0;
-        $('game').classList.add(ok ? 'correct' : 'revealed');
+        $('game').classList.add(right ? 'correct' : 'revealed');
+        if (right) hideDots(); else showDots(session.q, true);
         $('answer').textContent = String(session.q.a * session.q.b);
         $('reading').textContent = session.q.q_read + session.q.a_read;
-        $('feedback').textContent = ok ? (change === 'ready' ? 'きょうは OK！' : change === 'mastered' ? 'しっかり おぼえた！' : 'できた！') : 'まずは きいてね';
+        $('round-progress').value = session.index + 1;
+        // A status worth reading stays on screen through the answer's recitation.
+        session.status = helped ? 'ヒントで できた！' : !ok ? '' : change === 'ready' ? 'きょうは OK！' : change === 'mastered' ? 'しっかり おぼえた！' : change === 'slow' ? 'できた！ つぎは もっと はやく' : quick ? 'すぐ いえた！' : '';
+        $('feedback').textContent = session.status || (ok || right ? 'できた！' : 'まずは きいてね');
         setKeys(false);
         sound.cancelSpeech();
-        if (ok) updateParade(session.index + 1);
-        sound.effect(ok ? 'correct' : 'reveal', session.combo);
-        if (ok) {
+        // A wrong answer still counts as answered, but without the star flight or a stage change.
+        if (right) updateParade(session.index + 1); else fx.progress(session.index + 1, session.plan.count, false);
+        sound.effect(right ? 'correct' : 'reveal', session.combo);
+        if (right) {
             fx.burst(false, session.combo);
-            if (session.plan.kind !== 'intro') {
+            if (ok && session.plan.kind !== 'intro') {
                 const best = s.rewards.bests[session.plan.courseId];
                 const crossed = !!best && session.score > best.score && !session.bestCrossed;
                 session.newBest = crossed;
@@ -275,6 +353,8 @@
         }
         else {
             fx.reveal();
+            // Show the button that comes next, locked until the child has said the fact together with the voice.
+            $('reveal').textContent = session.index + 1 < session.plan.count ? 'いっしょに いったら つぎへ ▶' : 'いっしょに いったら けっかへ ▶';
             startRecitation(false);
         }
         save(true);
@@ -296,24 +376,43 @@
             text: fullRead(question),
             repeatOnly,
             encouragement: s.settings.voice ? encouragement : null,
+            silent: !sound.canSpeak(),
             say: sound.speak,
             stop: sound.cancelSpeech,
             onStep(name, label) {
                 if (session !== active || session.q !== question) return;
                 $('game').dataset.recitation = name;
                 if (!repeatOnly) fx.lessonStep(name);
-                $('feedback').textContent = label;
+                $('feedback').textContent = repeatOnly && active.status ? active.status : label;
             },
             onDone() {
                 if (session !== active || active.paused || active.recitation !== flow) return;
                 active.recitation = null;
                 journey.event({ type: 'recite', review: !intro && active.review });
-                if (intro) advanceIntro();
+                if (intro) active.plan.dan === 1 ? startCopy() : advanceIntro();
+                // After a miss, let the child say it and move on with a tap instead of racing to the next question.
+                else if (!repeatOnly) waitForNext();
                 else { active.index++; next(); }
             }
         });
         active.recitation = flow;
         flow.start();
+    }
+    function startCopy() {
+        // Tutorial: type the fact that was just heard, so the first answers practise the keys, not unheard facts.
+        if (!session || session.phase !== 'intro' || session.paused || session.recitation)
+            return;
+        Object.assign(session, { copy: true, hinted: true, phase: 'question', input: '', questionMs: 0, extended: false, lockMs: INPUT_GUARD_MS });
+        $('answer').textContent = '?';
+        $('reading').textContent = session.q.q_read;
+        $('feedback').textContent = 'きいた こたえを おしてみよう';
+        $('reveal').textContent = 'こたえを きく';
+        $('input-controls').hidden = false;
+        $('intro-guide').hidden = true;
+        delete $('game').dataset.recitation;
+        hideDots();
+        setKeys(false);
+        sound.effect('ready');
     }
     function advanceIntro() {
         if (!session || session.phase !== 'intro' || session.paused || session.recitation)
@@ -336,6 +435,7 @@
         if (session.index)
             L.daily(s, L.day()).games++;
         const complete = session.index === session.plan.count, intro = session.plan.kind === 'intro';
+        const perfect = complete && !intro && session.correct === session.plan.count;
         if (complete) journey.event({ type: 'finish' });
         const record = session.plan.kind === 'challenge' ? R.recordRun(s, session.plan.courseId, session.answers, L.day(), session.pace) : null;
         R.finishMix(s, session.plan, session.answers);
@@ -343,12 +443,12 @@
         const course = R.course(session.plan.courseId);
         const passed = !!(complete && course?.pass && session.correct >= course.pass);
         answerPage = 0;
-        $('result-title').textContent = passed ? 'クリア！' : complete ? 'はなまる！' : 'きょうは OK！';
+        $('result-title').textContent = passed ? 'クリア！' : !complete ? 'きょうは OK！' : intro ? 'はなまる！' : perfect ? 'ぜんもん せいかい！' : session.correct * 2 >= session.plan.count ? 'はなまる！' : 'もう すこし！';
         $('result-main').textContent = complete ? intro ? `${session.plan.dan}のだんで あそべたね！` : `${session.index}もん がんばったね！` : 'おさらいは また あした';
-        $('result-detail').textContent = complete ? intro ? 'つぎは こたえを おもいだしてみよう。' : `じぶんで できた ${session.correct} / ${session.index}もん` : 'じぶんで えらんで あそぶことも できるよ。';
+        $('result-detail').textContent = complete ? intro ? 'つぎは こたえを おもいだしてみよう。' : selfCorrectLine(session) : 'じぶんで えらんで あそぶことも できるよ。';
         const c = session.changes;
         $('result-changes').replaceChildren();
-        for (const [count, label] of [[c.ready, 'もん きょうの かくにん OK'], [c.reviewed, 'もん 日を あけても できた！'], [c.mastered, 'もん しっかり おぼえた！']]) {
+        for (const [count, label] of [[session.quick, 'もん すぐ いえた！'], [c.ready, 'もん きょうの かくにん OK'], [c.reviewed, 'もん 日を あけても できた！'], [c.mastered, 'もん しっかり おぼえた！']]) {
             if (count) {
                 const p = document.createElement('p');
                 p.textContent = count + label;
@@ -362,10 +462,11 @@
         const dayMs = L.daily(s, L.day()).ms;
         $('result-time').textContent = `このかい ${Math.round(session.elapsed / 1000)}びょう ・ きょう ${Math.floor(dayMs / 60000)}ふん`;
         const enough = dayMs >= 600000;
-        $('continue').textContent = enough ? 'きょうは おしまい →' : session.plan.kind === 'challenge' ? 'だんを えらぶ →' : session.plan.kind === 'mix' ? 'つぎの 10もん →' : 'つぎの れんしゅう →';
+        $('continue').textContent = enough ? 'きょうは おしまい →' : session.plan.kind === 'challenge' ? 'だんを えらぶ →' : session.plan.kind === 'mix' ? (R.plan(s).next ? 'つぎの だんへ →' : 'つぎの 10もん →') : 'つぎの れんしゅう →';
         $('finish').textContent = enough ? 'もうすこし あそぶ' : 'きょうは おしまい';
         $('continue').dataset.finish = String(enough);
-        if (enough && !passed)
+        // A perfect round keeps its own heading; reaching ten minutes is told by the buttons and the message instead.
+        if (enough && !passed && !perfect)
             $('result-title').textContent = 'きょうも がんばったね！';
         session.phase = 'done';
         save();
@@ -374,9 +475,14 @@
         if (complete) {
             fx.burst(true);
             sound.effect('finish');
-            sound.message(course?.test && passed ? 'final-clear' : passed ? 'clear' : enough ? 'daily-finish' :
-                intro ? 'intro-finish' : session.correct === session.plan.count ? 'perfect' : 'finish');
+            sound.message(course?.test && passed ? 'final-clear' : passed ? 'clear' : perfect ? 'perfect' : enough ? 'daily-finish' :
+                intro ? 'intro-finish' : 'finish');
         }
+    }
+    // Hinted answers are neither 'by yourself' nor wrong, so count them apart from the misses.
+    function selfCorrectLine(round) {
+        const hinted = round.answers.filter(a => a.reason === 'hint').length;
+        return `じぶんで できた ${round.correct} / ${round.index}もん` + (hinted ? `（ヒントで ${hinted}もん）` : '');
     }
     function renderAnswers() {
         const view = KukuResults.page(session?.responses || [], answerPage);
@@ -388,7 +494,7 @@
             const content = document.createElement('div'), equation = document.createElement('strong'), note = document.createElement('small');
             equation.textContent = item.equation;note.textContent = item.note;content.append(equation, note);
             const mark = document.createElement('span');mark.className = 'answer-mark';mark.textContent = item.mark;
-            mark.setAttribute('aria-label', item.state === 'correct' ? 'せいかい' : item.state === 'listen' ? 'きいたよ' : 'もういちど');
+            mark.setAttribute('aria-label', item.state === 'correct' ? 'せいかい' : item.state === 'listen' ? 'きいたよ' : item.state === 'hint' ? 'ヒントで できた' : 'もういちど');
             row.append(number, content, mark);$('answer-list').append(row);
         }
         $('answers-page').textContent = view.total ? `${view.start + 1}〜${view.end} / ${view.total}もん` : 'もんだいは ないよ';
@@ -400,7 +506,7 @@
     function follow() {
         const p = session?.plan;
         if (p?.kind === 'challenge') { show('route'); return; }
-        if (p?.kind === 'mix') { start(R.mixPlan(s, p.dans)); return; }
+        if (p?.kind === 'mix') { const nextPlan = R.plan(s); start(nextPlan.next ? nextPlan : R.mixPlan(s, p.dans)); return; }
         if (p?.kind === 'manual')
             start(p);
         else {
@@ -414,9 +520,15 @@
         if (screen !== 'game' || !session || session.paused || session.phase === 'loading' || document.hidden)
             return;
         session.elapsed += dt;
+        L.daily(s, L.day()).ms += dt;
+        if (session.phase === 'question' && session.lockMs > 0) {
+            // The answer clock starts when the keys come alive.
+            session.lockMs -= dt;
+            if (session.lockMs <= 0) { session.lockMs = 0; setKeys(true); }
+            return;
+        }
         session.questionMs += dt;
         session.phaseMs += dt;
-        L.daily(s, L.day()).ms += dt;
         if (session.recitation) { session.recitation.tick(dt); return; }
         if (session.phase === 'question' && session.questionMs >= (session.extended ? session.deadline : L.answerTime(session.pace)))
             answer(true, 'timeout');
@@ -486,8 +598,11 @@
                 }
             }
     }
+    const MAP_DETAIL_PROMPT = 'マスを おすと、きろくが 見られるよ。';
     function renderMap() {
         $('map-count').textContent = `しっかり おぼえた ${L.countMastered(s)} / 72もん`;
+        $('map').classList.remove('picked');
+        $('map-detail').textContent = MAP_DETAIL_PROMPT;
         makeGrid('map-grid', (button, a, b) => {
             const r = s.problems[L.key(a, b)], status = L.status(r), stars = L.mapStars(r);
             const review = stars > 0 && (r?.repair || !r?.stage || L.isDue(r, Date.now()));
@@ -495,8 +610,9 @@
             button.innerHTML = '<svg viewBox="0 0 36 26" aria-hidden="true">' + [0,1,2].map((i) => `<path class="${i < stars ? 'filled' : ''}" transform="translate(${i*12} ${i === 1 ? 0 : 7})" d="M6 1 7.5 4.5 11 5 8.5 7.5 9 11 6 9.3 3 11 3.5 7.5 1 5 4.5 4.5Z"/>`).join('') + '</svg>';
             button.setAttribute('aria-label', `${a}かける${b}、ほし ${stars}こ、${names[status]}${review ? '、おさらいしよう' : ''}`);
             button.onclick = () => {
+                $('map').classList.add('picked');
                 $('map-detail').textContent = `${a} × ${b} = ${a * b}　ほし ${stars}こ。${names[status]}。` +
-                    (review ? ' おさらいしよう！' : '') + (r ? ` じぶんで できた ${r.correct}かい。` : '');
+                    (review ? ' おさらいしよう！' : '') + (r ? ` じぶんで できた ${r.correct}かい。` : '') + ' ' + L.nextStep(r);
             };
         }, 2);
     }
@@ -514,6 +630,22 @@
             $('table-list').append(button);
         }
     }
+    let updatesPage = 0;
+    // Two notes per page keep the list readable on a phone without scrolling.
+    const updatePages = KukuVersion.notes.flatMap(note => Array.from({ length: Math.ceil(note.items.length / 2) }, (_, i) => ({ ...note, items: note.items.slice(i * 2, i * 2 + 2) })));
+    function renderUpdates() {
+        updatesPage = Math.max(0, Math.min(updatePages.length - 1, updatesPage));
+        const note = updatePages[updatesPage];
+        $('updates-version').textContent = `バージョン ${note.version}`;
+        $('updates-date').textContent = note.date.replace(/^(\d+)-0?(\d+)-0?(\d+)$/, '$1年$2月$3日');
+        $('updates-list').replaceChildren(...note.items.map(text => { const li = document.createElement('li'); li.textContent = text; return li; }));
+        $('updates-page').textContent = `${updatesPage + 1} / ${updatePages.length}`;
+        $('updates-newer').disabled = updatesPage === 0;
+        $('updates-older').disabled = updatesPage + 1 >= updatePages.length;
+    }
+    $('updates-newer').onclick = () => { updatesPage--; renderUpdates(); };
+    $('updates-older').onclick = () => { updatesPage++; renderUpdates(); };
+    $('app-version').textContent = `バージョン ${KukuVersion.version}`;
     function renderSettings() {
         $('setting-pace').value = s.settings.pace;
         $('setting-sound').checked = s.settings.sound;
@@ -531,7 +663,13 @@
         if (!pendingPlan) return;
         const pace = L.roundPace(s, pendingPlan, $('round-pace').value);
         $('round-pace-preview').textContent = 'こんかいは ' + L.paceLabel(pace);
-        $('round-pace-note').textContent = $('round-pace').value === 'auto' ? 'この もんだいの れんしゅうに あわせたよ。' : 'この 1かいは、えらんだ じかんで あそぶよ。';
+        $('round-pace-note').textContent = paceNote($('round-pace').value, pace);
+    }
+    function paceNote(choice, pace) {
+        if (choice !== 'auto') return 'この 1かいは、えらんだ じかんで あそぶよ。';
+        // おまかせ stays unlimited while the child counts up; say so, or it looks as if the time never moves on.
+        if (pace === 'first') return 'はじめての 九九や、かぞえて こたえて いる あいだは じかん なし。はやく いえる ように なると、みじかく なるよ。';
+        return 'これまでの せいかいと、こたえるのに かかった じかんに あわせたよ。';
     }
     $('round-pace').onchange = updateRoundPace;
     $('round-go').onclick = () => {
@@ -569,7 +707,7 @@
         }
     };
     $('enter').onclick = () => answer(false);
-    $('reveal').onclick = () => answer(true);
+    $('reveal').onclick = help;
 
     $('pause').onclick = pause;
     $('resume').onclick = resume;
@@ -582,7 +720,7 @@
         show('home');
     } }
     $('next-dan').onclick = () => show('route');
-    $('result-next-dan').onclick = () => show('route');
+    $('result-next-dan').onclick = () => { show('route'); document.querySelector('[data-route-page="rows"]').click(); };
     $('manual-focus').onclick = () => moveFocus([...selected][0]);
     $('manual-start').onclick = () => {
         if (selected.size)
@@ -641,7 +779,7 @@
         }
         if (e.key === 'Enter' && !['BUTTON', 'INPUT', 'SELECT'].includes(document.activeElement.tagName)) {
             e.preventDefault();
-            answer(false);
+            if (session?.phase === 'wait') proceed(); else answer(false);
         }
     });
     document.addEventListener('visibilitychange', () => {

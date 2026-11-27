@@ -157,7 +157,7 @@ window.KukuVisuals = (() => {
         level=energy<.38?0:energy<.65?1:energy<.82?2:3;
         document.body.dataset.tier=String(level);
     }
-    function progress(done,count){
+    function progress(done,count,reward=true){
         const old=completed;completed=done;total=count;
         const lights=$('parade-lights');
         const lamps=Math.min(10,total),lit=Math.floor(completed/total*lamps);
@@ -165,7 +165,7 @@ window.KukuVisuals = (() => {
         [...lights.children].forEach((el,i)=>el.classList.toggle('lit',i<lit));
         $('parade-count').textContent=`${completed} / ${total}`;
         $('parade-label').textContent=['ぱれーど はじまるよ','なかまが きたよ！','みんなで おどろう！','おまつり ぜんかい！'][level];
-        if(completed>old&&motion()){
+        if(reward&&completed>old&&motion()){
             const from=geometry.answer,to=geometry.lights?.[Math.min(lamps-1,Math.floor((completed-1)/total*lamps))];
             if(from&&to)deliveries.push({x:from.left+from.width/2,y:from.top+from.height/2,tx:to.left+to.width/2,ty:to.top+to.height/2,start:clock});
         }
@@ -314,7 +314,8 @@ window.KukuVisuals = (() => {
     }
     function setScene(id){geometryDirty=true;scene=id;flights=[];deliveries=[];gains=[];scheduled=[];reciting=false;paused=false;document.body.dataset.scene=id;document.body.dataset.paused='false';if(id!=='game'&&id!=='result'){clear();setEnergy(.08);smoothed=.08;}}
     function setPaused(value){paused=value;document.body.dataset.paused=String(value);animations.forEach(a=>value?a.pause():a.play());}
-    function nextQuestion(){geometryDirty=true;flights=[];deliveries=[];gains=[];scheduled=[];reciting=false;action=null;}
+    // The seal is see-through until the next correct answer; empty it so the last streak's text does not linger.
+    function nextQuestion(){geometryDirty=true;flights=[];deliveries=[];gains=[];scheduled=[];reciting=false;action=null;seal.textContent='';}
     function lessonStep(name){
         reciting=name==='repeat';
         if(name==='cue'){announce('せーのっ！');action={kind:'reveal',start:clock};}

@@ -15,7 +15,7 @@
     const count = (v, max = 1e7) => Number.isInteger(v) && v >= 0 && v <= max ? v : 0;
     const dateOK = v => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v) && L.day(new Date(v + 'T12:00:00').getTime()) === v;
     const fresh = () => ({ version: 1, bests: {}, legacyBests: {}, days: {}, trail: { cleared: [], selected: [], mixed: [], rounds: 0, passed: false, passedAll: false }  });
-    const emptyDay = () => ({ ms: 0, games: 0, answers: 0, correct: 0, recited: 0, reviewed: 0, finished: 0, bestRoundCorrect: 0, missionVersion: 2, missions: [], reviewKeys: [], seal: false });
+    const emptyDay = () => ({ ms: 0, games: 0, answers: 0, correct: 0, recited: 0, reviewed: 0, finished: 0, bestRoundCorrect: 0, mixRounds: 0, danClears: 0, missionVersion: 2, missions: [], reviewKeys: [], seal: false });
     const missionIds = ['play', 'play-three', 'round-correct', 'review', 'recite', 'correct'];
     function restore(raw, learning) {
         const r = fresh();
@@ -38,7 +38,7 @@
             for (const [date, v] of Object.entries(raw.days || {}).filter(([d]) => dateOK(d)).sort().slice(-730)) {
                 if (!v || typeof v !== 'object') continue;
                 const d = emptyDay();
-                for (const key of ['ms', 'games', 'answers', 'correct', 'recited', 'reviewed', 'finished', 'bestRoundCorrect']) d[key] = count(v[key], key === 'ms' ? 86400000 : 1e6);
+                for (const key of ['ms', 'games', 'answers', 'correct', 'recited', 'reviewed', 'finished', 'bestRoundCorrect', 'mixRounds', 'danClears']) d[key] = count(v[key], key === 'ms' ? 86400000 : 1e6);
                 d.missionVersion = v.missionVersion === 2 ? 2 : 0;
                 d.missions = [...new Set(Array.isArray(v.missions) ? v.missions.filter(id => missionIds.includes(id)) : [])].slice(0, 4);
                 d.reviewKeys = [...new Set(Array.isArray(v.reviewKeys) ? v.reviewKeys.filter(id => /^[2-9]x[1-9]$/.test(id)) : [])].slice(0, 72);
@@ -79,7 +79,7 @@
         const defs = {
             play: { text: '1かい さいごまで あそぼう', goal: 1, value: d.finished },
             'play-three': { text: '3かい さいごまで あそぼう', goal: 3, value: d.finished },
-            'round-correct': { text: '1かいで 3もん せいかいしよう', goal: 3, value: d.bestRoundCorrect },
+            'round-correct': { text: '1かいで 5もん せいかいしよう', goal: 5, value: d.bestRoundCorrect },
             review: { text: 'まえの 九九を おさらいしよう', goal: 1, value: d.reviewed }
         };
         return d.missions.map(id => ({ id, ...defs[id], done: defs[id].value >= defs[id].goal }));
@@ -118,7 +118,15 @@
             combo = a.ok ? combo + 1 : 0; correct += a.ok ? 1 : 0;
             answerMs += Math.round(a.ms); score += points(a.ok, a.ms, combo, c.count).total;
         }
-        if (id.startsWith('dan-') && correct === 9 && !s.rewards.trail.cleared.includes(c.dans[0])) s.rewards.trail.cleared.push(c.dans[0]);
+        if (id.startsWith('dan-') && correct === 9 && !s.rewards.trail.cleared.includes(c.dans[0])) {
+            const dan = c.dans[0], wasCleared = cleared(s).includes(dan);
+            s.rewards.trail.cleared.push(dan);
+            if (!wasCleared) {
+                (s.rewards.days[date] ||= emptyDay()).danClears++;
+                // A newly cleared row joins a hand-picked mix so the new row is reviewed too.
+                if (s.rewards.trail.selected.length && !s.rewards.trail.selected.includes(dan)) s.rewards.trail.selected.push(dan);
+            }
+        }
         if (id === 'final' && correct >= 45) s.rewards.trail.passed = true;
         if (id === 'all-81' && correct === 81) s.rewards.trail.passedAll = true;
         const current = { score, correct, answerMs, count: c.count, date, pace: ['first','easy','normal','hard','robot'].includes(pace) ? pace : null };
@@ -153,9 +161,11 @@
         const used = new Set(), rows = new Map(dans.map(a => [a, 0])), queue = [];
         const pool = dans.flatMap(a => Array.from({length: 9}, (_, i) => ({a, b: i + 1, tie: random()})));
         for (let i = 0; i < 10; i++) {
+            // A fact back in practice (missed, or one check left today) comes first: slow but right answers keep
+            // ★2 facts due for days, so being due alone would leave a missed fact to random tie-breaks.
             const rank = q => {
-                const id = L.key(q.a, q.b), r = s.problems[id];
-                return (r && !L.eligible(s, r, now) ? 100 : 0) + (s.rewards.trail.mixed.includes(id) ? 10 : 0) + (r?.due && r.due <= L.day(now) ? 0 : 2) + q.tie;
+                const id = L.key(q.a, q.b), r = s.problems[id], practising = r?.stage === 0 && r.history.some(x => x.kind !== 'intro');
+                return (r && !L.eligible(s, r, now) ? 100 : 0) + (practising ? 0 : 20) + (s.rewards.trail.mixed.includes(id) ? 10 : 0) + (L.isDue(r, now) ? 0 : 2) + q.tie;
             };
             const min = Math.min(...rows.values());
             const candidates = pool.filter(q => !used.has(L.key(q.a, q.b)) && rows.get(q.a) === min).sort((a,b) => rank(a) - rank(b));
@@ -163,7 +173,7 @@
         }
         return {kind:'mix', title: 'まぜて 10もん', dans, count:10, queue};
     }
-    function finishMix(s, plan, answers) {
+    function finishMix(s, plan, answers, date = L.day()) {
         if (plan.kind !== 'mix' || plan.count !== 10 || answers.length !== 10 || plan.dans.length < 2 || !plan.dans.every(a => cleared(s).includes(a))) return false;
         const seen = new Set();
         for (let i = 0; i < answers.length; i++) {
@@ -172,13 +182,30 @@
             seen.add(id);
         }
         s.rewards.trail.rounds++;
+        ensureDay(s, date).mixRounds++;
         s.rewards.trail.mixed = [...new Set([...s.rewards.trail.mixed, ...answers.filter(a => a.ok).map(a => L.key(a.a,a.b))])];
         return true;
     }
-    function plan(s) {
+    function nextDan(s, dan) {
+        const open = cleared(s);
+        return [...Array.from({length: 9 - dan}, (_, i) => dan + 1 + i), ...Array.from({length: dan - 2}, (_, i) => 2 + i)].find(a => !open.includes(a)) || null;
+    }
+    function plan(s, now = Date.now()) {
         const dan = s.focusDan || 2;
         if (!s.tutorial || !cleared(s).includes(dan)) return rowPlan(s, dan);
-        return mixPlan(s) || {kind:'route', title:'つぎの だんを えらぼう'};
+        // Review the cleared rows first each day; after one finished mix, move on to a new row unless a row was cleared today.
+        const d = s.rewards.days[L.day(now)], next = nextDan(s, dan), mix = mixPlan(s, undefined, now);
+        if (next && (!mix || d?.mixRounds >= 1 && !d?.danClears)) return {...rowPlan(s, next), next: true};
+        return mix || {kind:'route', title:'つぎの だんを えらぼう'};
+    }
+    function estimate(s, p, now = Date.now()) {
+        // Minutes per round from recent real play; null until there is enough history.
+        const recent = Object.entries(s.days || {}).filter(([date]) => date <= L.day(now) && date >= L.plusDays(L.day(now), -14));
+        const ms = recent.reduce((t, [, d]) => t + (d.ms || 0), 0), games = recent.reduce((t, [, d]) => t + (d.games || 0), 0);
+        if (games < 3 || !ms) return null;
+        const per = ms / games * (p.count || 10) / 10 / 60000;
+        const lo = Math.max(1, Math.floor(per));
+        return [lo, Math.max(lo + 1, Math.ceil(per))];
     }
     function calendar(s, year, month) {
         syncCalendar(s);
@@ -187,5 +214,5 @@
             return { date, number: i + 1, played: !!d?.answers, seal: !!d?.seal, ...(d || emptyDay()) };
         });
     }
-    return { fresh, restore, courses, course, available, questions, syncCalendar, ensureDay, missions, event, points, recordRun, route, calendar, cleared, selected, finalReady, rowPlan, mixPlan, finishMix, plan };
+    return { fresh, restore, courses, course, available, questions, syncCalendar, ensureDay, missions, event, points, recordRun, route, calendar, cleared, selected, finalReady, rowPlan, mixPlan, finishMix, plan, nextDan, estimate };
 });

@@ -72,7 +72,7 @@ try {
         if(pending&&!window.__holdSpeech){pending.left-=50;if(pending.left<=0){window.__pendingSpeech=null;pending.u.onend?.();}}
         for(const t of window.__timers){if(window.__clock-t.last>=t.ms){t.last=window.__clock;t.fn();}}
       }};
-      window.__finishFeedback=()=>{let left=300;const game=document.getElementById('game');while(left-->0&&!game.hidden&&(game.classList.contains('correct')||game.classList.contains('revealed')))window.__advance(50);if(left<0)throw Error('Feedback did not complete');};
+      window.__finishFeedback=()=>{let left=300;const game=document.getElementById('game');while(left-->0&&!game.hidden&&(game.classList.contains('correct')||game.classList.contains('revealed'))){if(game.dataset.wait==='true')document.getElementById('reveal').click();else window.__advance(50);}if(left<0)throw Error('Feedback did not complete');};
     ` });
     await send('Page.reload');
     await sleep(900);
@@ -102,16 +102,16 @@ try {
         await evaluate(`document.querySelector('[data-open="settings"]').click();document.getElementById('setting-pace').value='${pace}';document.getElementById('setting-pace').dispatchEvent(new Event('change'));document.getElementById('custom-start').click()`);
         await check(`JSON.parse(localStorage.getItem('kuku:learning:v1')).settings.pace==='${pace}'`, pace+' setting is saved');
         const cues=await evaluate('__readyCount');
-        await evaluate(`__advance(${Number.isFinite(limit)?limit-50:60000})`);
-        await check(`!document.getElementById('game').classList.contains('revealed') && document.getElementById('counter').textContent==='1 / 10'`, pace+' waits for its deadline');
+        await evaluate(`__advance(${600+(Number.isFinite(limit)?limit-50:60000)})`);
+        await check(`!document.getElementById('game').classList.contains('revealed') && document.getElementById('counter').textContent==='1もんめ / 10'`, pace+' waits for its deadline');
         await click('pause');await evaluate('__advance(10000)');await click('resume');
         await check(`__readyCount===${cues}`, pace+' resume does not repeat ready sound');
-        if (pace==='first') await click('reveal'); else await evaluate('__advance(50)');
+        if (pace==='first') { await click('reveal');await click('reveal'); } else await evaluate('__advance(50)');
         await check(`document.getElementById('game').classList.contains('revealed')`, pace+' shows answer at the expected time');
         await evaluate('__finishFeedback()');
-        await check(`__readyCount===${cues+1} && document.getElementById('counter').textContent==='2 / 10'`, pace+' next question has one ready sound');
+        await check(`__readyCount===${cues+1} && document.getElementById('counter').textContent==='2もんめ / 10'`, pace+' next question has one ready sound');
         if (Number.isFinite(limit)) {
-            await evaluate(`__advance(${limit-50});document.querySelector('[data-digit="1"]').click();__advance(50)`);
+            await evaluate(`__advance(${600+limit-50});document.querySelector('[data-digit="1"]').click();__advance(50)`);
             await check(`!document.getElementById('game').classList.contains('revealed')`, pace+' late first digit has time for the second');
             await evaluate(`document.querySelector('[data-digit="2"]').click()`);
             await check(`document.getElementById('game').classList.contains('correct')`, pace+' second digit can complete the answer');
@@ -135,11 +135,12 @@ try {
     await check(`!document.getElementById('game').hidden`, 'tutorial starts');
     await check(`document.getElementById('main-nav').hidden`, 'play hides menu navigation');
     await evaluate('__holdSpeech=true;__advance(10000)');
-    await check(`document.getElementById('counter').textContent==='1 / 9' && document.getElementById('game').dataset.recitation==='listen'`, 'lecture waits for voice completion');
+    await check(`document.getElementById('counter').textContent==='1もんめ / 9' && document.getElementById('game').dataset.recitation==='listen'`, 'lecture waits for voice completion');
     await click('pause');await evaluate('__advance(5000)');
-    await check(`document.getElementById('counter').textContent==='1 / 9'`, 'lecture pause holds the problem');
+    await check(`document.getElementById('counter').textContent==='1もんめ / 9'`, 'lecture pause holds the problem');
     await evaluate('__holdSpeech=false;__spoken=[]');await click('resume');
-    await evaluate('__advance(100000)');
+    // Each tutorial fact is heard first, then the same fact is typed.
+    await evaluate(`(()=>{for(let i=0;i<9;i++){let left=4000;const keys=()=>!document.getElementById('input-controls').hidden&&!document.querySelector('[data-digit="1"]').disabled;while(left-->0&&!keys()&&document.getElementById('result').hidden)__advance(50);if(!document.getElementById('result').hidden)break;const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);if(n[1]!==i+1)throw Error('tutorial asked an unheard fact');String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());__finishFeedback();}__advance(3000);})()`);
     await check(`__spoken[0]===__spoken[2] && __spoken[1]==='いってみよう。せーのっ！'`, 'lecture reads, cues, then repeats');
     await check(`KukuStore.state.tutorial && !document.getElementById('result').hidden`, 'tutorial completes');
     await click('continue');
@@ -168,6 +169,8 @@ try {
     await click('resume');
     await evaluate('__spoken=[]');
     await click('reveal');
+    await check(`!document.getElementById('dot-board').hidden && document.getElementById('reveal').textContent==='こたえを きく'`, 'first help shows a hint');
+    await click('reveal');
     await check(`document.getElementById('game').classList.contains('revealed')`, 'show answer');
     const wrongCounter=await evaluate(`document.getElementById('counter').textContent`);
     await evaluate('__advance(2100)');
@@ -175,7 +178,7 @@ try {
     await evaluate('__advance(4000)');
     await check(`__spoken[0]===__spoken[2] && __spoken[1]==='いってみよう。せーのっ！'`, 'wrong answer reads, cues, then repeats');
     await evaluate('__finishFeedback()');
-    await evaluate(`(()=>{const text=document.getElementById('equation').textContent;const n=text.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());})()`);
+    await evaluate(`__advance(650);(()=>{const text=document.getElementById('equation').textContent;const n=text.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());})()`);
     await check(`document.getElementById('game').classList.contains('correct')`, 'number keys submit correct answer');
     const correctCounter = await evaluate(`document.getElementById('counter').textContent`);
     await evaluate('__holdSpeech=true;__advance(3000)');
@@ -192,12 +195,12 @@ try {
     await check(`document.getElementById('round-name').textContent==='じぶんの れんしゅう'`, 'manual range');
     await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
     for (let i = 0; i < 9; i++) {
-        await evaluate(`(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());__finishFeedback();})()`);
+        await evaluate(`__advance(650);(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());__finishFeedback();})()`);
     }
     await sleep(450);
     await shot('late-round');
     await check(`document.body.dataset.tier==='3' && [...document.querySelectorAll('.parade-guest')].filter(e=>getComputedStyle(e).opacity==='1').length===6`, 'late-game audience and stage');
-    await evaluate(`(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());__finishFeedback();})()`);
+    await evaluate(`__advance(650);(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());__finishFeedback();})()`);
     await sleep(450);
     await shot('finale');
     await check(`document.body.dataset.scene==='result'`, 'finale scene');
@@ -240,14 +243,14 @@ try {
     const covered=[];
     for(let i=0;i<9;i++){
         covered.push(await evaluate(`document.getElementById('equation').textContent`));
-        await evaluate(`__advance(3000);(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());__finishFeedback();})()`);
+        await evaluate(`__advance(3000);__advance(650);(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());__finishFeedback();})()`);
     }
     if(new Set(covered).size!==9)throw Error('Challenge repeated a question');
     await check(`KukuStore.state.rewards.bests['dan-2'].correct===9 && KukuStore.state.rewards.bests['dan-2'].answerMs>=27000 && KukuStore.state.rewards.bests['dan-2'].answerMs<35000`, 'challenge scores exclude pauses and recitation');
     const slowBest=await evaluate(`KukuStore.state.rewards.bests['dan-2'].score`);
     await click('challenge-again');
     for(let i=0;i<9;i++){
-        await evaluate(`(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());})()`);
+        await evaluate(`__advance(650);(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());})()`);
         if(i===0)await evaluate('__holdSpeech=true;__advance(4000);__holdSpeech=false');
         await evaluate('__finishFeedback()');
     }
@@ -255,7 +258,7 @@ try {
     await check(`document.getElementById('result-score').getBoundingClientRect().bottom<innerHeight`, 'personal best is visible without scrolling');
     await shot('personal-best');
     await click('challenge-again');
-    await evaluate(`(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());__finishFeedback();})()`);
+    await evaluate(`__advance(650);(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());__finishFeedback();})()`);
     await click('pause');await click('quit');
     await check(`KukuStore.state.rewards.bests['dan-2'].runs===2`, 'incomplete challenge does not save a best');
     await evaluate(`KukuStore.state.days[KukuLearning.day(new Date(new Date().getFullYear(),new Date().getMonth()-1,15,12).getTime())]={ms:90000,games:1,answers:9};document.querySelector('[data-open="calendar"]').click()`);
@@ -273,21 +276,21 @@ try {
     const mixed=[];
     for(let i=0;i<10;i++){
       mixed.push(await evaluate(`document.getElementById('equation').textContent`));
-      await evaluate(`(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());__finishFeedback();})()`);
+      await evaluate(`__advance(650);(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());__finishFeedback();})()`);
     }
     if(new Set(mixed).size!==10)throw Error('Mixed challenge repeated a question');
     await check(`KukuStore.state.rewards.bests['pair-2'].correct===10 && KukuStore.state.rewards.bests['dan-2'].count===9`, 'mixed course saves a separate complete 10-question record');
     await click('result-next-dan');
     await check(`document.getElementById('mix-start').disabled && document.getElementById('final-start').disabled`, 'mix requires two cleared rows and final stays locked');
     await evaluate(`document.querySelector('[data-row-start="3"]').click()`);
-    for(let i=0;i<9;i++) await evaluate(`(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());__finishFeedback();})()`);
+    for(let i=0;i<9;i++) await evaluate(`__advance(650);(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());__finishFeedback();})()`);
     await click('result-next-dan');
     await check(`!document.getElementById('mix-start').disabled && document.querySelector('[data-mix-dan="7"]').disabled`, 'only cleared rows can be selected for mixed practice');
     await click('mix-start');
     const mixTen=[];
     for(let i=0;i<10;i++) {
       mixTen.push(await evaluate(`document.getElementById('equation').textContent`));
-      await evaluate(`(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());__finishFeedback();})()`);
+      await evaluate(`__advance(650);(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());__finishFeedback();})()`);
     }
     if(new Set(mixTen).size!==10 || mixTen.filter(q=>q.startsWith('2 ×')).length!==5) throw Error('Mixed ten must be balanced and unique');
     await check(`KukuStore.state.rewards.trail.rounds===1 && KukuStore.state.rewards.trail.mixed.length===10`, 'ten-question mix saves route progress');
@@ -297,12 +300,12 @@ try {
     await check(`KukuStore.state.rewards.trail.rounds===1`, 'unfinished mix does not add a completed round');
     await evaluate(`const ss=KukuStore.state;ss.rewards.trail.cleared=[2,3,4,5,6,7,8,9];ss.ordered=[2,3,4,5,6,7,8,9];ss.introduced=[...ss.ordered];ss.rewards.trail.mixed=ss.ordered.flatMap(a=>Array.from({length:9},(_,i)=>a+'x'+(i+1)));document.querySelector('[data-open="route"]').click()`);
     await click('final-start');
-    await check(`document.getElementById('counter').textContent==='1 / 50' && document.querySelectorAll('#parade-lights i').length===10`, 'final starts fifty questions with ten progress lamps');
+    await check(`document.getElementById('counter').textContent==='1もんめ / 50' && document.querySelectorAll('#parade-lights i').length===10`, 'final starts fifty questions with ten progress lamps');
     const finalRows=new Set();
     for(let i=0;i<50;i++) {
       finalRows.add(await evaluate(`document.getElementById('equation').textContent[0]`));
-      if(i<5) { await click('reveal');await evaluate('__finishFeedback()'); }
-      else await evaluate(`(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());__finishFeedback();})()`);
+      if(i<5) { await evaluate('__advance(650)');await click('reveal');await click('reveal');await evaluate('__finishFeedback()'); }
+      else await evaluate(`__advance(650);(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());__finishFeedback();})()`);
     }
     if(finalRows.size!==8)throw Error('Final must include all eight rows');
     await check(`KukuStore.state.rewards.trail.passed && KukuStore.state.rewards.bests.final.correct===45 && document.getElementById('result-dan-progress').textContent.includes('クリア')`, '45 out of 50 passes final and stores its separate record');
@@ -313,10 +316,10 @@ try {
     await check(`document.querySelectorAll('#answer-list .correct').length===5`, 'results paginate correct answers');
     for(const mistakes of [1,0]) {
       await evaluate(`document.querySelector('[data-open="result"]').click();document.getElementById('result-next-dan').click();document.getElementById('all-start').click()`);
-      await check(`document.getElementById('counter').textContent==='1 / 81'`, 'all-facts test starts 81 questions');
+      await check(`document.getElementById('counter').textContent==='1もんめ / 81'`, 'all-facts test starts 81 questions');
       for(let i=0;i<81;i++) {
-        if(i<mistakes) { await click('reveal');await evaluate('__finishFeedback()'); }
-        else await evaluate(`(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());__finishFeedback();})()`);
+        if(i<mistakes) { await evaluate('__advance(650)');await click('reveal');await click('reveal');await evaluate('__finishFeedback()'); }
+        else await evaluate(`__advance(650);(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());__finishFeedback();})()`);
       }
       await check(`KukuStore.state.rewards.trail.passedAll===${mistakes===0} && KukuStore.state.rewards.bests['all-81'].correct===${81-mistakes} && KukuStore.state.rewards.bests.final.correct===45`, '81 test needs a perfect run and preserves 50-question record');
     }
@@ -356,7 +359,7 @@ try {
       document.querySelector('[data-open="manual"]').click();document.getElementById('manual-start').click();`);
     const stages = new Set();
     for(let i=0;i<10;i++){
-        await evaluate(`(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());})()`);
+        await evaluate(`__advance(650);(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());})()`);
         await sleep(180);
         await check(`document.getElementById('game').classList.contains('correct') && document.getElementById('parade-lights').querySelectorAll('.lit').length===${i+1}`, 'real-time answer reward '+(i+1));
         stages.add(await evaluate(`document.body.dataset.tier`));
@@ -384,7 +387,7 @@ try {
     await check(`!document.getElementById('result').hidden`, 'real-time voiced round completes');
     await click('finish');
     await evaluate(`KukuStore.state.settings.motion=0;document.querySelector('[data-open="manual"]').click();document.getElementById('manual-start').click();`);
-    await evaluate(`(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());})()`);
+    await evaluate(`__advance(650);(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());})()`);
     await sleep(100);
     await check(`document.body.dataset.motion==='off' && document.getAnimations().filter(a=>a.playState==='running').length===0`, 'zero-motion answer has no running animations');
     await click('pause');await click('quit');

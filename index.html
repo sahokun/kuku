@@ -50,6 +50,13 @@
         <button data-open="manual"><span class="menu-symbol" aria-hidden="true">＋</span><span><strong>じぶんで えらぶ</strong><small>だん・はんい・もんだいを えらぶ</small></span><b aria-hidden="true">›</b></button>
         <button data-open="settings"><span class="menu-symbol" aria-hidden="true">⚙</span><span><strong>せってい</strong><small>おと・こえ・うごき</small></span><b aria-hidden="true">›</b></button>
       </nav>
+      <button data-open="updates" class="quiet version-link"><span id="app-version">バージョン</span> ・ こうしん きろく →</button>
+    </section>
+    <section id="updates" class="screen" hidden>
+      <div class="section-top"><button class="back">← もどる</button><h1>こうしん きろく</h1></div>
+      <p class="help">あたらしく なった ところだよ。</p>
+      <article class="updates-card"><h2 id="updates-version"></h2><p id="updates-date" class="help"></p><ul id="updates-list"></ul></article>
+      <nav class="answer-pages" aria-label="こうしんの ページ"><button id="updates-newer">← まえ</button><strong id="updates-page" aria-live="polite"></strong><button id="updates-older">つぎ →</button></nav>
     </section>
     <section id="missions" class="screen" hidden>
       <div class="section-top"><button class="back">← もどる</button><h1>きょうの めあて</h1></div>
@@ -70,14 +77,14 @@
       <progress id="round-progress" max="10" value="0" aria-label="もんだいの すすみぐあい"></progress>
       <div id="score-strip" class="score-strip"><span>スコア <strong id="game-score">0</strong></span><span id="game-best"></span><span id="score-gain" aria-live="polite"></span></div>
       <div class="parade-meter"><span id="parade-label">ぱれーど はじまるよ</span><div id="parade-lights" aria-hidden="true"></div><span id="parade-count">0 / 10</span></div>
-      <div class="stage"><div class="stage-floor" aria-hidden="true"></div><div class="stage-lights" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><div class="stage-backdrop" aria-hidden="true"></div><div class="audience" aria-hidden="true"></div><div id="stage-cheer" aria-hidden="true"></div><div id="mascot-game" class="mascot-host" aria-hidden="true"></div><span id="combo" aria-live="polite"></span></div>
+      <div class="stage"><div id="dot-board" class="dot-board" hidden><div id="dot-rows" class="dot-rows" aria-hidden="true"></div><p id="dot-caption" class="dot-caption"></p></div><div class="stage-floor" aria-hidden="true"></div><div class="stage-lights" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><div class="stage-backdrop" aria-hidden="true"></div><div class="audience" aria-hidden="true"></div><div id="stage-cheer" aria-hidden="true"></div><div id="mascot-game" class="mascot-host" aria-hidden="true"></div><span id="combo" aria-live="polite"></span></div>
       <div class="question-card"><div id="answer-seal" aria-hidden="true">できた！</div><p id="mode-note" class="eyebrow"></p><div id="equation" class="equation"></div><p id="reading" class="reading"></p><div id="answer" class="answer" aria-label="こたえ" aria-live="polite">?</div><p id="feedback" role="status"></p></div>
       <div id="input-controls"><div class="numpad" aria-label="すうじの ボタン">
         <button data-digit="1">1</button><button data-digit="2">2</button><button data-digit="3">3</button>
         <button data-digit="4">4</button><button data-digit="5">5</button><button data-digit="6">6</button>
         <button data-digit="7">7</button><button data-digit="8">8</button><button data-digit="9">9</button>
         <button id="erase" class="key-small">けす</button><button data-digit="0">0</button><button id="enter" class="key-small key-enter">こたえる</button>
-      </div><button id="reveal" class="reveal">わからない → こたえを きく</button></div>
+      </div><button id="reveal" class="reveal">わからない → ヒント</button></div>
       <div id="intro-guide" class="recitation-guide" hidden aria-hidden="true"><span data-step="listen">きく</span><span>→</span><span data-step="cue">せーのっ</span><span>→</span><span data-step="repeat">いっしょに</span></div>
       <div id="voice-loading" hidden role="status"><p id="voice-load-status">こえを じゅんびちゅう…</p><div id="voice-load-actions" hidden><button id="voice-retry" class="primary wide">もういちど</button><button id="voice-skip" class="quiet wide">こえ なしで あそぶ</button></div></div>
     </section>
@@ -155,7 +162,7 @@
     </section>
     <section id="map" class="screen" hidden>
       <div class="section-top"><button class="back">← もどる</button><h1>九九マップ</h1></div><p id="map-count"></p><div class="map-growth" aria-label="ほしが ふえるほど おぼえたよ"><span>ほしを あつめよう</span><strong>☆ → ★ → ★★ → ★★★</strong></div>
-      <div id="map-grid" class="kuku-grid"></div><button id="map-tutorial" class="quiet map-tutorial">1のだん · はじめの れんしゅう →</button><p class="help">ほしが 3こで、しっかり おぼえた！<br>オレンジの しるしは、おさらいしよう。</p><div id="map-detail" class="detail-card" aria-live="polite">マスを おすと、きろくが 見られるよ。</div>
+      <div id="map-grid" class="kuku-grid"></div><button id="map-tutorial" class="quiet map-tutorial">1のだん · はじめの れんしゅう →</button><p class="help">★★★は、日を あけて 3びょうで いえたら！<br>オレンジの しるしは、おさらいしよう。</p><div id="map-detail" class="detail-card" aria-live="polite">マスを おすと、きろくが 見られるよ。</div>
     </section>
     <section id="table" class="screen" hidden>
       <div class="section-top"><button class="back">← もどる</button><h1>九九を きく</h1></div><label class="table-select">だんを えらぶ <select id="table-dan" aria-label="きく だん"></select></label><p class="help">おすと よみかたを きけるよ。</p><div id="table-list"></div>
@@ -176,6 +183,6 @@
     <dialog id="pause-dialog"><h2>ひとやすみ</h2><p>じかんは とまっているよ。</p><button id="resume" class="primary wide">つづける</button><button id="quit" class="quiet wide">はじめに もどる</button></dialog>
   </main>
   <div id="reward-toast" role="status" hidden></div>
-  <script src="js/viewport.js"></script><script src="js/data.js"></script><script src="js/learning.js"></script><script src="js/rewards.js"></script><script src="js/results.js"></script><script src="js/store.js"></script><script src="js/voice-manifest.js"></script><script src="js/voice-files.js"></script><script src="js/sound.js"></script><script src="js/visuals.js"></script><script src="js/recitation.js"></script><script src="js/journey.js"></script><script src="js/diagnostics.js"></script><script src="js/app.js"></script>
+  <script src="js/version.js"></script><script src="js/viewport.js"></script><script src="js/data.js"></script><script src="js/learning.js"></script><script src="js/rewards.js"></script><script src="js/results.js"></script><script src="js/store.js"></script><script src="js/voice-manifest.js"></script><script src="js/voice-files.js"></script><script src="js/sound.js"></script><script src="js/visuals.js"></script><script src="js/recitation.js"></script><script src="js/journey.js"></script><script src="js/diagnostics.js"></script><script src="js/app.js"></script>
 </body>
 </html>

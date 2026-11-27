@@ -85,7 +85,7 @@ try {
  await click('pause');await click('quit');
  await check(`KukuSound.prepare().then(()=>__decoded.length===${count})`,'restarting uses cached decoded recordings');
  await evaluate(`KukuSound.ready=__originalReady;document.getElementById('tutorial-replay').click()`);
- await check(`document.getElementById('voice-loading').hidden&&document.getElementById('counter').textContent==='1 / 9'`,'cached round starts without a loading screen');
+ await check(`document.getElementById('voice-loading').hidden&&document.getElementById('counter').textContent==='1もんめ / 9'`,'cached round starts without a loading screen');
  await click('pause');await click('quit');
  await evaluate(`KukuSound.ready=()=>false;KukuVoiceFiles.prepare=()=>new Promise(resolve=>window.__releaseVoice=resolve);document.getElementById('tutorial-replay').click()`);
  await click('pause');await click('quit');await evaluate('__releaseVoice()');await sleep(50);
