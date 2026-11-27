@@ -20,10 +20,11 @@ description: |
 
 | Issue | 中身 |
 | --- | --- |
-| #1 日次ログ | 1日1コメント。到達点・学習状況・新規報告No.・追記したNo. |
-| #2 不具合まとめ | 日付ごとのコメントにチェック行 `- [ ] 【重要度】タイトル（報告No.N／要望M）` |
+| #1 日次ログ | 2026-11-18 の分まで、1日1コメント。到達点・学習状況・新規報告No.・追記したNo. |
+| #2 不具合まとめ | 2026-11-18 の分まで、日付ごとのコメントにチェック行 `- [ ] No.N: タイトル（報告No.N／要望M）` |
 | #3 UI・分かりにくさまとめ | 同上 |
 | #4 成長阻害まとめ | 同上 |
+| 日ごとのIssue（#7 以降） | 2026-11-19 の分から、1日1Issue。本文に到達点・学習の進み具合・新規報告のチェック行・再現と解消の確認。要望は `- [ ] 要望N: …` の行 |
 
 ユーザーからの委任: **対応の要否・方法は自分で判断して自分で直し、自分で確認する**。ユーザーに頼むのは環境構築など、どうしても自分でできないことだけ。dev-workflow-solo などの別スキル・サブエージェントには任せない。
 
@@ -35,11 +36,12 @@ description: |
 git fetch origin && git status -sb          # develop が origin と揃っているか
 gh api "repos/sahokun/kuku-playtest/issues/comments?per_page=100" \
   --jq '.[] | {id, issue: (.issue_url|split("/")|last), created_at, updated_at, body}'
-gh issue list -R sahokun/kuku-playtest --state all --json number,title,state   # 新しいIssueが増えていないか
+gh issue list -R sahokun/kuku-playtest --state all --json number,title,state   # 新しい日のIssueが増えていないか
+.claude/skills/playtest-review/unmarked.sh   # 印のないチェック行（コメントと日ごとのIssue本文の両方）
 ```
 
-- **未処理の判定は印で行う**: まとめIssue（#2〜#4）のチェック行のうち、✅ / ➖ / ⏸ の印がない行が未処理。台帳は別に作らない。
-- 日次ログ（#1）は前回の対応以降の日を読む。到達点の停滞、同じ問題のくり返し、「〇〇に追記」とされたNo.を拾う。
+- **未処理の判定は印で行う**: チェック行のうち、✅ / ➖ / ⏸ の印がない行が未処理（`unmarked.sh` が一覧する）。台帳は別に作らない。
+- 日ごとのIssue（#7 以降、`gh issue view <N> -R sahokun/kuku-playtest`）と日次ログ（#1）は、前回の対応以降の日を読む。チェック行だけでなく「再現・解消の確認」も読み、同じ問題のくり返しを拾う。到達点の停滞、同じ問題のくり返し、「〇〇に追記」とされたNo.を拾う。
 - muse の追記本文の多くは muse 側の資料にあり、GitHub には要約しかない。GitHub にある情報だけで判断する。
 - 日次ログに書かれたバージョンを見て、**どの版での観察か**を確かめる。修正前の版での報告を「再発」と扱わない。
 
@@ -59,6 +61,9 @@ muse の観察を読むときの注意:
 - 「即答0回」はシミュレーションの設定による。muse の回答時間だけを根拠に難しさを調整しない。
 - 前の問題の復唱（まずは きいてね → せーのっ → いっしょに）を「次の問題の前に答えが出る」と書くことがある。
 - muse はホームの「つぎは これ！」に従って遊ぶ。おすすめの作りが、そのまま到達点に表れる。
+- muse はページの文字を DOM から読むので、透明・`hidden` の要素に残った文字も「表示された」と書くことがある（例: 前の回の「10れんぞく！」、消えた後の通知）。画面に出る条件（CSS・`hidden`）までコードで確かめる。
+- 自動操作は、押せないボタンへのクリックを、押せるようになるまで待ってから押すことがある。子どもには起きないので、入力の持ち越し（No.22）の再発は、まずこれを疑う。
+- muse が引用する「こうしん きろく」の文言は、`js/version.js` と照らす。無い文言を引用していることがある。
 
 主なコードの場所: 進行・入力・タイマーは `js/app.js`（`next` `digit` `answer` `tick`）、定着・星・おまかせ時間は `js/learning.js`（`submitAttempt` `roundPace` `mapStars`）、おすすめ・まぜて・段クリア・めあては `js/rewards.js`（`plan` `mixPlan` `recordRun` `missions`）、結果一覧は `js/results.js`、ルート・結果画面は `js/journey.js`、復唱の流れは `js/recitation.js`。
 
@@ -77,7 +82,7 @@ muse の観察を読むときの注意:
 
 ### 4. kuku-playtest の印付け（管理用。muse は読まない）
 
-まとめIssue のチェック行を、コメント本文の書き換えで更新する。新しいコメントは書かない。
+チェック行を、コメント本文（#2〜#4）または日ごとのIssueの本文の書き換えで更新する。新しいコメントは書かない。
 
 ```
 - [x] ✅ 元の行 → v2026.11.16（sahokun/kuku#27）：何をしたか（短く）
@@ -85,18 +90,20 @@ muse の観察を読むときの注意:
 - [ ] ⏸ 元の行 → 次回以降：何を検討するか
 ```
 
-一度に書き換えるときは、報告No.→判定の表を作り、`報告No\.(\d+)` に一致して印のないチェック行だけを置き換えるスクリプトを scratchpad に書く（第1回は `sahokun/kuku#27`）。⏸ の項目は、次の回で直したら ✅ に書き換える。
+報告No.→判定の表を JSON で scratchpad に書き、`mark.py` で置き換える（印のない行だけを変え、表に無いチェック行があれば失敗する。表の形は `mark.py` の先頭）。⏸ の項目は、次の回で直したら手で ✅ に書き換える。
 
 - `- []`（スペースなし）はチェックボックスとして表示されないので、`- [ ]` / `- [x]` に直す。
 - チェック行の下の説明の行は変えない。
 - 書き換える直前に本文を取り直し、その間に muse が編集していないか確かめる。
 
 ```sh
-gh api repos/sahokun/kuku-playtest/issues/comments/<ID> --jq .body > body.md   # scratchpad で編集
-gh api -X PATCH repos/sahokun/kuku-playtest/issues/comments/<ID> -F body=@body.md
+M=.claude/skills/playtest-review/mark.py
+gh api repos/sahokun/kuku-playtest/issues/comments/<ID> --jq .body > body.md   # 日ごとのIssueは issues/<N>
+python3 -I $M table.json body.md body.out.md
+gh api -X PATCH repos/sahokun/kuku-playtest/issues/comments/<ID> -F body=@body.out.md   # 日ごとのIssueは issues/<N>
 ```
 
-- そのIssueのチェック行がすべて ✅ か ➖ になったら、Issue を close してよい（muse が新しい日のコメントを足すと、未処理の行がまた増える）。
+- そのIssueのチェック行がすべて ✅ か ➖ になったら（チェック行の無い日も）、Issue を close してよい。⏸ が残る日のIssueと日次ログ #1 は開いたままにする。
 
 ### 5. 報告（ユーザーへ、短く）
 
