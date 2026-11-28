@@ -22,6 +22,8 @@ node tools/verify-voice.mjs http://127.0.0.1:9223
 node tools/verify-diagnostics.mjs http://127.0.0.1:9223
 ```
 
+Node 側の待ちの期限は `performance.now()`（単調な時計）で測ります。WSL では `Date.now()` が一時的に20秒ほど先へ跳ぶことがあり、期限を誤って切らせるためです。
+
 スクリプトは同じタブを操作するため1本ずつ実行します。Windows Chromeへの接続でWindows版Node.jsを使う場合、スクリプトのパスもWindowsからアクセスできる形式で渡してください。
 
 ## 保存データと後始末

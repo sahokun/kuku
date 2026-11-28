@@ -385,9 +385,9 @@ try {
       document.querySelector('[data-open="manual"]').click();document.getElementById('manual-start').click();`);
     const stages = new Set();
     // Real clocks from here on: wait for the recordings and the first question instead of advancing a mock clock.
-    const ready=Date.now()+15000;
+    const ready=performance.now()+15000;
     while(!await evaluate(`!document.getElementById('game').hidden && document.getElementById('voice-loading').hidden && /[0-9]/.test(document.getElementById('equation').textContent)`)){
-        if(Date.now()>ready)throw Error('Real-time round did not start');
+        if(performance.now()>ready)throw Error('Real-time round did not start');
         await sleep(100);
     }
     for(let i=0;i<10;i++){
@@ -408,9 +408,9 @@ try {
             await check(`document.getElementById('mascot-game').querySelector('.bird').getAttribute('transform')===${JSON.stringify(frozen)}`, 'celebration freezes during pause');
             await click('resume');
         }
-        const until=Date.now()+14000;
+        const until=performance.now()+14000;
         while(await evaluate(`document.getElementById('game').classList.contains('correct') && !document.getElementById('game').hidden`)){
-            if(Date.now()>until)throw Error('Correct recitation did not finish in real-time round');
+            if(performance.now()>until)throw Error('Correct recitation did not finish in real-time round');
             await sleep(100);
         }
     }

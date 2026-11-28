@@ -77,8 +77,8 @@ try {
  await click('pause');await click('quit');
  await evaluate(`document.getElementById('tutorial-replay').click()`);await sleep(30);
  await evaluate(`KukuVoiceFiles.prepare=__originalPrepare`);await click('voice-retry');
- const deadline=Date.now()+15000;
- while(await evaluate(`!document.getElementById('voice-loading').hidden`)){if(Date.now()>deadline)throw Error('Voice retry timeout');await sleep(100);}
+ const deadline=performance.now()+15000;
+ while(await evaluate(`!document.getElementById('voice-loading').hidden`)){if(performance.now()>deadline)throw Error('Voice retry timeout');await sleep(100);}
  await check(`__decoded.length===3`,'single-row round decodes only messages, cue and that row');
  await check(`Promise.all(Object.entries(KukuVoiceManifest.clips).map(async([text,clip])=>{const file=await KukuVoiceFiles.get(__context,text);return clip.offset+clip.duration<=file.buffer.duration+.005;})).then(values=>values.every(Boolean))`,'every recording lies inside its decoded bank');
  const count=await evaluate('__decoded.length');

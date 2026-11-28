@@ -97,10 +97,15 @@ try {
  await check(`document.getElementById('diag-output').value.includes('A 通常')&&document.getElementById('diag-output').value.includes('C 入力演出なし')`,'copyable summary has all conditions');
  await evaluate(`document.getElementById('diag-mode').value='voice-only'`);await click('diag-start');await sleep(800);
  await check(`!KukuSound.isPlaying()`,'voice-only condition has no music');
- await evaluate(`document.querySelector('[data-digit="3"]').click();document.querySelector('[data-digit="6"]').click()`);
- const speechDeadline=Date.now()+10000;
+ // Recordings load before the first question in this condition, so answer the question that actually appears.
+ const questionDeadline=performance.now()+15000;
+ while(!await evaluate(`document.getElementById('voice-loading').hidden && /[0-9]/.test(document.getElementById('equation').textContent)`)) {
+  if(performance.now()>questionDeadline)throw Error('voice-only question timeout');await sleep(100);
+ }
+ await evaluate(`(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());})()`);
+ const speechDeadline=performance.now()+10000;
  while(!await evaluate(`KukuDiagnostics.report().events.some(e=>e.run===4&&e.type==='recording-end')`)) {
-  if(Date.now()>speechDeadline)throw Error('recording completion timeout');await sleep(100);
+  if(performance.now()>speechDeadline)throw Error('recording completion timeout');await sleep(100);
  }
  await check(`KukuDiagnostics.report().events.some(e=>e.run===4&&e.type==='recording-start')&&KukuDiagnostics.report().events.some(e=>e.run===4&&e.type==='audio-call'&&e.name==='effect'&&e.skipped)`,'recording lifecycle recorded while effects are bypassed');
  await click('diag-open');await evaluate(`document.getElementById('diag-mode').value='synth-only'`);await click('diag-start');await sleep(800);
