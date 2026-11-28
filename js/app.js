@@ -204,7 +204,8 @@
             startRecitation(true);
         else {
             sound.effect('ready');
-            if (session.plan.kind === 'auto' && session.plan.dan < 10) sound.speak(session.q.q_speak || session.q.q_read);
+            // The question is read while the keys are already live: answering cuts it off, and the clock keeps running to keep the tempo.
+            sound.speak(session.q.q_speak || session.q.q_read);
         }
     }
     function updateParade(done) {
