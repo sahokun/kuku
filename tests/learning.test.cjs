@@ -213,3 +213,40 @@ test('おまかせは、ヒントの回を直近の誤答・正解の判定に�
  L.record(s,{a:2,b:3}).history=[{at:now,ok:false,ms:1000,kind:'random'},{at:now,ok:true,ms:9000,kind:'hint'},{at:now,ok:false,ms:1000,kind:'random'}];
  assert.equal(L.roundPace(s,{kind:'ordered',dan:2}),'first');
 });
+const SLOW_MS = L.FLUENT_MS + 1;
+test('★2以上の問題で3秒を超えた自力正解は、おまかせ・まぜて・じぶんで えらぶで唱え直す',()=>{
+ for(const stage of [2,3,4])
+  for(const kind of ['auto','mix','manual'])
+   assert.equal(L.shouldChant({stage},true,SLOW_MS,kind),true,`stage ${stage} ${kind}`);
+});
+test('3秒以内の正解・誤答・★1までの問題では唱え直さない',()=>{
+ assert.equal(L.shouldChant({stage:2},true,L.FLUENT_MS,'mix'),false);
+ assert.equal(L.shouldChant({stage:2},false,SLOW_MS,'mix'),false);
+ assert.equal(L.shouldChant({stage:1},true,SLOW_MS,'mix'),false);
+ assert.equal(L.shouldChant({stage:0,stars:3,repair:true},true,SLOW_MS,'mix'),false);
+ assert.equal(L.shouldChant(undefined,true,SLOW_MS,'mix'),false);
+});
+test('段のクリア・スコアのコース・テスト・じゅんばん・導入では唱え直さない',()=>{
+ for(const kind of ['challenge','ordered','intro'])
+  assert.equal(L.shouldChant({stage:3},true,SLOW_MS,kind),false,kind);
+});
+test('★2以上で直近の正解が3秒を超えたとき、マップは となえる練習を案内する',()=>{
+ const now=new Date('2026-11-16T12:00:00').getTime();
+ const r={attempts:5,correct:5,stage:2,stars:2,due:'2026-11-16',history:[{at:now,ok:true,ms:SLOW_MS,kind:'random'}]};
+ assert.match(L.nextStep(r,now),/となえよう/);
+ Object.assign(r,{stage:4,mastered:true,repair:false,stars:3});
+ assert.match(L.nextStep(r,now),/となえよう/,'a due upkeep check asks for speed too');
+});
+test('直近の正解が3秒以内・まだ たしかめの日でない★3・★1では、となえる案内を出さない',()=>{
+ const now=new Date('2026-11-16T12:00:00').getTime();
+ const fast={attempts:5,correct:5,stage:3,stars:2,due:'2026-11-16',history:[{at:now,ok:true,ms:L.FLUENT_MS,kind:'random'}]};
+ assert.doesNotMatch(L.nextStep(fast,now),/となえよう/);
+ const slow=[{at:now,ok:true,ms:SLOW_MS,kind:'random'}];
+ assert.doesNotMatch(L.nextStep({attempts:5,correct:5,stage:4,mastered:true,stars:3,due:'2026-11-30',history:slow},now),/となえよう/);
+ assert.doesNotMatch(L.nextStep({attempts:5,correct:5,stage:1,stars:1,due:'2026-11-17',history:slow},now),/となえよう/);
+});
+test('ヒントの回は、となえる案内の判定に使わない',()=>{
+ const now=new Date('2026-11-16T12:00:00').getTime();
+ const r={attempts:5,correct:5,stage:2,stars:2,due:'2026-11-16',history:[{at:now,ok:true,ms:1000,kind:'random'},{at:now,ok:true,ms:9000,kind:'hint'}]};
+ assert.doesNotMatch(L.nextStep(r,now),/となえよう/);
+});

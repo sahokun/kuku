@@ -10,6 +10,8 @@
     const VERSION = 1;
     // ★3 (しっかり おぼえた) means recalling, not counting: the later spaced checks must be answered this fast.
     const FLUENT_MS = 3000;
+    // Plans where a slow ★2+ answer is chanted. Row clears, ordered runs and lessons allow counting; score courses and tests keep their length.
+    const CHANT_PLANS = Object.freeze(['auto', 'mix', 'manual']);
     const answerTimes = Object.freeze({ first: Infinity, easy: 10000, normal: 5000, hard: 3000, robot: 1500 });
     function answerTime(pace) { return Object.hasOwn(answerTimes, pace) ? answerTimes[pace] : answerTimes.normal; }
     function answerDeadline(pace, firstDigitMs = null) {
@@ -143,7 +145,23 @@
     }
     // Answers that judge the child: a hinted answer is practice, so it neither clears a miss nor counts as a recent result.
     function graded(r) { return (r?.history || []).filter(x => x.kind !== 'intro' && x.kind !== 'hint'); }
+    // From ★2 on, the checks need recall within FLUENT_MS. A slower right answer means the child still counts,
+    // so it is chanted (listen, cue, say it together) to tie the answer to its sound instead of to counting.
+    function shouldChant(r, ok, elapsed, planKind) {
+        return ok === true && CHANT_PLANS.includes(planKind) && (r?.stage || 0) >= 2 && elapsed > FLUENT_MS;
+    }
+    function isLastAnswerSlow(r) {
+        const last = graded(r).at(-1);
+        return !!last && last.ok && last.ms > FLUENT_MS;
+    }
+    const CHANT_ADVICE = ' かぞえずに いえるように、「九九を きく」で となえよう。';
     function nextStep(r, now = Date.now()) {
+        const step = nextStepCore(r, now);
+        // A mastered fact asks for speed only when its upkeep check is due.
+        const isSpeedChecked = r?.stage === 2 || r?.stage === 3 || r?.stage === 4 && isDue(r, now);
+        return isSpeedChecked && isLastAnswerSlow(r) ? step + CHANT_ADVICE : step;
+    }
+    function nextStepCore(r, now) {
         const today = day(now);
         if (!r || !r.attempts) return 'じぶんで こたえて みよう。';
         const answered = graded(r), last = answered[answered.length - 1];
@@ -309,5 +327,5 @@
                     n++;
         return n;
     }
-    return { VERSION, FLUENT_MS, mapStars, roundPace, nextStep, hint, paceLabel, answerTime, answerDeadline, key, day, plusDays, fresh, restore, record, daily, eligible, isDue, activeDan, danProgress, chooseDan, plan, submit, finishIntro, pick, status, countMastered };
+    return { VERSION, FLUENT_MS, mapStars, shouldChant, isLastAnswerSlow, roundPace, nextStep, hint, paceLabel, answerTime, answerDeadline, key, day, plusDays, fresh, restore, record, daily, eligible, isDue, activeDan, danProgress, chooseDan, plan, submit, finishIntro, pick, status, countMastered };
 });
