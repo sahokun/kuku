@@ -168,8 +168,12 @@ try {
     await evaluate('__advance(60000)');
     await click('continue');
     await check(`document.getElementById('round-name').textContent.includes('じゅんばん')`, 'ordered recall');
-    await evaluate('__advance(110000)');
+    // New facts get no time limit and a miss waits for a tap, so the ordered round is finished by answering it.
+    for (let i = 0; i < 9; i++)
+        await evaluate(`__advance(50);(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());__finishFeedback();})()`);
+    await check(`KukuStore.state.ordered.includes(2) && !document.getElementById('result').hidden`, 'ordered round completes');
     await click('continue');
+    await check(`document.getElementById('round-name').textContent==='2のだんに ちょうせん'`, 'after the ordered round the row test follows');
     await shot('game');
     await check(`document.getElementById('reveal').getBoundingClientRect().bottom<=innerHeight`, '390x844 keypad and reveal fit');
     await check(`!document.getElementById('input-controls').hidden`, 'practice input');
@@ -205,7 +209,9 @@ try {
     await check(`document.getElementById('counter').textContent===${JSON.stringify(correctCounter)} && document.getElementById('game').dataset.recitation==='repeat'`, 'correct answer waits for full recitation');
     await evaluate('__holdSpeech=false;__finishFeedback()');
     await check(`document.getElementById('counter').textContent!==${JSON.stringify(correctCounter)}`, 'correct answer advances after recitation');
-    await evaluate('__advance(8000)');
+    // Facts answered once quickly get the 10-second automatic limit.
+    await check(`document.getElementById('mode-note').textContent.includes('10びょう')`, 'row test after quick ordered answers uses ten seconds');
+    await evaluate('__advance(10050)');
     await check(`Object.values(KukuStore.state.problems).some(r=>r.history.some(h=>h.kind==='random'&&!h.ok))`, 'timeout recorded');
     await click('pause');
     await click('quit');
@@ -378,8 +384,14 @@ try {
       if(!KukuStore.state.settings.sound)document.getElementById('sound').click();
       document.querySelector('[data-open="manual"]').click();document.getElementById('manual-start').click();`);
     const stages = new Set();
+    // Real clocks from here on: wait for the recordings and the first question instead of advancing a mock clock.
+    const ready=Date.now()+15000;
+    while(!await evaluate(`!document.getElementById('game').hidden && document.getElementById('voice-loading').hidden && /[0-9]/.test(document.getElementById('equation').textContent)`)){
+        if(Date.now()>ready)throw Error('Real-time round did not start');
+        await sleep(100);
+    }
     for(let i=0;i<10;i++){
-        await evaluate(`__advance(50);(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());})()`);
+        await evaluate(`(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());})()`);
         await sleep(180);
         await check(`document.getElementById('game').classList.contains('correct') && document.getElementById('parade-lights').querySelectorAll('.lit').length===${i+1}`, 'real-time answer reward '+(i+1));
         stages.add(await evaluate(`document.body.dataset.tier`));
@@ -407,7 +419,8 @@ try {
     await check(`!document.getElementById('result').hidden`, 'real-time voiced round completes');
     await click('finish');
     await evaluate(`KukuStore.state.settings.motion=0;document.querySelector('[data-open="manual"]').click();document.getElementById('manual-start').click();`);
-    await evaluate(`__advance(50);(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());})()`);
+    await sleep(300);
+    await evaluate(`(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number);String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());})()`);
     await sleep(100);
     await check(`document.body.dataset.motion==='off' && document.getAnimations().filter(a=>a.playState==='running').length===0`, 'zero-motion answer has no running animations');
     await click('pause');await click('quit');
