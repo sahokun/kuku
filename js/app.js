@@ -739,8 +739,10 @@
             start({ kind: 'manual', keys: [...custom], count: 10 });
     };
     if (window.KukuDiagnostics) window.addEventListener('kuku:diagnostic-start', () => {
-        start({ kind: 'challenge', courseId: 'dan-4', title: '4のだん', dans: [4], count: 9,
-            queue: [9, 1, 7, 2, 4, 8, 6, 3, 5].map(b => ({ a: 4, b })) });
+        const p = { kind: 'challenge', courseId: 'dan-4', title: '4のだん', dans: [4], count: 9,
+            queue: [9, 1, 7, 2, 4, 8, 6, 3, 5].map(b => ({ a: 4, b })) };
+        // Skip the pace dialog: while it waits, the screen is still home and the measurement stops as a screen change.
+        start(p, L.roundPace(s, p));
     });
     $('table-dan').onchange = renderTable;
     for (const name of ['sound', 'voice', 'volume', 'motion'])
