@@ -44,8 +44,27 @@ async function check(expression, label) {
 }
 async function click(id) { await evaluate(`document.getElementById(${JSON.stringify(id)}).click()`); }
 async function shot(name) { const r = await send('Page.captureScreenshot', { format: 'png' }); const dir = process.platform === 'win32' ? path.join(process.env.TEMP, 'kuku-check') : '/tmp/kuku-check'; await fs.mkdir(dir, { recursive: true }); const out = path.join(dir, name + '.png'); await fs.writeFile(out, Buffer.from(r.data, 'base64')); console.log('SCREENSHOT ' + out); }
+// Answers 2×6 as a ★2 fact: past FLUENT_MS it is chanted and moves on without a tap; within it, it is only heard once.
+async function verifyChant() {
+    const before = await evaluate(`JSON.stringify(KukuStore.state)`);
+    const fluent = await evaluate('KukuLearning.FLUENT_MS');
+    await evaluate(`(()=>{const L=KukuLearning,s=KukuStore.state,today=L.day(Date.now());
+        Object.assign(L.record(s,{a:2,b:6}),{attempts:5,correct:5,today:'',hits:2,stage:2,stars:2,everReady:true,due:today,lastReview:L.plusDays(today,-3),lastAt:Date.now()-3*86400000,gap:5,history:[]});
+        s.settings.pace='first';s.settings.voice=true;KukuStore.save();})();
+        document.querySelector('[data-open="custom"]').click();document.querySelector('#problem-picker [aria-label="2かける6"]').click();document.getElementById('custom-start').click()`);
+    const answer = `'12'.split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click())`;
+    await evaluate(`__spoken=[];__advance(${600 + fluent + 500});${answer}`);
+    await check(`document.getElementById('game').classList.contains('correct') && document.getElementById('game').dataset.recitation==='listen' && document.getElementById('feedback').textContent==='できた！ となえて おぼえよう' && document.getElementById('dot-board').hidden`, 'slow ★2 answer starts a chant and keeps the correct look');
+    await check(`(()=>{const game=document.getElementById('game');for(let i=0;i<300&&game.classList.contains('correct');i++){if(game.dataset.wait)return false;__advance(50);}return !game.classList.contains('correct');})()`, 'chant moves on without waiting for a tap');
+    await check(`__spoken[0]===__spoken[2] && __spoken[1]==='いってみよう。せーのっ！' && document.getElementById('counter').textContent==='2もんめ / 10'`, 'chant reads, cues, then repeats the fact');
+    await evaluate(`__spoken=[];__advance(1600);${answer}`);
+    await check(`document.getElementById('game').dataset.recitation==='repeat' && document.getElementById('feedback').textContent==='すぐ いえた！' && __spoken.length===1`, 'quick ★2 answer is only heard once');
+    await evaluate(`__finishFeedback();document.getElementById('pause').click();document.getElementById('quit').click();
+        document.querySelector('[data-open="custom"]').click();document.querySelector('#problem-picker [aria-label="2かける6"]').click();
+        Object.assign(KukuStore.state,JSON.parse(${JSON.stringify(before)}));KukuStore.save();document.getElementById('brand').click()`);
+}
 let injected;
-const original = await evaluate(`localStorage.getItem('kuku:learning:v1')`);
+const original =await evaluate(`localStorage.getItem('kuku:learning:v1')`);
 try {
     await send('Runtime.enable');
     await send('Page.enable');
@@ -119,6 +138,7 @@ try {
         await click('pause');await click('quit');
     }
     await evaluate(`document.querySelector('[data-open="custom"]').click();document.querySelector('#problem-picker [aria-label="2かける6"]').click();KukuSound.effect=__effectOriginal;Object.assign(KukuStore.state,JSON.parse(${JSON.stringify(beforePace)}));KukuStore.save();document.getElementById('brand').click()`);
+    await verifyChant();
     acceptRoundSetup = false;
     await evaluate(`document.querySelector('[data-open="manual"]').click();document.getElementById('manual-start').click()`);
     await check(`document.getElementById('round-setup').open && document.getElementById('round-pace-preview').textContent.includes('はじめて')`, 'new facts default to unlimited automatic pace');
@@ -167,7 +187,8 @@ try {
     await evaluate('__advance(10000)');
     await check(`KukuLearning.daily(KukuStore.state,KukuLearning.day()).ms===${before}`, 'pause excludes elapsed time');
     await click('resume');
-    await evaluate('__spoken=[]');
+    // The input guard does not run while paused, so let it end before asking for help.
+    await evaluate('__advance(650);__spoken=[]');
     await click('reveal');
     await check(`!document.getElementById('dot-board').hidden && document.getElementById('reveal').textContent==='こたえを きく'`, 'first help shows a hint');
     await click('reveal');
