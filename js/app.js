@@ -110,7 +110,7 @@
         sound.cancelSpeech();
         const rowDan = ['intro', 'ordered'].includes(p.kind) ? p.dan : p.courseId?.startsWith('dan-') ? p.dans[0] : 0;
         if (rowDan >= 2) L.chooseDan(s, rowDan);
-        session = { pace: chosenPace || L.roundPace(s, p), score: 0, speedPoints: 0, chainPoints: 0, answers: [], responses: [], bestCrossed: false, plan: p, index: 0, recent: [], correct: 0, combo: 0, changes: { ready: 0, reviewed: 0, mastered: 0 }, quick: 0, elapsed: 0, questionMs: 0, phaseMs: 0, paused: false, phase: 'question', input: '', extended: false, lockMs: 0 };
+        session = { pace: chosenPace || L.roundPace(s, p), score: 0, speedPoints: 0, chainPoints: 0, answers: [], responses: [], bestCrossed: false, plan: p, index: 0, recent: [], correct: 0, combo: 0, changes: { ready: 0, reviewed: 0, mastered: 0 }, quick: 0, chanted: 0, elapsed: 0, questionMs: 0, phaseMs: 0, paused: false, phase: 'question', input: '', extended: false, lockMs: 0 };
         R.ensureDay(s);
         fx.clear();
         $('score-strip').hidden = p.kind === 'intro';
@@ -219,6 +219,9 @@
     const GUIDE = 'おしたら すぐ こたえあわせ（2けたは 2つ）';
     // Said when the hint appears, so a hinted answer scoring nothing is not a surprise afterwards.
     const HINT_RULE = '（ヒントの あとは △。てんは つかないよ）';
+    // Say what to do about a slow answer rather than only asking for more speed.
+    const CHANT_STATUS = 'できた！ となえて おぼえよう';
+    const SLOW_STATUS = 'できた！ となえると すぐ いえるよ';
     // "a × b" read as "a pieces, b times": b groups of a dots (rows of five), laid out to fit the stage.
     function showDots(q, total) {
         const board = $('dot-board');
@@ -300,6 +303,8 @@
         const right = !reveal && Number(session.input) === session.q.a * session.q.b;
         const helped = right && session.hinted && !session.copy, ok = right && !helped;
         session.review = R.ensureDay(s).reviewKeys.includes(L.key(session.q.a, session.q.b));
+        const chant = L.shouldChant(s.problems[L.key(session.q.a, session.q.b)], ok, session.questionMs, session.plan.kind);
+        if (chant) session.chanted++;
         const change = L.submit(s, session.q, right, Date.now(), session.questionMs, session.copy ? 'intro' : helped ? 'hint' : session.plan.kind === 'ordered' ? 'ordered' : 'random');
         const quick = ok && !session.copy && session.questionMs <= L.FLUENT_MS;
         if (quick) session.quick++;
@@ -333,7 +338,7 @@
         $('reading').textContent = session.q.q_read + session.q.a_read;
         $('round-progress').value = session.index + 1;
         // A status worth reading stays on screen through the answer's recitation.
-        session.status = helped ? 'ヒントで できた！' : !ok ? '' : change === 'ready' ? 'きょうは OK！' : change === 'mastered' ? 'しっかり おぼえた！' : change === 'slow' ? 'できた！ つぎは もっと はやく' : quick ? 'すぐ いえた！' : '';
+        session.status = helped ? 'ヒントで できた！' : !ok ? '' : change === 'ready' ? 'きょうは OK！' : change === 'mastered' ? 'しっかり おぼえた！' : chant ? CHANT_STATUS : change === 'slow' ? SLOW_STATUS : quick ? 'すぐ いえた！' : '';
         $('feedback').textContent = session.status || (ok || right ? 'できた！' : 'まずは きいてね');
         setKeys(false);
         sound.cancelSpeech();
@@ -349,7 +354,7 @@
                 if (crossed) { session.bestCrossed = true;journey.toast('🏆 じぶんの ベストを こえた！');sound.effect('lift'); }
                 fx.scoreGain(award.total, award.label, crossed);
             }
-            startRecitation(false, true);
+            startRecitation(false, !chant, chant);
         }
         else {
             fx.reveal();
@@ -359,11 +364,11 @@
         }
         save(true);
     }
-    function startRecitation(intro, repeatOnly = false) {
+    function startRecitation(intro, repeatOnly = false, chant = false) {
         const active = session, question = session.q;
         let encouragement = null;
         if (!intro && active.index + 1 < active.plan.count) {
-            if (repeatOnly) {
+            if (repeatOnly || chant) {
                 const key = active.newBest ? 'praise-best' : active.justMastered ? 'praise-mastered' : active.correct === 1 ? 'praise-first' :
                     ({ 3: 'praise-three', 5: 'praise-five', 8: 'praise-eight', 10: 'praise-eight' })[active.combo];
                 encouragement = sound.phrase(key);
@@ -383,7 +388,7 @@
                 if (session !== active || session.q !== question) return;
                 $('game').dataset.recitation = name;
                 if (!repeatOnly) fx.lessonStep(name);
-                $('feedback').textContent = repeatOnly && active.status ? active.status : label;
+                $('feedback').textContent = (repeatOnly || chant && name === 'listen') && active.status ? active.status : label;
             },
             onDone() {
                 if (session !== active || active.paused || active.recitation !== flow) return;
@@ -391,7 +396,7 @@
                 journey.event({ type: 'recite', review: !intro && active.review });
                 if (intro) active.plan.dan === 1 ? startCopy() : advanceIntro();
                 // After a miss, let the child say it and move on with a tap instead of racing to the next question.
-                else if (!repeatOnly) waitForNext();
+                else if (!repeatOnly && !chant) waitForNext();
                 else { active.index++; next(); }
             }
         });
@@ -448,7 +453,7 @@
         $('result-detail').textContent = complete ? intro ? 'つぎは こたえを おもいだしてみよう。' : selfCorrectLine(session) : 'じぶんで えらんで あそぶことも できるよ。';
         const c = session.changes;
         $('result-changes').replaceChildren();
-        for (const [count, label] of [[session.quick, 'もん すぐ いえた！'], [c.ready, 'もん きょうの かくにん OK'], [c.reviewed, 'もん 日を あけても できた！'], [c.mastered, 'もん しっかり おぼえた！']]) {
+        for (const [count, label] of [[session.quick, 'もん すぐ いえた！'], [session.chanted, 'もん となえなおした'], [c.ready, 'もん きょうの かくにん OK'], [c.reviewed, 'もん 日を あけても できた！'], [c.mastered, 'もん しっかり おぼえた！']]) {
             if (count) {
                 const p = document.createElement('p');
                 p.textContent = count + label;
