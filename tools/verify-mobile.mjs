@@ -98,7 +98,6 @@ try {
  await evaluate(`KukuStore.state.settings.sound=true;KukuStore.state.settings.voice=true;KukuSound.speak=(text,end)=>{setTimeout(()=>end?.(true),60);return true;};document.querySelector('[data-open="manual"]').click();document.getElementById('manual-start').click();__long=[];window.__frames=[];window.__prev=0;window.__sample=true;requestAnimationFrame(function sample(t){if(__prev)__frames.push(t-__prev);__prev=t;if(__sample)requestAnimationFrame(sample);});`);
  await evaluate(`window.__costs=[];for(const [name,object,keys] of [['visual',KukuVisuals,['digit','burst','progress','scoreGain']],['sound',KukuSound,['effect','cancelSpeech']]]) for(const key of keys){const fn=object[key];object[key]=(...args)=>{const t=performance.now();const r=fn(...args);__costs.push([name+'.'+key,Math.round((performance.now()-t)*10)/10]);return r;};}`);
  const answerCosts=[];
- await sleep(700); // keys stay disabled for 600ms after each question appears
  for(let i=0;i<10;i++){
   answerCosts.push(await evaluate(`(()=>{const n=document.getElementById('equation').textContent.match(/[0-9]+/g).map(Number),start=performance.now();String(n[0]*n[1]).split('').forEach(d=>document.querySelector('[data-digit="'+d+'"]').click());return performance.now()-start;})()`));
   await sleep(150);await fit('answer reward '+(i+1));
