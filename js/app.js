@@ -5,8 +5,6 @@
     const data = new Map(KukuData.map(q => [L.key(q.a, q.b), q]));
     let session = null, screen = 'home', lastTick = performance.now(), selected = new Set([2]), custom = new Set();
     const narrated = new Set();
-    // Taps that land just after the screen moves on belong to the previous question, not the new one.
-    const INPUT_GUARD_MS = 600;
     const minutes = n => `${n}${[1, 3, 4, 6, 8, 10].includes(n) ? 'ぷん' : 'ふん'}`;
     let answerPage = 0, pendingPlan = null;
     const backTargets = {}, roots = ['home', 'route', 'records', 'menu'];
@@ -110,7 +108,7 @@
         sound.cancelSpeech();
         const rowDan = ['intro', 'ordered'].includes(p.kind) ? p.dan : p.courseId?.startsWith('dan-') ? p.dans[0] : 0;
         if (rowDan >= 2) L.chooseDan(s, rowDan);
-        session = { pace: chosenPace || L.roundPace(s, p), score: 0, speedPoints: 0, chainPoints: 0, answers: [], responses: [], bestCrossed: false, plan: p, index: 0, recent: [], correct: 0, combo: 0, changes: { ready: 0, reviewed: 0, mastered: 0 }, quick: 0, chanted: 0, elapsed: 0, questionMs: 0, phaseMs: 0, paused: false, phase: 'question', input: '', extended: false, lockMs: 0 };
+        session = { pace: chosenPace || L.roundPace(s, p), score: 0, speedPoints: 0, chainPoints: 0, answers: [], responses: [], bestCrossed: false, plan: p, index: 0, recent: [], correct: 0, combo: 0, changes: { ready: 0, reviewed: 0, mastered: 0 }, quick: 0, chanted: 0, elapsed: 0, questionMs: 0, phaseMs: 0, paused: false, phase: 'question', input: '', extended: false };
         R.ensureDay(s);
         fx.clear();
         $('score-strip').hidden = p.kind === 'intro';
@@ -201,8 +199,7 @@
         $('intro-guide').hidden = !intro;
         delete $('game').dataset.recitation;
         $('combo').textContent = session.combo >= 2 ? `${session.combo}もん れんぞく！` : '';
-        session.lockMs = intro ? 0 : INPUT_GUARD_MS;
-        setKeys(intro);
+        setKeys(true);
         if (intro)
             startRecitation(true);
         else {
@@ -251,7 +248,7 @@
     function help() {
         if (!session || session.paused || screen !== 'game') return;
         if (session.phase === 'wait') { proceed(); return; }
-        if (session.phase !== 'question' || session.lockMs > 0) return;
+        if (session.phase !== 'question') return;
         if (session.hinted) { answer(true); return; }
         session.hinted = true;
         showDots(session.q, false);
@@ -278,7 +275,7 @@
         $('input-controls').querySelectorAll('button').forEach(b => b.disabled = !enabled);
     }
     function digit(n) {
-        if (!session || session.paused || session.phase !== 'question' || session.lockMs > 0 || screen !== 'game')
+        if (!session || session.paused || session.phase !== 'question' || screen !== 'game')
             return;
         if (session.input.length >= 2)
             return;
@@ -296,7 +293,7 @@
             $('feedback').textContent = 'あと 1つ おすか「こたえる」';
     }
     function answer(reveal, reason = 'shown') {
-        if (!session || session.phase !== 'question' || session.paused || session.lockMs > 0)
+        if (!session || session.phase !== 'question' || session.paused)
             return;
         if (!reveal && session.input === '')
             return;
@@ -407,7 +404,7 @@
         // Tutorial: type the fact that was just heard, so the first answers practise the keys, not unheard facts.
         if (!session || session.phase !== 'intro' || session.paused || session.recitation)
             return;
-        Object.assign(session, { copy: true, hinted: true, phase: 'question', input: '', questionMs: 0, extended: false, lockMs: INPUT_GUARD_MS });
+        Object.assign(session, { copy: true, hinted: true, phase: 'question', input: '', questionMs: 0, extended: false });
         $('answer').textContent = '?';
         $('reading').textContent = session.q.q_read;
         $('feedback').textContent = 'きいた こたえを おしてみよう';
@@ -416,7 +413,7 @@
         $('intro-guide').hidden = true;
         delete $('game').dataset.recitation;
         hideDots();
-        setKeys(false);
+        setKeys(true);
         sound.effect('ready');
     }
     function advanceIntro() {
@@ -526,12 +523,6 @@
             return;
         session.elapsed += dt;
         L.daily(s, L.day()).ms += dt;
-        if (session.phase === 'question' && session.lockMs > 0) {
-            // The answer clock starts when the keys come alive.
-            session.lockMs -= dt;
-            if (session.lockMs <= 0) { session.lockMs = 0; setKeys(true); }
-            return;
-        }
         session.questionMs += dt;
         session.phaseMs += dt;
         if (session.recitation) { session.recitation.tick(dt); return; }
